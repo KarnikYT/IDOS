@@ -110,6 +110,7 @@
         }
         .btn-google:hover { background: #f8f9fa; }
         .btn-danger { background: var(--danger); }
+        .btn-secondary { background: #6b778c; margin-top: 10px; }
 
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -417,13 +418,14 @@
         </button>
     </nav>
 
-    <!-- FIREBASE MODULE -->
+    <!-- FIREBASE AUTH MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
         import { 
             getAuth, 
             GoogleAuthProvider, 
-            signInWithPopup, 
+            signInWithRedirect,
+            getRedirectResult,
             signOut, 
             onAuthStateChanged 
         } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
@@ -442,21 +444,28 @@
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
 
-        // BEZPEČNÉ PŘIHLÁŠENÍ VYSKAKOVACÍM OKNEM (POPUP)
-        window.handleGoogleLogin = async () => {
-            try {
-                const result = await signInWithPopup(auth, googleProvider);
-                document.getElementById('auth-error').innerText = '';
-            } catch (err) {
-                document.getElementById('auth-error').innerText = 'Chyba přihlášení: ' + err.message;
-            }
+        // PŘIHLÁŠENÍ S PŘESMĚROVÁNÍM
+        window.handleGoogleLogin = () => {
+            signInWithRedirect(auth, googleProvider);
         };
 
         window.handleLogout = () => {
             signOut(auth);
         };
 
-        // REÁLNOU DOBU ODEMKNUTÍ SEZNAMU JÍZDENEK MÁ NA STAROSTI ODCHYTÁVÁNÍ STAVU UŽIVATELE:
+        // ZPRACOVÁNÍ NÁVRATU Z GOOGLE PŘIHLÁŠENÍ
+        getRedirectResult(auth)
+            .then((result) => {
+                if (result && result.user) {
+                    switchTab('tickets'); // Automaticky přesune na Jízdenky po úspěšném přihlášení
+                }
+            })
+            .catch((error) => {
+                const errElem = document.getElementById('auth-error');
+                if (errElem) errElem.innerText = 'Chyba: ' + error.message;
+            });
+
+        // SLEDOVÁNÍ STAVU PŘIHLÁŠENÍ
         onAuthStateChanged(auth, (user) => {
             const authSection = document.getElementById('auth-section');
             const profileSection = document.getElementById('user-profile-section');
@@ -464,25 +473,27 @@
             const ticketWarning = document.getElementById('ticket-auth-warning');
 
             if (user) {
-                authSection.style.display = 'none';
-                profileSection.style.display = 'block';
-                document.getElementById('user-email-display').innerText = user.email || user.displayName;
+                if (authSection) authSection.style.display = 'none';
+                if (profileSection) profileSection.style.display = 'block';
+                
+                const emailElem = document.getElementById('user-email-display');
+                if (emailElem) emailElem.innerText = user.email || user.displayName;
 
-                // Odemknutí nákupu jízdenky
-                ticketBuyBox.style.display = 'block';
-                ticketWarning.style.display = 'none';
+                // Odemknout jízdenky
+                if (ticketBuyBox) ticketBuyBox.style.display = 'block';
+                if (ticketWarning) ticketWarning.style.display = 'none';
             } else {
-                authSection.style.display = 'block';
-                profileSection.style.display = 'none';
+                if (authSection) authSection.style.display = 'block';
+                if (profileSection) profileSection.style.display = 'none';
 
-                // Uzamknutí nákupu jízdenky
-                ticketBuyBox.style.display = 'none';
-                ticketWarning.style.display = 'block';
+                // Zamknout jízdenky
+                if (ticketBuyBox) ticketBuyBox.style.display = 'none';
+                if (ticketWarning) ticketWarning.style.display = 'block';
             }
         });
     </script>
 
-    <!-- LOGIKA IDOS -->
+    <!-- HLAVNÍ LOGIKA IDOS -->
     <script>
         function removeConsecutiveDuplicates(arr) {
             return arr.filter((item, index) => item.trim() !== (arr[index - 1] || '').trim());
@@ -749,7 +760,7 @@
 
                                     return `
                                         <div class="timeline-step ${isCurrent ? 'active' : ''}">
-                                            <strong>${formatTime(s.time)}</strong> - ${s.stopName} ${tag} ${isCurrent ? '👈 <b>[ZDE JESPOJ]</b>' : ''}
+                                            <strong>${formatTime(s.time)}</strong> - ${s.stopName} ${tag} ${isCurrent ? '👈 <b>[ZDE JE SPOJ]</b>' : ''}
                                         </div>
                                     `;
                                 }).join('')}
