@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IDOS - Městská Doprava</title>
+    
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="IDOS — Vyhledávání spojů & Jízdní řády">
+    <meta property="og:description" content="Vyhledejte si spojení, odjezdy ze zastávek, prohlížejte trasy linek nebo si zakupte virtuální jízdenky.">
+    <meta property="og:image" content="https://img.icons8.com/color/512/bus.png">
+    <meta property="og:site_name" content="IDOS Doprava">
+    <meta name="theme-color" content="#0052cc">
+
     <style>
         :root {
             --primary: #0052cc;
@@ -15,6 +23,8 @@
             --tram: #de350b;
             --trolley: #00875a;
             --bus: #ffab00;
+            --success: #00875a;
+            --danger: #de350b;
         }
 
         * {
@@ -27,87 +37,74 @@
         body {
             background-color: var(--bg);
             color: var(--text);
-            padding: 20px;
-            max-width: 900px;
+            padding-bottom: 70px; /* Místo pro spodní navigaci */
+            max-width: 600px;
             margin: 0 auto;
         }
 
         header {
             background: var(--primary);
             color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
-        h1 { font-size: 1.8rem; }
+        h1 { font-size: 1.3rem; }
 
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            background: #e3e6e8;
-            color: var(--text);
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .tab-btn.active {
-            background: var(--primary);
-            color: white;
+        .container {
+            padding: 15px;
         }
 
         .card {
             background: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            margin-bottom: 20px;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 15px;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         label {
             display: block;
             margin-bottom: 5px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            color: #5e6c84;
         }
 
         select, input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid var(--border);
-            border-radius: 5px;
+            border-radius: 8px;
             font-size: 1rem;
+            background: #fff;
         }
 
         .btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 12px 20px;
+            padding: 12px;
             font-size: 1rem;
             font-weight: bold;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             width: 100%;
+            transition: background 0.2s;
         }
 
         .btn:hover { background: var(--primary-dark); }
+        .btn-danger { background: var(--danger); }
+        .btn-secondary { background: #6b778c; }
 
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -118,38 +115,132 @@
             border-radius: 4px;
             color: white;
             font-weight: bold;
-            font-size: 0.85rem;
-            margin-right: 8px;
+            font-size: 0.8rem;
         }
 
         .badge-tram { background: var(--tram); }
         .badge-troley { background: var(--trolley); }
         .badge-bus { background: var(--bus); color: #000; }
 
-        .result-item {
-            border-left: 4px solid var(--primary);
-            background: #f9fafb;
+        /* VÝSLEDKY A ROZKLIK TRASY */
+        .result-card {
+            background: white;
+            border-radius: 10px;
             padding: 15px;
             margin-bottom: 12px;
-            border-radius: 0 6px 6px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: border-color 0.2s;
         }
 
-        .time-info {
-            font-size: 1.1rem;
+        .result-card:hover {
+            border-color: var(--primary);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .time-main {
+            font-size: 1.2rem;
             font-weight: bold;
             color: var(--primary);
-            margin-bottom: 8px;
         }
 
-        .route-step {
-            margin-top: 5px;
-            font-size: 0.95rem;
+        .countdown-tag {
+            background: #e3fcef;
+            color: #006644;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .route-details {
+            display: none;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--border);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 5px;
+            bottom: 5px;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-step {
+            position: relative;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .timeline-step::before {
+            content: '';
+            position: absolute;
+            left: -18px;
+            top: 5px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+
+        /* SPODNÍ NAVIGACE (BOTTOM TABS) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: white;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.75rem;
+            color: #6b778c;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 20%;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .nav-icon {
+            font-size: 1.3rem;
+            margin-bottom: 2px;
         }
 
         .timetable {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
         }
 
         .timetable th, .timetable td {
@@ -158,146 +249,329 @@
             text-align: left;
         }
 
-        .timetable th { background: #f0f2f5; }
+        /* JÍZDENKA */
+        .ticket-card {
+            background: #eef5ff;
+            border: 2px dashed var(--primary);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .ticket-qr {
+            width: 140px;
+            height: 140px;
+            margin: 15px auto;
+            background: #fff;
+            padding: 5px;
+            border: 1px solid var(--border);
+        }
     </style>
 </head>
 <body>
 
     <header>
         <h1>IDOS Doprava</h1>
-        <span id="clock" style="font-weight: bold;">--:--</span>
+        <span id="clock" style="font-weight: bold; font-size: 1rem;">--:--:--</span>
     </header>
 
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('search')">Vyhledat spoj</button>
-        <button class="tab-btn" onclick="switchTab('departures')">Odjezdy ze zastávky</button>
-        <button class="tab-btn" onclick="switchTab('lines')">Seznam linek</button>
-    </div>
-
-    <!-- VYHLEDÁVÁNÍ SPOJŮ -->
-    <div id="tab-search" class="tab-content active">
-        <div class="card">
-            <div class="form-group">
-                <label>Odkud:</label>
-                <select id="from-stop"></select>
+    <div class="container">
+        <!-- 1. TAB: SPOJENÍ -->
+        <div id="tab-search" class="tab-content active">
+            <div class="card">
+                <div class="form-group">
+                    <label>Odkud</label>
+                    <select id="from-stop"></select>
+                </div>
+                <div class="form-group">
+                    <label>Kam</label>
+                    <select id="to-stop"></select>
+                </div>
+                <div class="form-group">
+                    <label>Čas odjezdu</label>
+                    <input type="time" id="search-time">
+                </div>
+                <button class="btn" onclick="searchConnection()">Vyhledat spojení</button>
             </div>
-            <div class="form-group">
-                <label>Kam:</label>
-                <select id="to-stop"></select>
-            </div>
-            <div class="form-group">
-                <label>Čas odjezdu:</label>
-                <input type="time" id="search-time">
-            </div>
-            <button class="btn" onclick="searchConnection()">Vyhledat spojení</button>
+            <div id="search-results"></div>
         </div>
 
-        <div id="search-results"></div>
-    </div>
-
-    <!-- ODJEZDY ZE ZASTÁVEK -->
-    <div id="tab-departures" class="tab-content">
-        <div class="card">
-            <div class="form-group">
-                <label>Vyberte zastávku:</label>
-                <select id="dep-stop" onchange="showDepartures()"></select>
+        <!-- 2. TAB: ODJEZDY -->
+        <div id="tab-departures" class="tab-content">
+            <div class="card">
+                <div class="form-group">
+                    <label>Vyberte zastávku</label>
+                    <select id="dep-stop" onchange="showDepartures()"></select>
+                </div>
+                <div class="form-group">
+                    <label>Od času</label>
+                    <input type="time" id="dep-time" onchange="showDepartures()">
+                </div>
             </div>
-            <div class="form-group">
-                <label>Čas odjezdu od:</label>
-                <input type="time" id="dep-time" onchange="showDepartures()">
+
+            <div class="card">
+                <h3 style="margin-bottom: 10px;">Následující odjezdy</h3>
+                <table class="timetable">
+                    <thead>
+                        <tr>
+                            <th>Čas</th>
+                            <th>Za kolik</th>
+                            <th>Linka</th>
+                            <th>Cíl</th>
+                        </tr>
+                    </thead>
+                    <tbody id="departures-list">
+                        <tr><td colspan="4">Vyberte zastávku...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="card">
-            <h3>Následující odjezdy</h3>
-            <table class="timetable">
-                <thead>
-                    <tr>
-                        <th>Čas</th>
-                        <th>Linka</th>
-                        <th>Cílová stanice</th>
-                    </tr>
-                </thead>
-                <tbody id="departures-list">
-                    <tr><td colspan="3">Vyberte zastávku...</td></tr>
-                </tbody>
-            </table>
+        <!-- 3. TAB: JÍZDENKY -->
+        <div id="tab-tickets" class="tab-content">
+            <div class="card">
+                <h2>Virtuální jízdenky</h2>
+                <p style="margin-bottom: 15px; color: #5e6c84; font-size: 0.85rem;">Pro nákup jízdenky se musíte nejprve přihlásit v záložce "Účet".</p>
+                
+                <div id="ticket-buy-box" style="display: none;">
+                    <div class="form-group">
+                        <label>Vyberte typ jízdenky</label>
+                        <select id="ticket-type">
+                            <option value="30 min / 24 Kč">30 minutová - 24 Kč</option>
+                            <option value="60 min / 32 Kč">60 minutová - 32 Kč</option>
+                            <option value="24 hodin / 100 Kč">24 hodinová - 100 Kč</option>
+                        </select>
+                    </div>
+                    <button class="btn" style="background: var(--success);" onclick="buyTicket()">Koupit jízdenku (Zdarma)</button>
+                </div>
+
+                <div id="ticket-auth-warning">
+                    <p style="color: var(--danger); font-weight: bold; text-align: center; padding: 10px;">🔒 Pro nákup jízdenek se prosím přihlaste v záložce Účet.</p>
+                    <button class="btn btn-secondary" onclick="switchTab('account')">Přejít k přihlášení</button>
+                </div>
+
+                <div id="ticket-output"></div>
+            </div>
+        </div>
+
+        <!-- 4. TAB: VÍCE (SEZNAM LINEK) -->
+        <div id="tab-more" class="tab-content">
+            <div class="card" id="lines-list"></div>
+        </div>
+
+        <!-- 5. TAB: ÚČET (FIREBASE AUTH) -->
+        <div id="tab-account" class="tab-content">
+            <!-- Formular nepřihlášen -->
+            <div id="auth-section" class="card">
+                <h2 id="auth-title">Přihlášení</h2>
+                <p style="margin-bottom: 15px; color: #5e6c84; font-size: 0.85rem;">Přihlaste se ke svému účtu pro nákup a správu jízdenek.</p>
+                
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" id="auth-email" placeholder="vas@email.cz">
+                </div>
+                <div class="form-group">
+                    <label>Heslo (min. 6 znaků)</label>
+                    <input type="password" id="auth-password" placeholder="******">
+                </div>
+                
+                <button class="btn" id="auth-submit-btn" onclick="handleAuth()">Přihlásit se</button>
+                
+                <div style="margin-top: 15px; text-align: center;">
+                    <button id="auth-toggle-btn" style="background:none; border:none; color: var(--primary); cursor:pointer; font-size: 0.9rem;" onclick="toggleAuthMode()">
+                        Nemáte účet? Zaregistrujte se
+                    </button>
+                </div>
+                <div id="auth-error" style="color: var(--danger); margin-top: 10px; font-weight: bold; text-align: center;"></div>
+            </div>
+
+            <!-- Přihlášený profil -->
+            <div id="user-profile-section" class="card" style="display: none;">
+                <h2>Váš Profil</h2>
+                <br>
+                <p style="margin-bottom: 15px;">Přihlášen jako: <strong id="user-email-display"></strong></p>
+                <button class="btn btn-danger" onclick="handleLogout()">Odhlásit se</button>
+            </div>
         </div>
     </div>
 
-    <!-- SEZNAM LINEK -->
-    <div id="tab-lines" class="tab-content">
-        <div class="card" id="lines-list"></div>
-    </div>
+    <!-- SPODNÍ NAVIGAČNÍ LIŠTA -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" id="nav-search" onclick="switchTab('search')">
+            <span class="nav-icon">🔍</span>
+            <span>Spojení</span>
+        </button>
+        <button class="nav-item" id="nav-departures" onclick="switchTab('departures')">
+            <span class="nav-icon">⏱️</span>
+            <span>Odjezdy</span>
+        </button>
+        <button class="nav-item" id="nav-tickets" onclick="switchTab('tickets')">
+            <span class="nav-icon">🎫</span>
+            <span>Jízdenky</span>
+        </button>
+        <button class="nav-item" id="nav-more" onclick="switchTab('more')">
+            <span class="nav-icon">📋</span>
+            <span>Více</span>
+        </button>
+        <button class="nav-item" id="nav-account" onclick="switchTab('account')">
+            <span class="nav-icon">👤</span>
+            <span>Účet</span>
+        </button>
+    </nav>
 
+    <!-- FIREBASE AUTH INICIALIZACE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBGF2uRhi2ILfG393c3YosLdPbRrMRzfzI",
+            authDomain: "idosvcompany.firebaseapp.com",
+            projectId: "idosvcompany",
+            storageBucket: "idosvcompany.firebasestorage.app",
+            messagingSenderId: "15502495272",
+            appId: "1:15502495272:web:656ce2dfadbe01e48eaf1d",
+            measurementId: "G-8CXVDFRCSB"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        let isLoginMode = true;
+
+        window.toggleAuthMode = () => {
+            isLoginMode = !isLoginMode;
+            document.getElementById('auth-error').innerText = '';
+            if (isLoginMode) {
+                document.getElementById('auth-title').innerText = 'Přihlášení';
+                document.getElementById('auth-submit-btn').innerText = 'Přihlásit se';
+                document.getElementById('auth-toggle-btn').innerText = 'Nemáte účet? Zaregistrujte se';
+            } else {
+                document.getElementById('auth-title').innerText = 'Registrace';
+                document.getElementById('auth-submit-btn').innerText = 'Vytvořit účet';
+                document.getElementById('auth-toggle-btn').innerText = 'Již máte účet? Přihlaste se';
+            }
+        };
+
+        window.handleAuth = async () => {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const errorDiv = document.getElementById('auth-error');
+            errorDiv.innerText = '';
+
+            if(!email || !password) {
+                errorDiv.innerText = 'Vyplňte e-mail a heslo.';
+                return;
+            }
+
+            try {
+                if (isLoginMode) {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                }
+            } catch (err) {
+                errorDiv.innerText = 'Chyba: ' + err.message;
+            }
+        };
+
+        window.handleLogout = () => {
+            signOut(auth);
+        };
+
+        // Sledování přihlášeného uživatele
+        onAuthStateChanged(auth, (user) => {
+            const authSection = document.getElementById('auth-section');
+            const profileSection = document.getElementById('user-profile-section');
+            const ticketBuyBox = document.getElementById('ticket-buy-box');
+            const ticketWarning = document.getElementById('ticket-auth-warning');
+
+            if (user) {
+                authSection.style.display = 'none';
+                profileSection.style.display = 'block';
+                document.getElementById('user-email-display').innerText = user.email;
+
+                ticketBuyBox.style.display = 'block';
+                ticketWarning.style.display = 'none';
+            } else {
+                authSection.style.display = 'block';
+                profileSection.style.display = 'none';
+
+                ticketBuyBox.style.display = 'none';
+                ticketWarning.style.display = 'block';
+            }
+        });
+    </script>
+
+    <!-- HLAVNÍ LOGIKA APLIKACE -->
     <script>
-        // --- DATA O LINKÁCH ---
-        const rawLines = [
-            // Tramvaje
-            { type: 'tram', name: '889', stops: ['Warsawska', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzedzin', 'Rzedzin Pętla', 'Slaska', 'Lotnisko'], roundtrip: true },
-            { type: 'tram', name: '89', stops: ['Rzedzin Petla', 'Slaska', 'Lotnisko'], roundtrip: true },
+        function removeConsecutiveDuplicates(arr) {
+            return arr.filter((item, index) => item.trim() !== (arr[index - 1] || '').trim());
+        }
 
-            // Trolejbusy
-            { type: 'troley', name: '1', stops: ['Os. Zgody', 'Wiczista', 'Lwowska', 'Mrożka', 'Warszawska', 'Dworcowa', 'Kochłowice', 'Kochłowice'], returnStops: ['Kochłowice', 'Dworcowa', 'Warszawska', 'Mrożka', 'Lwowska', 'Wiczista', 'Os. Zgody'] },
-            { type: 'troley', name: '3', stops: ['Os. Zgody', 'Mrozka', 'Warsawska', 'Os. 30 Lecia', 'Rynek Glowny'], roundtrip: true },
-            { type: 'troley', name: '4', stops: ['Os. Zgody', 'Wieczista', 'Mrozka', 'Dworzec Glowny', 'Al. Jana Pawla II.', 'Urząd Miasta', 'Kochłowice', 'Dworcowa', 'Os. 30 Lecia', 'Rynek Glowny', 'Blachownia', 'Blachownia'], roundtrip: true },
-            { type: 'troley', name: '101', stops: ['Cementarz Mosice', 'Żwiry', 'Bastzowa', 'Lwowska', 'Mrożka', 'Warszawska', 'Dworcowa', 'Kochłowice', 'Kochłowice'], returnStops: ['Kochłowice', 'Dworcowa', 'Warszawska', 'Mrożka', 'Lwowska', 'Bastzowa', 'Żwiry', 'Cementarz Mosice'] },
-            { type: 'troley', name: '201', stops: ['Kochłowice', 'Dworcowa', 'Warsawska', 'Mrożka', 'Lwowska', 'Bastzowa', 'Żwiry'], roundtrip: true },
-            { type: 'troley', name: '202', stops: ['Os. Zgody', 'Wieczista', 'Lwowska', 'Mrozka'], roundtrip: true },
-            { type: 'troley', name: '203', stops: ['Blachownia', 'Blachownia PKP', 'Warsawska', 'Dworzec Glowny', 'Dworzec Glowny'], roundtrip: true },
-            { type: 'troley', name: '204', stops: ['Gorka Narodowa', 'Dworzec Glowny', 'Warsawska', 'Blachownia PKP', 'Blachownia', 'Blachownia', 'Rynek Glowny', 'Os. 30 Lecia', 'Dworcowa', 'Kochlowice', 'Witosa', 'Rzedzin'], roundtrip: true },
-
-            // Autobusy
-            { type: 'bus', name: 'x88', stops: ['Warsawska', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzedzin'], roundtrip: true },
-            { type: 'bus', name: 'x89', stops: ['Rzedzin', 'Rzedzin Petla', 'Slaska', 'Lotnisko'], roundtrip: true },
-            { type: 'bus', name: 'x889', stops: ['Warsawska', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzedzin', 'Rzedzin Petla', 'Slaska', 'Lotnisko'], roundtrip: true },
-            { type: 'bus', name: '2', stops: ['Zwiry', 'Bastzowa', 'Lwowska', 'Wieczista', 'Os. Zgody', 'Wieczista', 'Kombinat'], roundtrip: true },
-            { type: 'bus', name: '369', stops: ['Lotnisko', 'Gorka Narodowa', 'Kochłowice', 'Rzedzin', 'Rzedzin Petla', 'Slaska', 'Lotnisko'], roundtrip: true },
-            { type: 'bus', name: '370', stops: ['Rzedzin Petla', 'Rzedzin', 'Kochłowice', 'Dworcowa', 'Os. 30 Lecia', 'Rynek Glowny', 'Blachownia', 'Blachownia', 'Warszawska', 'Mrożka', 'Lwowska', 'Bastzowa', 'Żwiry', 'Cenentarz Mosice'], roundtrip: true },
-            { type: 'bus', name: '999', stops: ['Jablunkov Státní hranice', 'Jablunkov Nádraží'], roundtrip: true },
-            { type: 'bus', name: '998', stops: ['Jablunkov Nádraží', 'Jablunkov Státní Hranice', 'Żwiry', 'Bastzowa', 'Blachownia', 'Rynek Glowny'], roundtrip: true },
-            { type: 'bus', name: '291', stops: ['Kochłowice', 'Dworcowa', 'Warsawska', 'Blachownia PKP', 'Blachownia', 'Bastzowa', 'Żwiry', 'Cementarz Mosice', 'Jablunkov Nádraží'], roundtrip: true },
-            { type: 'bus', name: '292', stops: ['Jablunkov Nádraží', 'Jablunkov Státní hranice', 'Żwiry', 'Bastzowa', 'Lwowska', 'Kombinat'], roundtrip: true },
-            { type: 'bus', name: '293', stops: ['Jablunkov Státní Hranice', 'Żwiry'], roundtrip: true },
-            { type: 'bus', name: '88', stops: ['Warsawska', 'Os. 30 Lecia', 'Rynek Glowny', 'Os. 30 Lecia', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzedzin', 'Rzedzin', 'Rzedzin Petla'], roundtrip: true },
-            { type: 'bus', name: '159', stops: ['Blachownia', 'Blachownia PKP', 'Warsawska', 'Dworcowa', 'Kochłowice', 'Urząd Miasta', 'Lodzka', 'Slaska', 'Lotnisko'], roundtrip: true }
+        const rawLinesData = [
+            { type: 'tram', typeName: 'Tramvaj', name: '889', stops: ['Warsawska', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzedzin', 'Rzedzin Pętla', 'Slaska', 'Lotnisko'], roundtrip: true },
+            { type: 'tram', typeName: 'Tramvaj', name: '89', stops: ['Rzedzin Petla', 'Slaska', 'Lotnisko'], roundtrip: true },
+            { type: 'troley', typeName: 'Trolejbus', name: '1', stops: ['Os. Zgody', 'Wiczista', 'Lwowska', 'Mrożka', 'Warszawska', 'Dworcowa', 'Kochłowice'], roundtrip: true },
+            { type: 'troley', typeName: 'Trolejbus', name: '3', stops: ['Os. Zgody', 'Mrozka', 'Warsawska', 'Os. 30 Lecia', 'Rynek Glowny'], roundtrip: true },
+            { type: 'troley', typeName: 'Trolejbus', name: '4', stops: ['Os. Zgody', 'Wieczista', 'Mrozka', 'Dworzec Glowny', 'Al. Jana Pawla II.', 'Urząd Miasta', 'Kochłowice', 'Dworcowa', 'Os. 30 Lecia', 'Rynek Glowny', 'Blachownia'], roundtrip: true },
+            { type: 'troley', typeName: 'Trolejbus', name: '101', stops: ['Cementarz Mosice', 'Żwiry', 'Bastzowa', 'Lwowska', 'Mrożka', 'Warszawska', 'Dworcowa', 'Kochłowice'], roundtrip: true },
+            { type: 'troley', typeName: 'Trolejbus', name: '201', stops: ['Kochłowice', 'Dworcowa', 'Warsawska', 'Mrożka', 'Lwowska', 'Bastzowa', 'Żwiry'], roundtrip: true },
+            { type: 'troley', typeName: 'Trolejbus', name: '202', stops: ['Os. Zgody', 'Wieczista', 'Lwowska', 'Mrozka'], roundtrip: true },
+            { type: 'troley', typeName: 'Trolejbus', name: '203', stops: ['Blachownia', 'Blachownia PKP', 'Warsawska', 'Dworzec Glowny'], roundtrip: true },
+            { type: 'troley', typeName: 'Trolejbus', name: '204', stops: ['Gorka Narodowa', 'Dworzec Glowny', 'Warsawska', 'Blachownia PKP', 'Blachownia', 'Rynek Glowny', 'Os. 30 Lecia', 'Dworcowa', 'Kochlowice', 'Witosa', 'Rzedzin'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: 'x88', stops: ['Warsawska', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzedzin'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: 'x89', stops: ['Rzedzin', 'Rzedzin Petla', 'Slaska', 'Lotnisko'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: 'x889', stops: ['Warsawska', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzedzin', 'Rzedzin Petla', 'Slaska', 'Lotnisko'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '2', stops: ['Zwiry', 'Bastzowa', 'Lwowska', 'Wieczista', 'Os. Zgody', 'Kombinat'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '4', stops: ['Os. Zgody', 'Wieczista', 'Mrozka', 'Dworzec Glowny', 'Al. Jana Pawla II.', 'Urząd Miasta', 'Kochłowice', 'Dworcowa', 'Os. 30 Lecia', 'Rynek Glowny', 'Blachownia'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '369', stops: ['Lotnisko', 'Gorka Narodowa', 'Kochłowice', 'Rzedzin', 'Rzedzin Petla', 'Slaska', 'Lotnisko'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '370', stops: ['Rzedzin Petla', 'Rzedzin', 'Kochłowice', 'Dworcowa', 'Os. 30 Lecia', 'Rynek Glowny', 'Blachownia', 'Warszawska', 'Mrożka', 'Lwowska', 'Bastzowa', 'Żwiry', 'Cementarz Mosice'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '999', stops: ['Jablunkov Státní hranice', 'Jablunkov Nádraží'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '998', stops: ['Jablunkov Nádraží', 'Jablunkov Státní Hranice', 'Żwiry', 'Bastzowa', 'Blachownia', 'Rynek Glowny'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '291', stops: ['Kochłowice', 'Dworcowa', 'Warsawska', 'Blachownia PKP', 'Blachownia', 'Bastzowa', 'Żwiry', 'Cementarz Mosice', 'Jablunkov Nádraží'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '292', stops: ['Jablunkov Nádraží', 'Jablunkov Státní hranice', 'Żwiry', 'Bastzowa', 'Lwowska', 'Kombinat'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '293', stops: ['Jablunkov Státní Hranice', 'Żwiry'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '88', stops: ['Warsawska', 'Os. 30 Lecia', 'Rynek Glowny', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzedzin', 'Rzedzin Petla'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '159', stops: ['Blachownia', 'Blachownia PKP', 'Warsawska', 'Dworcowa', 'Kochłowice', 'Urząd Miasta', 'Lodzka', 'Slaska', 'Lotnisko'], roundtrip: true }
         ];
 
-        // --- NORMALIZACE A VÝPOČET JÍZDNÍCH ŘÁDŮ ---
         let linesData = [];
         let allStops = new Set();
 
         function buildSchedules() {
-            rawLines.forEach(l => {
-                // Připrav směr tam
-                let directions = [{ stops: l.stops }];
+            rawLinesData.forEach(l => {
+                const cleanedStops = removeConsecutiveDuplicates(l.stops);
+                let directions = [{ stops: cleanedStops }];
                 
-                // Připrav směr zpět
                 if (l.returnStops) {
-                    directions.push({ stops: l.returnStops });
+                    directions.push({ stops: removeConsecutiveDuplicates(l.returnStops) });
                 } else if (l.roundtrip) {
-                    directions.push({ stops: [...l.stops].reverse() });
+                    directions.push({ stops: [...cleanedStops].reverse() });
                 }
 
                 directions.forEach((dir, dirIdx) => {
                     dir.stops.forEach(s => allStops.add(s.trim()));
-                    
-                    // Spočítat délku trasy
-                    const travelTime = (dir.stops.length - 1); // 1 min na úsek
-                    const turnPause = 2; // 2 min na konečné
-                    const cycleTime = (travelTime + turnPause) * 2; // Celý okruh tam i zpět
-
-                    // Vygenerovat odjezdy během dne (např. od 5:00 do 22:00 každých N minut)
+                    const travelTime = (dir.stops.length - 1);
+                    const turnPause = 2;
+                    const interval = 10; 
                     let departures = [];
-                    let interval = Math.max(15, cycleTime); // Interval linky podle délky okruhu
                     
-                    for (let mins = 5 * 60; mins <= 22 * 60; mins += interval) {
+                    for (let mins = 0; mins < 24 * 60; mins += interval) {
                         let startTime = mins + (dirIdx * (travelTime + turnPause));
                         departures.push(startTime);
                     }
 
                     linesData.push({
                         type: l.type,
+                        typeName: l.typeName,
                         name: l.name,
                         stops: dir.stops,
                         departures: departures,
@@ -307,18 +581,27 @@
             });
         }
 
-        // --- INICIALIZACE ---
+        function getCurrentMinutes() {
+            const now = new Date();
+            return now.getHours() * 60 + now.getMinutes();
+        }
+
+        function updateLiveClock() {
+            const now = new Date();
+            const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+            document.getElementById('clock').innerText = timeStr;
+        }
+
         window.onload = () => {
             buildSchedules();
-            
-            // Nastavit aktuální čas
+            updateLiveClock();
+            setInterval(updateLiveClock, 1000);
+
             const now = new Date();
             const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-            document.getElementById('clock').innerText = timeStr;
             document.getElementById('search-time').value = timeStr;
             document.getElementById('dep-time').value = timeStr;
 
-            // Naplnit výběry zastávek
             const sortedStops = Array.from(allStops).sort();
             const fromSelect = document.getElementById('from-stop');
             const toSelect = document.getElementById('to-stop');
@@ -337,11 +620,11 @@
         };
 
         function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
             
-            event.target.classList.add('active');
             document.getElementById(`tab-${tabId}`).classList.add('active');
+            document.getElementById(`nav-${tabId}`).classList.add('active');
         }
 
         function formatTime(totalMinutes) {
@@ -356,12 +639,24 @@
         }
 
         function getBadge(type) {
-            if (type === 'tram') return '<span class="badge badge-tram">Tram</span>';
+            if (type === 'tram') return '<span class="badge badge-tram">Tramvaj</span>';
             if (type === 'troley') return '<span class="badge badge-troley">Trolejbus</span>';
             return '<span class="badge badge-bus">Autobus</span>';
         }
 
-        // --- VYHLEDÁVÁNÍ SPOJENÍ ---
+        // VÝPOČET DYNAMIČTĚ ODPOČTU REÁLNÝCH MINUT
+        function getMinutesLeftText(targetTimeMinutes) {
+            const currentMins = getCurrentMinutes();
+            let diff = targetTimeMinutes - currentMins;
+
+            if (diff < 0) diff += 1440; // ošetření přesnoční doby
+
+            if (diff === 0) return 'Právě jedou';
+            if (diff === 1) return 'za 1 minutu';
+            if (diff >= 2 && diff <= 4) return `za ${diff} minuty`;
+            return `za ${diff} minut`;
+        }
+
         function searchConnection() {
             const from = document.getElementById('from-stop').value;
             const to = document.getElementById('to-stop').value;
@@ -369,56 +664,82 @@
             const container = document.getElementById('search-results');
 
             if (from === to) {
-                container.innerHTML = '<div class="card">Ahoj! Výchozí a cílová zastávka se shodují.</div>';
+                container.innerHTML = '<div class="card">Výchozí a cílová zastávka se shodují.</div>';
                 return;
             }
 
             let results = [];
 
-            // 1. Přímé spoje
             linesData.forEach(line => {
                 const fromIdx = line.stops.indexOf(from);
                 const toIdx = line.stops.indexOf(to);
 
                 if (fromIdx !== -1 && toIdx !== -1 && fromIdx < toIdx) {
-                    const rideDuration = toIdx - fromIdx; // 1 min na zastávku
+                    const rideDuration = toIdx - fromIdx;
                     
                     line.departures.forEach(dep => {
                         const depAtFrom = dep + fromIdx;
-                        if (depAtFrom >= startTime) {
+                        if (depAtFrom >= startTime && depAtFrom <= startTime + 120) {
+                            
+                            // Vygenerujeme mezizastávky pro rozkliknutí
+                            let routeStops = [];
+                            for(let i = fromIdx; i <= toIdx; i++) {
+                                routeStops.push({
+                                    stopName: line.stops[i],
+                                    time: dep + i
+                                });
+                            }
+
                             results.push({
-                                type: 'direct',
                                 depTime: depAtFrom,
                                 arrTime: depAtFrom + rideDuration,
                                 duration: rideDuration,
                                 line: line.name,
                                 vehicleType: line.type,
                                 from: from,
-                                to: to
+                                to: to,
+                                routeStops: routeStops
                             });
                         }
                     });
                 }
             });
 
-            // Seřadit podle času odjezdu a vzít prvních 5
             results.sort((a, b) => a.depTime - b.depTime);
-            results = results.slice(0, 5);
+            results = results.slice(0, 8);
 
             if (results.length === 0) {
-                container.innerHTML = '<div class="card">Pro zadaný čas nebylo nalezeno žádné přímé spojení.</div>';
+                container.innerHTML = '<div class="card">Pro zadaný čas nebylo nalezeno žádné spojení.</div>';
                 return;
             }
 
             let html = '';
-            results.forEach(res => {
+            results.forEach((res, index) => {
+                const countdown = getMinutesLeftText(res.depTime);
+
                 html += `
-                    <div class="result-item">
-                        <div class="time-info">
-                            ${formatTime(res.depTime)} - ${formatTime(res.arrTime)} (${res.duration} min)
+                    <div class="result-card" onclick="toggleRouteDetails(${index})">
+                        <div class="result-header">
+                            <div>
+                                ${getBadge(res.vehicleType)} <strong>Linka ${res.line}</strong>
+                                <div class="time-main">${formatTime(res.depTime)} → ${formatTime(res.arrTime)} (${res.duration} min)</div>
+                            </div>
+                            <span class="countdown-tag">${countdown}</span>
                         </div>
-                        <div class="route-step">
-                            ${getBadge(res.vehicleType)} <strong>Linka ${res.line}</strong>: ${res.from} $\\rightarrow$ ${res.to}
+                        <div style="font-size: 0.85rem; color: #5e6c84; margin-top: 5px;">
+                            ${res.from} ➔ ${res.to} <span style="float:right;">▼ Trasa</span>
+                        </div>
+
+                        <!-- ROZKLIKÁVACÍ DETAIL TRASY -->
+                        <div class="route-details" id="route-details-${index}">
+                            <strong>Detail trasy a mezizastávky:</strong>
+                            <div class="timeline">
+                                ${res.routeStops.map(s => `
+                                    <div class="timeline-step">
+                                        <strong>${formatTime(s.time)}</strong> - ${s.stopName}
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
                     </div>
                 `;
@@ -427,7 +748,15 @@
             container.innerHTML = html;
         }
 
-        // --- ODJEZDY ZE ZASTÁVEK ---
+        function toggleRouteDetails(index) {
+            const elem = document.getElementById(`route-details-${index}`);
+            if (elem.style.display === 'block') {
+                elem.style.display = 'none';
+            } else {
+                elem.style.display = 'block';
+            }
+        }
+
         function showDepartures() {
             const stop = document.getElementById('dep-stop').value;
             const time = parseTime(document.getElementById('dep-time').value);
@@ -437,7 +766,7 @@
 
             linesData.forEach(line => {
                 const stopIdx = line.stops.indexOf(stop);
-                if (stopIdx !== -1 && stopIdx < line.stops.length - 1) { // Neukazovat pokud je to konečná
+                if (stopIdx !== -1 && stopIdx < line.stops.length - 1) {
                     line.departures.forEach(dep => {
                         const depTime = dep + stopIdx;
                         if (depTime >= time) {
@@ -453,33 +782,34 @@
             });
 
             list.sort((a, b) => a.time - b.time);
-            list = list.slice(0, 10); // Prvních 10 odjezdů
+            list = list.slice(0, 12);
 
             if (list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3">Žádné odjezdy v nejbližší době.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4">Žádné odjezdy v nejbližší době.</td></tr>';
                 return;
             }
 
             tbody.innerHTML = list.map(item => `
                 <tr>
                     <td><strong>${formatTime(item.time)}</strong></td>
+                    <td><span class="countdown-tag">${getMinutesLeftText(item.time)}</span></td>
                     <td>${getBadge(item.type)} ${item.line}</td>
                     <td>${item.dest}</td>
                 </tr>
             `).join('');
         }
 
-        // --- SEZNAM LINEK ---
         function renderLinesList() {
             const container = document.getElementById('lines-list');
-            let html = '<h2>Přehled linek</h2><br>';
+            let html = '<h2>Přehled všech linek</h2><br>';
 
-            rawLines.forEach(l => {
+            rawLinesData.forEach(l => {
+                const cleanedStops = removeConsecutiveDuplicates(l.stops);
                 html += `
-                    <div style="margin-bottom: 15px;">
+                    <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border);">
                         ${getBadge(l.type)} <strong>Linka ${l.name}</strong>
-                        <div style="color: #5e6c84; font-size: 0.9rem; margin-top: 4px;">
-                            ${l.stops.join(' $\\rightarrow$ ')}
+                        <div style="font-size: 0.85rem; color: #5e6c84; margin-top: 4px;">
+                            ${cleanedStops.join(' ➔ ')}
                         </div>
                     </div>
                 `;
@@ -487,7 +817,28 @@
 
             container.innerHTML = html;
         }
+
+        function buyTicket() {
+            const type = document.getElementById('ticket-type').value;
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('cs-CZ');
+            const dateStr = now.toLocaleDateString('cs-CZ');
+            const ticketId = 'TCK-' + Math.floor(100000 + Math.random() * 900000);
+
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${ticketId}`;
+
+            const html = `
+                <div class="ticket-card">
+                    <h3 style="color: var(--primary);">✅ PLATNÁ JÍZDENKA</h3>
+                    <p style="margin-top: 5px;"><strong>${type}</strong></p>
+                    <img src="${qrUrl}" class="ticket-qr" alt="QR Kód">
+                    <p style="font-size: 0.85rem; color: #5e6c84;">ID: <strong>${ticketId}</strong></p>
+                    <p style="font-size: 0.85rem; color: #5e6c84;">Zakoupeno: ${dateStr} ${timeStr}</p>
+                </div>
+            `;
+
+            document.getElementById('ticket-output').innerHTML = html;
+        }
     </script>
 </body>
 </html>
-
