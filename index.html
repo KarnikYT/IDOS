@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IDOS - Městská Doprava</title>
+    <title>IDOS</title>
     
     <meta property="og:type" content="website">
     <meta property="og:title" content="IDOS — Vyhledávání spojů & Jízdní řády">
@@ -37,7 +37,7 @@
         body {
             background-color: var(--bg);
             color: var(--text);
-            padding-bottom: 70px; /* Místo pro spodní navigaci */
+            padding-bottom: 70px;
             max-width: 600px;
             margin: 0 auto;
         }
@@ -56,9 +56,7 @@
 
         h1 { font-size: 1.3rem; }
 
-        .container {
-            padding: 15px;
-        }
+        .container { padding: 15px; }
 
         .card {
             background: var(--card-bg);
@@ -68,9 +66,7 @@
             margin-bottom: 15px;
         }
 
-        .form-group {
-            margin-bottom: 12px;
-        }
+        .form-group { margin-bottom: 12px; }
 
         label {
             display: block;
@@ -99,12 +95,21 @@
             border-radius: 8px;
             cursor: pointer;
             width: 100%;
-            transition: background 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
 
         .btn:hover { background: var(--primary-dark); }
+        .btn-google {
+            background: #ffffff;
+            color: #757575;
+            border: 1px solid var(--border);
+            margin-bottom: 12px;
+        }
+        .btn-google:hover { background: #f8f9fa; }
         .btn-danger { background: var(--danger); }
-        .btn-secondary { background: #6b778c; }
 
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -122,7 +127,6 @@
         .badge-troley { background: var(--trolley); }
         .badge-bus { background: var(--bus); color: #000; }
 
-        /* VÝSLEDKY A ROZKLIK TRASY */
         .result-card {
             background: white;
             border-radius: 10px;
@@ -131,11 +135,6 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             cursor: pointer;
             border: 1px solid var(--border);
-            transition: border-color 0.2s;
-        }
-
-        .result-card:hover {
-            border-color: var(--primary);
         }
 
         .result-header {
@@ -157,6 +156,18 @@
             border-radius: 12px;
             font-size: 0.85rem;
             font-weight: bold;
+        }
+
+        /* LIVE POLOHA A DETAIL TRASY */
+        .live-status-box {
+            background: #e6fcff;
+            border-left: 4px solid #00b8d9;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #004b57;
         }
 
         .route-details {
@@ -188,6 +199,11 @@
             font-size: 0.9rem;
         }
 
+        .timeline-step.active::before {
+            background: #00b8d9;
+            box-shadow: 0 0 0 3px #b3f5ff;
+        }
+
         .timeline-step::before {
             content: '';
             position: absolute;
@@ -199,7 +215,7 @@
             background: var(--primary);
         }
 
-        /* SPODNÍ NAVIGACE (BOTTOM TABS) */
+        /* NAVIGACE DOLE */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -233,10 +249,7 @@
             font-weight: bold;
         }
 
-        .nav-icon {
-            font-size: 1.3rem;
-            margin-bottom: 2px;
-        }
+        .nav-icon { font-size: 1.3rem; margin-bottom: 2px; }
 
         .timetable {
             width: 100%;
@@ -249,7 +262,6 @@
             text-align: left;
         }
 
-        /* JÍZDENKA */
         .ticket-card {
             background: #eef5ff;
             border: 2px dashed var(--primary);
@@ -277,7 +289,7 @@
     </header>
 
     <div class="container">
-        <!-- 1. TAB: SPOJENÍ -->
+        <!-- SPOJENÍ -->
         <div id="tab-search" class="tab-content active">
             <div class="card">
                 <div class="form-group">
@@ -297,7 +309,7 @@
             <div id="search-results"></div>
         </div>
 
-        <!-- 2. TAB: ODJEZDY -->
+        <!-- ODJEZDY -->
         <div id="tab-departures" class="tab-content">
             <div class="card">
                 <div class="form-group">
@@ -328,7 +340,7 @@
             </div>
         </div>
 
-        <!-- 3. TAB: JÍZDENKY -->
+        <!-- JÍZDENKY -->
         <div id="tab-tickets" class="tab-content">
             <div class="card">
                 <h2>Virtuální jízdenky</h2>
@@ -355,38 +367,27 @@
             </div>
         </div>
 
-        <!-- 4. TAB: VÍCE (SEZNAM LINEK) -->
+        <!-- VÍCE -->
         <div id="tab-more" class="tab-content">
             <div class="card" id="lines-list"></div>
         </div>
 
-        <!-- 5. TAB: ÚČET (FIREBASE AUTH) -->
+        <!-- ÚČET & AUTHENTIKACE -->
         <div id="tab-account" class="tab-content">
-            <!-- Formular nepřihlášen -->
             <div id="auth-section" class="card">
-                <h2 id="auth-title">Přihlášení</h2>
-                <p style="margin-bottom: 15px; color: #5e6c84; font-size: 0.85rem;">Přihlaste se ke svému účtu pro nákup a správu jízdenek.</p>
-                
-                <div class="form-group">
-                    <label>E-mail</label>
-                    <input type="email" id="auth-email" placeholder="vas@email.cz">
-                </div>
-                <div class="form-group">
-                    <label>Heslo (min. 6 znaků)</label>
-                    <input type="password" id="auth-password" placeholder="******">
-                </div>
-                
-                <button class="btn" id="auth-submit-btn" onclick="handleAuth()">Přihlásit se</button>
-                
-                <div style="margin-top: 15px; text-align: center;">
-                    <button id="auth-toggle-btn" style="background:none; border:none; color: var(--primary); cursor:pointer; font-size: 0.9rem;" onclick="toggleAuthMode()">
-                        Nemáte účet? Zaregistrujte se
-                    </button>
-                </div>
+                <h2>Přihlášení</h2>
+                <p style="margin-bottom: 15px; color: #5e6c84; font-size: 0.85rem;">Přihlaste se ke svému účtu pro nákup jízdenek.</p>
+
+                <!-- TLAČÍTKO GOOGLE PŘIHLÁŠENÍ -->
+                <button class="btn btn-google" onclick="handleGoogleLogin()">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="Google">
+                    Přihlásit se přes Google
+                </button>
+
                 <div id="auth-error" style="color: var(--danger); margin-top: 10px; font-weight: bold; text-align: center;"></div>
             </div>
 
-            <!-- Přihlášený profil -->
+            <!-- PROFIL PŘIHLÁŠENÉHO UŽIVATELE -->
             <div id="user-profile-section" class="card" style="display: none;">
                 <h2>Váš Profil</h2>
                 <br>
@@ -396,7 +397,7 @@
         </div>
     </div>
 
-    <!-- SPODNÍ NAVIGAČNÍ LIŠTA -->
+    <!-- BOTTOM NAVIGACE -->
     <nav class="bottom-nav">
         <button class="nav-item active" id="nav-search" onclick="switchTab('search')">
             <span class="nav-icon">🔍</span>
@@ -420,13 +421,14 @@
         </button>
     </nav>
 
-    <!-- FIREBASE AUTH INICIALIZACE -->
+    <!-- FIREBASE MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
         import { 
             getAuth, 
-            signInWithEmailAndPassword, 
-            createUserWithEmailAndPassword, 
+            GoogleAuthProvider, 
+            signInWithRedirect, 
+            getRedirectResult, 
             signOut, 
             onAuthStateChanged 
         } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
@@ -443,50 +445,29 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
 
-        let isLoginMode = true;
-
-        window.toggleAuthMode = () => {
-            isLoginMode = !isLoginMode;
-            document.getElementById('auth-error').innerText = '';
-            if (isLoginMode) {
-                document.getElementById('auth-title').innerText = 'Přihlášení';
-                document.getElementById('auth-submit-btn').innerText = 'Přihlásit se';
-                document.getElementById('auth-toggle-btn').innerText = 'Nemáte účet? Zaregistrujte se';
-            } else {
-                document.getElementById('auth-title').innerText = 'Registrace';
-                document.getElementById('auth-submit-btn').innerText = 'Vytvořit účet';
-                document.getElementById('auth-toggle-btn').innerText = 'Již máte účet? Přihlaste se';
-            }
-        };
-
-        window.handleAuth = async () => {
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            const errorDiv = document.getElementById('auth-error');
-            errorDiv.innerText = '';
-
-            if(!email || !password) {
-                errorDiv.innerText = 'Vyplňte e-mail a heslo.';
-                return;
-            }
-
+        // PŘIHLÁŠENÍ PŘES GOOGLE RE-DIRECT
+        window.handleGoogleLogin = async () => {
             try {
-                if (isLoginMode) {
-                    await signInWithEmailAndPassword(auth, email, password);
-                } else {
-                    await createUserWithEmailAndPassword(auth, email, password);
-                }
+                await signInWithRedirect(auth, googleProvider);
             } catch (err) {
-                errorDiv.innerText = 'Chyba: ' + err.message;
+                document.getElementById('auth-error').innerText = 'Chyba přihlášení: ' + err.message;
             }
         };
+
+        // Zpracování návratu po přesměrování z Google
+        getRedirectResult(auth).catch((error) => {
+            if (error) {
+                document.getElementById('auth-error').innerText = 'Chyba: ' + error.message;
+            }
+        });
 
         window.handleLogout = () => {
             signOut(auth);
         };
 
-        // Sledování přihlášeného uživatele
+        // Sledování stavu uživatele
         onAuthStateChanged(auth, (user) => {
             const authSection = document.getElementById('auth-section');
             const profileSection = document.getElementById('user-profile-section');
@@ -496,7 +477,7 @@
             if (user) {
                 authSection.style.display = 'none';
                 profileSection.style.display = 'block';
-                document.getElementById('user-email-display').innerText = user.email;
+                document.getElementById('user-email-display').innerText = user.email || user.displayName;
 
                 ticketBuyBox.style.display = 'block';
                 ticketWarning.style.display = 'none';
@@ -510,7 +491,7 @@
         });
     </script>
 
-    <!-- HLAVNÍ LOGIKA APLIKACE -->
+    <!-- LOGIKA IDOS -->
     <script>
         function removeConsecutiveDuplicates(arr) {
             return arr.filter((item, index) => item.trim() !== (arr[index - 1] || '').trim());
@@ -575,7 +556,8 @@
                         name: l.name,
                         stops: dir.stops,
                         departures: departures,
-                        destination: dir.stops[dir.stops.length - 1]
+                        firstStop: dir.stops[0],
+                        lastStop: dir.stops[dir.stops.length - 1]
                     });
                 });
             });
@@ -644,17 +626,44 @@
             return '<span class="badge badge-bus">Autobus</span>';
         }
 
-        // VÝPOČET DYNAMIČTĚ ODPOČTU REÁLNÝCH MINUT
         function getMinutesLeftText(targetTimeMinutes) {
             const currentMins = getCurrentMinutes();
             let diff = targetTimeMinutes - currentMins;
 
-            if (diff < 0) diff += 1440; // ošetření přesnoční doby
+            if (diff < 0) diff += 1440;
 
             if (diff === 0) return 'Právě jedou';
             if (diff === 1) return 'za 1 minutu';
             if (diff >= 2 && diff <= 4) return `za ${diff} minuty`;
             return `za ${diff} minut`;
+        }
+
+        // AKTUÁLNÍ POLOHA SPOJE PODLE ČASU
+        function getLiveVehicleStatus(allStops, lineStartDeparture) {
+            const currentMins = getCurrentMinutes();
+            const totalStops = allStops.length;
+            const lineEndArrival = lineStartDeparture + totalStops - 1;
+
+            if (currentMins < lineStartDeparture) {
+                return {
+                    statusText: `🅿️ Spoj na trase ještě nevyjel (vyjíždí v ${formatTime(lineStartDeparture)} ze stanice ${allStops[0]})`,
+                    currentStopIndex: -1
+                };
+            } else if (currentMins >= lineEndArrival) {
+                return {
+                    statusText: `🏁 Spoj již dorazil do cílové stanice ${allStops[totalStops - 1]} (${formatTime(lineEndArrival)})`,
+                    currentStopIndex: totalStops
+                };
+            } else {
+                const currentStopIndex = currentMins - lineStartDeparture;
+                const currentStopName = allStops[currentStopIndex];
+                const nextStopName = allStops[currentStopIndex + 1] || 'Cílová stanice';
+                
+                return {
+                    statusText: `📍 Spoj se PRÁVĚ NACHÁZÍ v / poblíž stanice: **${currentStopName}** (míří do: ${nextStopName})`,
+                    currentStopIndex: currentStopIndex
+                };
+            }
         }
 
         function searchConnection() {
@@ -681,16 +690,16 @@
                         const depAtFrom = dep + fromIdx;
                         if (depAtFrom >= startTime && depAtFrom <= startTime + 120) {
                             
-                            // Vygenerujeme mezizastávky pro rozkliknutí
-                            let routeStops = [];
-                            for(let i = fromIdx; i <= toIdx; i++) {
-                                routeStops.push({
-                                    stopName: line.stops[i],
-                                    time: dep + i
-                                });
-                            }
+                            // Načíst celou trasy spoje (od 1. do poslední zastávky)
+                            let fullRouteStops = line.stops.map((stopName, idx) => ({
+                                stopName: stopName,
+                                time: dep + idx,
+                                isBoarding: idx === fromIdx,
+                                isExit: idx === toIdx
+                            }));
 
                             results.push({
+                                lineStartDeparture: dep,
                                 depTime: depAtFrom,
                                 arrTime: depAtFrom + rideDuration,
                                 duration: rideDuration,
@@ -698,7 +707,10 @@
                                 vehicleType: line.type,
                                 from: from,
                                 to: to,
-                                routeStops: routeStops
+                                firstStop: line.firstStop,
+                                lastStop: line.lastStop,
+                                fullRouteStops: fullRouteStops,
+                                allStops: line.stops
                             });
                         }
                     });
@@ -716,6 +728,7 @@
             let html = '';
             results.forEach((res, index) => {
                 const countdown = getMinutesLeftText(res.depTime);
+                const liveStatus = getLiveVehicleStatus(res.allStops, res.lineStartDeparture);
 
                 html += `
                     <div class="result-card" onclick="toggleRouteDetails(${index})">
@@ -726,19 +739,33 @@
                             </div>
                             <span class="countdown-tag">${countdown}</span>
                         </div>
+                        
                         <div style="font-size: 0.85rem; color: #5e6c84; margin-top: 5px;">
-                            ${res.from} ➔ ${res.to} <span style="float:right;">▼ Trasa</span>
+                            <strong>Trasa:</strong> ${res.firstStop} ➔ ${res.lastStop} <span style="float:right;">▼ Detail</span>
                         </div>
 
-                        <!-- ROZKLIKÁVACÍ DETAIL TRASY -->
+                        <!-- ROZKLIK DETAIL TRASY S POLOHOU -->
                         <div class="route-details" id="route-details-${index}">
-                            <strong>Detail trasy a mezizastávky:</strong>
+                            <div class="live-status-box">
+                                ${liveStatus.statusText.replace(/\*\*(.*?)\*\*/g, '<u>$1</u>')}
+                            </div>
+
+                            <h4 style="margin-top: 10px; font-size: 0.9rem;">Celá trasa spoje:</h4>
                             <div class="timeline">
-                                ${res.routeStops.map(s => `
-                                    <div class="timeline-step">
-                                        <strong>${formatTime(s.time)}</strong> - ${s.stopName}
-                                    </div>
-                                `).join('')}
+                                ${res.fullRouteStops.map((s, idx) => {
+                                    let style = "";
+                                    let tag = "";
+                                    let isCurrent = idx === liveStatus.currentStopIndex;
+
+                                    if (s.isBoarding) tag = " 🟢 (Nástup)";
+                                    if (s.isExit) tag = " 🔴 (Výstup)";
+
+                                    return `
+                                        <div class="timeline-step ${isCurrent ? 'active' : ''}">
+                                            <strong>${formatTime(s.time)}</strong> - ${s.stopName} ${tag} ${isCurrent ? '👈 <b>[ZDE JE SPOJ]</b>' : ''}
+                                        </div>
+                                    `;
+                                }).join('')}
                             </div>
                         </div>
                     </div>
@@ -774,7 +801,7 @@
                                 time: depTime,
                                 line: line.name,
                                 type: line.type,
-                                dest: line.destination
+                                dest: line.lastStop
                             });
                         }
                     });
@@ -809,7 +836,7 @@
                     <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border);">
                         ${getBadge(l.type)} <strong>Linka ${l.name}</strong>
                         <div style="font-size: 0.85rem; color: #5e6c84; margin-top: 4px;">
-                            ${cleanedStops.join(' ➔ ')}
+                            ${cleanedStops[0]} ➔ ${cleanedStops[cleanedStops.length - 1]}
                         </div>
                     </div>
                 `;
