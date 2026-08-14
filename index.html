@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IDOS</title>
+    <title>IDOS - Městská Doprava</title>
     
     <meta property="og:type" content="website">
     <meta property="og:title" content="IDOS — Vyhledávání spojů & Jízdní řády">
@@ -158,7 +158,6 @@
             font-weight: bold;
         }
 
-        /* LIVE POLOHA A DETAIL TRASY */
         .live-status-box {
             background: #e6fcff;
             border-left: 4px solid #00b8d9;
@@ -215,7 +214,6 @@
             background: var(--primary);
         }
 
-        /* NAVIGACE DOLE */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -344,7 +342,7 @@
         <div id="tab-tickets" class="tab-content">
             <div class="card">
                 <h2>Virtuální jízdenky</h2>
-                <p style="margin-bottom: 15px; color: #5e6c84; font-size: 0.85rem;">Pro nákup jízdenky se musíte nejprve přihlásit v záložce "Účet".</p>
+                <p style="margin-bottom: 15px; color: #5e6c84; font-size: 0.85rem;">Pro nákup jízdenky se musíte nejprve přihlásit.</p>
                 
                 <div id="ticket-buy-box" style="display: none;">
                     <div class="form-group">
@@ -378,7 +376,6 @@
                 <h2>Přihlášení</h2>
                 <p style="margin-bottom: 15px; color: #5e6c84; font-size: 0.85rem;">Přihlaste se ke svému účtu pro nákup jízdenek.</p>
 
-                <!-- TLAČÍTKO GOOGLE PŘIHLÁŠENÍ -->
                 <button class="btn btn-google" onclick="handleGoogleLogin()">
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="Google">
                     Přihlásit se přes Google
@@ -387,7 +384,6 @@
                 <div id="auth-error" style="color: var(--danger); margin-top: 10px; font-weight: bold; text-align: center;"></div>
             </div>
 
-            <!-- PROFIL PŘIHLÁŠENÉHO UŽIVATELE -->
             <div id="user-profile-section" class="card" style="display: none;">
                 <h2>Váš Profil</h2>
                 <br>
@@ -427,8 +423,7 @@
         import { 
             getAuth, 
             GoogleAuthProvider, 
-            signInWithRedirect, 
-            getRedirectResult, 
+            signInWithPopup, 
             signOut, 
             onAuthStateChanged 
         } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
@@ -447,27 +442,21 @@
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
 
-        // PŘIHLÁŠENÍ PŘES GOOGLE RE-DIRECT
+        // BEZPEČNÉ PŘIHLÁŠENÍ VYSKAKOVACÍM OKNEM (POPUP)
         window.handleGoogleLogin = async () => {
             try {
-                await signInWithRedirect(auth, googleProvider);
+                const result = await signInWithPopup(auth, googleProvider);
+                document.getElementById('auth-error').innerText = '';
             } catch (err) {
                 document.getElementById('auth-error').innerText = 'Chyba přihlášení: ' + err.message;
             }
         };
 
-        // Zpracování návratu po přesměrování z Google
-        getRedirectResult(auth).catch((error) => {
-            if (error) {
-                document.getElementById('auth-error').innerText = 'Chyba: ' + error.message;
-            }
-        });
-
         window.handleLogout = () => {
             signOut(auth);
         };
 
-        // Sledování stavu uživatele
+        // REÁLNOU DOBU ODEMKNUTÍ SEZNAMU JÍZDENEK MÁ NA STAROSTI ODCHYTÁVÁNÍ STAVU UŽIVATELE:
         onAuthStateChanged(auth, (user) => {
             const authSection = document.getElementById('auth-section');
             const profileSection = document.getElementById('user-profile-section');
@@ -479,12 +468,14 @@
                 profileSection.style.display = 'block';
                 document.getElementById('user-email-display').innerText = user.email || user.displayName;
 
+                // Odemknutí nákupu jízdenky
                 ticketBuyBox.style.display = 'block';
                 ticketWarning.style.display = 'none';
             } else {
                 authSection.style.display = 'block';
                 profileSection.style.display = 'none';
 
+                // Uzamknutí nákupu jízdenky
                 ticketBuyBox.style.display = 'none';
                 ticketWarning.style.display = 'block';
             }
@@ -638,7 +629,6 @@
             return `za ${diff} minut`;
         }
 
-        // AKTUÁLNÍ POLOHA SPOJE PODLE ČASU
         function getLiveVehicleStatus(allStops, lineStartDeparture) {
             const currentMins = getCurrentMinutes();
             const totalStops = allStops.length;
@@ -690,7 +680,6 @@
                         const depAtFrom = dep + fromIdx;
                         if (depAtFrom >= startTime && depAtFrom <= startTime + 120) {
                             
-                            // Načíst celou trasy spoje (od 1. do poslední zastávky)
                             let fullRouteStops = line.stops.map((stopName, idx) => ({
                                 stopName: stopName,
                                 time: dep + idx,
@@ -744,7 +733,6 @@
                             <strong>Trasa:</strong> ${res.firstStop} ➔ ${res.lastStop} <span style="float:right;">▼ Detail</span>
                         </div>
 
-                        <!-- ROZKLIK DETAIL TRASY S POLOHOU -->
                         <div class="route-details" id="route-details-${index}">
                             <div class="live-status-box">
                                 ${liveStatus.statusText.replace(/\*\*(.*?)\*\*/g, '<u>$1</u>')}
@@ -753,7 +741,6 @@
                             <h4 style="margin-top: 10px; font-size: 0.9rem;">Celá trasa spoje:</h4>
                             <div class="timeline">
                                 ${res.fullRouteStops.map((s, idx) => {
-                                    let style = "";
                                     let tag = "";
                                     let isCurrent = idx === liveStatus.currentStopIndex;
 
@@ -762,7 +749,7 @@
 
                                     return `
                                         <div class="timeline-step ${isCurrent ? 'active' : ''}">
-                                            <strong>${formatTime(s.time)}</strong> - ${s.stopName} ${tag} ${isCurrent ? '👈 <b>[ZDE JE SPOJ]</b>' : ''}
+                                            <strong>${formatTime(s.time)}</strong> - ${s.stopName} ${tag} ${isCurrent ? '👈 <b>[ZDE JESPOJ]</b>' : ''}
                                         </div>
                                     `;
                                 }).join('')}
