@@ -377,7 +377,7 @@
                 <h2>Přihlášení</h2>
                 <p style="margin-bottom: 15px; color: #5e6c84; font-size: 0.85rem;">Přihlaste se ke svému účtu pro nákup jízdenek.</p>
 
-                <button class="btn btn-google" onclick="handleGoogleLogin()">
+                <button id="google-login-btn" class="btn btn-google">
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="Google">
                     Přihlásit se přes Google
                 </button>
@@ -389,7 +389,7 @@
                 <h2>Váš Profil</h2>
                 <br>
                 <p style="margin-bottom: 15px;">Přihlášen jako: <strong id="user-email-display"></strong></p>
-                <button class="btn btn-danger" onclick="handleLogout()">Odhlásit se</button>
+                <button id="logout-btn" class="btn btn-danger">Odhlásit se</button>
             </div>
         </div>
     </div>
@@ -418,14 +418,13 @@
         </button>
     </nav>
 
-    <!-- FIREBASE AUTH MODULE -->
+    <!-- FIREBASE AUTH MODULE (OPRAVENO PRO POPUP BEZ REDIRECTU) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
         import { 
             getAuth, 
             GoogleAuthProvider, 
-            signInWithRedirect,
-            getRedirectResult,
+            signInWithPopup, 
             signOut, 
             onAuthStateChanged 
         } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
@@ -444,28 +443,23 @@
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
 
-        // PŘIHLÁŠENÍ S PŘESMĚROVÁNÍM
-        window.handleGoogleLogin = () => {
-            signInWithRedirect(auth, googleProvider);
-        };
+        // PŘÍMÝ EVENT LISTENER (Nutný pro iOS Safari, aby nezablokoval Popup)
+        document.getElementById("google-login-btn").addEventListener("click", () => {
+            signInWithPopup(auth, googleProvider)
+                .then((result) => {
+                    switchTab('tickets'); // Po přihlášení rovnou na jízdenky
+                })
+                .catch((error) => {
+                    const errElem = document.getElementById('auth-error');
+                    if (errElem) errElem.innerText = 'Chyba: ' + error.message;
+                });
+        });
 
-        window.handleLogout = () => {
+        document.getElementById("logout-btn").addEventListener("click", () => {
             signOut(auth);
-        };
+        });
 
-        // ZPRACOVÁNÍ NÁVRATU Z GOOGLE PŘIHLÁŠENÍ
-        getRedirectResult(auth)
-            .then((result) => {
-                if (result && result.user) {
-                    switchTab('tickets'); // Automaticky přesune na Jízdenky po úspěšném přihlášení
-                }
-            })
-            .catch((error) => {
-                const errElem = document.getElementById('auth-error');
-                if (errElem) errElem.innerText = 'Chyba: ' + error.message;
-            });
-
-        // SLEDOVÁNÍ STAVU PŘIHLÁŠENÍ
+        // SLEDOVÁNÍ STAVU PŘIHLÁŠENÍ (Řídí viditelnost)
         onAuthStateChanged(auth, (user) => {
             const authSection = document.getElementById('auth-section');
             const profileSection = document.getElementById('user-profile-section');
@@ -760,7 +754,7 @@
 
                                     return `
                                         <div class="timeline-step ${isCurrent ? 'active' : ''}">
-                                            <strong>${formatTime(s.time)}</strong> - ${s.stopName} ${tag} ${isCurrent ? '👈 <b>[ZDE JE SPOJ]</b>' : ''}
+                                            <strong>${formatTime(s.time)}</strong> - ${s.stopName} ${tag} ${isCurrent ? '👈 <b>[ZDE JESPOJ]</b>' : ''}
                                         </div>
                                     `;
                                 }).join('')}
