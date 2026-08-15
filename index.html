@@ -10,8 +10,28 @@
     <meta property="og:description" content="Vyhledejte si spojení, odjezdy ze zastávek, prohlížejte trasy linek nebo si zakupte virtuální jízdenky.">
     <meta property="og:image" content="https://img.icons8.com/color/512/bus.png">
     <meta property="og:site_name" content="IDOS Doprava">
-    <meta name="theme-color" content="#0052cc">
+    <meta name="theme-color" content="#0052cc" media="(prefers-color-scheme: light)" id="theme-color-light">
+    <meta name="theme-color" content="#0e1420" media="(prefers-color-scheme: dark)" id="theme-color-dark">
 
+    <script>
+        // Aplikuje uloženou volbu motivu co nejdříve, aby stránka nebliknula ve špatném režimu.
+        (function() {
+            try {
+                const saved = localStorage.getItem('idos-theme');
+                if (saved === 'light' || saved === 'dark') {
+                    document.documentElement.setAttribute('data-theme', saved);
+                }
+            } catch (e) { /* localStorage nedostupný (např. soukromý režim) */ }
+        })();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+    <script>
+        // Pokud primární CDN selže (blokovaná síť, výpadek), zkusí se záložní zdroj.
+        if (typeof window.lucide === 'undefined') {
+            document.write('<script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"><\/script>');
+        }
+    </script>
     <style>
         :root {
             --primary: #0052cc;
@@ -19,12 +39,90 @@
             --bg: #f4f5f7;
             --card-bg: #ffffff;
             --text: #172b4d;
+            --text-muted: #5e6c84;
             --border: #dfe1e6;
             --tram: #de350b;
             --trolley: #00875a;
             --bus: #ffab00;
             --success: #00875a;
             --danger: #de350b;
+            --input-bg: #ffffff;
+            --live-bg: #e6fcff;
+            --live-border: #00b8d9;
+            --live-text: #004b57;
+            --countdown-bg: #e3fcef;
+            --countdown-text: #006644;
+            --board-bg: #e3fcef;
+            --board-text: #006644;
+            --exit-bg: #ffebe6;
+            --exit-text: #bf2600;
+            --current-bg: #deebff;
+            --current-text: #0052cc;
+            --ticket-bg: #eef5ff;
+            --nav-bg: #ffffff;
+            --nav-text: #6b778c;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --primary: #4c9aff;
+                --primary-dark: #2684ff;
+                --bg: #0e1420;
+                --card-bg: #182234;
+                --text: #e6ecf5;
+                --text-muted: #92a2b8;
+                --border: #2c3a52;
+                --tram: #ff6b52;
+                --trolley: #36d19e;
+                --bus: #ffc94a;
+                --success: #36d19e;
+                --danger: #ff6b52;
+                --input-bg: #101827;
+                --live-bg: #0d2b33;
+                --live-border: #22c3e6;
+                --live-text: #8fe3f5;
+                --countdown-bg: #0d3325;
+                --countdown-text: #5ce8ac;
+                --board-bg: #0d3325;
+                --board-text: #5ce8ac;
+                --exit-bg: #3a1712;
+                --exit-text: #ff9c86;
+                --current-bg: #16294a;
+                --current-text: #7db4ff;
+                --ticket-bg: #101d33;
+                --nav-bg: #182234;
+                --nav-text: #92a2b8;
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --primary: #4c9aff;
+            --primary-dark: #2684ff;
+            --bg: #0e1420;
+            --card-bg: #182234;
+            --text: #e6ecf5;
+            --text-muted: #92a2b8;
+            --border: #2c3a52;
+            --tram: #ff6b52;
+            --trolley: #36d19e;
+            --bus: #ffc94a;
+            --success: #36d19e;
+            --danger: #ff6b52;
+            --input-bg: #101827;
+            --live-bg: #0d2b33;
+            --live-border: #22c3e6;
+            --live-text: #8fe3f5;
+            --countdown-bg: #0d3325;
+            --countdown-text: #5ce8ac;
+            --board-bg: #0d3325;
+            --board-text: #5ce8ac;
+            --exit-bg: #3a1712;
+            --exit-text: #ff9c86;
+            --current-bg: #16294a;
+            --current-text: #7db4ff;
+            --ticket-bg: #101d33;
+            --nav-bg: #182234;
+            --nav-text: #92a2b8;
         }
 
         * {
@@ -54,6 +152,60 @@
             z-index: 10;
         }
 
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-toggle-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0;
+            transition: background 0.15s ease;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .theme-toggle-btn svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        #theme-icon-dark { display: none; }
+        [data-theme="dark"] #theme-icon-light { display: none; }
+        [data-theme="dark"] #theme-icon-dark { display: block; }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) #theme-icon-light { display: none; }
+            :root:not([data-theme="light"]) #theme-icon-dark { display: block; }
+        }
+
+        .header-clock {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: bold;
+            font-size: 1rem;
+            font-variant-numeric: tabular-nums;
+        }
+
         h1 { font-size: 1.3rem; }
 
         .container { padding: 15px; }
@@ -69,11 +221,10 @@
         .form-group { margin-bottom: 12px; }
 
         label {
-            display: block;
             margin-bottom: 5px;
             font-weight: 600;
             font-size: 0.85rem;
-            color: #5e6c84;
+            color: var(--text-muted);
         }
 
         select, input {
@@ -82,7 +233,7 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             font-size: 1rem;
-            background: #fff;
+            background: var(--input-bg);
         }
 
         .btn {
@@ -98,25 +249,79 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            transition: background 0.15s ease;
+        }
+
+        .btn svg, label svg, .nav-icon svg, h2 svg, h3 svg, h4 svg {
+            flex-shrink: 0;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        h2, h3, h4 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn:hover { background: var(--primary-dark); }
+        .btn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
+        select:disabled, option:disabled { color: var(--text-muted); }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .loading-box .spinner {
+            border-color: rgba(0,82,204,0.2);
+            border-top-color: var(--primary);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .spinner { animation: none; border-top-color: rgba(255,255,255,0.4); }
+            .loading-box .spinner { border-top-color: var(--primary); }
+        }
         .btn-google {
-            background: #ffffff;
-            color: #757575;
+            background: var(--card-bg);
+            color: var(--text-muted);
             border: 1px solid var(--border);
             margin-bottom: 12px;
         }
-        .btn-google:hover { background: #f8f9fa; }
+        .btn-google:hover { background: var(--bg); }
         .btn-danger { background: var(--danger); }
-        .btn-secondary { background: #6b778c; margin-top: 10px; }
+        .btn-secondary { background: var(--nav-text); margin-top: 10px; }
 
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
         .badge {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
             padding: 3px 8px;
             border-radius: 4px;
             color: white;
@@ -124,18 +329,29 @@
             font-size: 0.8rem;
         }
 
+        .badge svg { width: 13px; height: 13px; }
+
         .badge-tram { background: var(--tram); }
         .badge-troley { background: var(--trolley); }
         .badge-bus { background: var(--bus); color: #000; }
 
         .result-card {
-            background: white;
+            background: var(--card-bg);
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 12px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             cursor: pointer;
             border: 1px solid var(--border);
+        }
+
+        .result-card:focus-visible,
+        .nav-item:focus-visible,
+        .btn:focus-visible,
+        select:focus-visible,
+        input:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
         }
 
         .result-header {
@@ -151,8 +367,8 @@
         }
 
         .countdown-tag {
-            background: #e3fcef;
-            color: #006644;
+            background: var(--countdown-bg);
+            color: var(--countdown-text);
             padding: 4px 8px;
             border-radius: 12px;
             font-size: 0.85rem;
@@ -160,21 +376,41 @@
         }
 
         .live-status-box {
-            background: #e6fcff;
-            border-left: 4px solid #00b8d9;
+            background: var(--live-bg);
+            border-left: 4px solid var(--live-border);
             padding: 10px;
             margin-top: 10px;
             border-radius: 4px;
             font-size: 0.85rem;
             font-weight: bold;
-            color: #004b57;
+            color: var(--live-text);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
         }
+
+        .live-status-box svg { flex-shrink: 0; margin-top: 1px; }
 
         .route-details {
             display: none;
             margin-top: 12px;
             padding-top: 12px;
             border-top: 1px dashed var(--border);
+        }
+
+        .detail-toggle {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            white-space: nowrap;
+        }
+
+        .detail-toggle svg {
+            transition: transform 0.2s ease;
+        }
+
+        .result-card.expanded .detail-toggle svg {
+            transform: rotate(180deg);
         }
 
         .timeline {
@@ -200,8 +436,8 @@
         }
 
         .timeline-step.active::before {
-            background: #00b8d9;
-            box-shadow: 0 0 0 3px #b3f5ff;
+            background: var(--live-border);
+            box-shadow: 0 0 0 3px var(--live-bg);
         }
 
         .timeline-step::before {
@@ -215,13 +451,30 @@
             background: var(--primary);
         }
 
+        .stop-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 0.78rem;
+            font-weight: bold;
+            padding: 1px 6px;
+            border-radius: 10px;
+            vertical-align: middle;
+        }
+
+        .stop-tag svg { width: 12px; height: 12px; }
+
+        .stop-tag.board { background: var(--board-bg); color: var(--board-text); }
+        .stop-tag.exit { background: var(--exit-bg); color: var(--exit-text); }
+        .stop-tag.current { background: var(--current-bg); color: var(--current-text); }
+
         .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
             height: 60px;
-            background: white;
+            background: var(--nav-bg);
             border-top: 1px solid var(--border);
             display: flex;
             justify-content: space-around;
@@ -236,7 +489,7 @@
             flex-direction: column;
             align-items: center;
             font-size: 0.75rem;
-            color: #6b778c;
+            color: var(--nav-text);
             background: none;
             border: none;
             cursor: pointer;
@@ -248,7 +501,8 @@
             font-weight: bold;
         }
 
-        .nav-icon { font-size: 1.3rem; margin-bottom: 2px; }
+        .nav-icon { margin-bottom: 2px; }
+        .nav-icon svg { width: 22px; height: 22px; }
 
         .timetable {
             width: 100%;
@@ -261,8 +515,39 @@
             text-align: left;
         }
 
+        #departures-list {
+            animation: fadeIn 0.2s ease;
+        }
+
+        #weekend-banner {
+            background: #fff8e1;
+            color: #7a5b00;
+        }
+
+        #offline-banner {
+            background: #ffebe6;
+            color: #bf2600;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            #weekend-banner {
+                background: #332a00;
+                color: #ffd875;
+            }
+
+            #offline-banner {
+                background: #3a1712;
+                color: #ff9c86;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         .ticket-card {
-            background: #eef5ff;
+            background: var(--ticket-bg);
             border: 2px dashed var(--primary);
             border-radius: 12px;
             padding: 20px;
@@ -274,36 +559,82 @@
             width: 140px;
             height: 140px;
             margin: 15px auto;
-            background: #fff;
+            background: var(--input-bg);
             padding: 5px;
             border: 1px solid var(--border);
         }
+
+        .ticket-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--primary);
+        }
+
+        .auth-warning-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--danger);
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+        }
+
+        [data-lucide] { display: inline-block; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>IDOS Doprava</h1>
-        <span id="clock" style="font-weight: bold; font-size: 1rem;">--:--:--</span>
+        <div class="header-title">
+            <i data-lucide="bus-front"></i>
+            <h1>IDOS Doprava</h1>
+        </div>
+        <div class="header-right">
+            <button id="theme-toggle" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Přepnout světlý/tmavý motiv" title="Přepnout světlý/tmavý motiv">
+                <i data-lucide="sun" id="theme-icon-light"></i>
+                <i data-lucide="moon" id="theme-icon-dark"></i>
+            </button>
+            <span class="header-clock">
+                <i data-lucide="clock" style="width:16px;height:16px;"></i>
+                <span id="clock">--:--:--</span>
+            </span>
+        </div>
     </header>
+
+    <div id="offline-banner" style="padding: 8px 15px; font-size: 0.8rem; display:none; align-items:center; gap:6px; max-width:600px; margin:0 auto;">
+        <i data-lucide="wifi-off" style="width:14px;height:14px; flex-shrink:0;"></i>
+        <span>Jste offline. Některé funkce (přihlášení, nákup jízdenek) nemusí fungovat.</span>
+    </div>
+
+    <div id="weekend-banner" style="padding: 8px 15px; font-size: 0.8rem; display:none; align-items:center; gap:6px; max-width:600px; margin:0 auto;">
+        <i data-lucide="calendar-x" style="width:14px;height:14px; flex-shrink:0;"></i>
+        <span>Dnes je víkend – expresní linky (x88, x89, x889) dnes nejezdí.</span>
+    </div>
 
     <div class="container">
         <!-- SPOJENÍ -->
         <div id="tab-search" class="tab-content active">
             <div class="card">
                 <div class="form-group">
-                    <label>Odkud</label>
-                    <select id="from-stop"></select>
+                    <label><i data-lucide="map-pin" style="width:14px;height:14px;"></i>Odkud</label>
+                    <select id="from-stop" onchange="syncStopSelects()"></select>
                 </div>
                 <div class="form-group">
-                    <label>Kam</label>
-                    <select id="to-stop"></select>
+                    <label><i data-lucide="flag" style="width:14px;height:14px;"></i>Kam</label>
+                    <select id="to-stop" onchange="syncStopSelects()"></select>
+                </div>
+                <div id="same-stop-warning" style="color: var(--danger); font-size: 0.8rem; margin: -6px 0 12px; display:none; align-items:center; gap:5px;">
+                    <i data-lucide="alert-triangle" style="width:14px;height:14px;"></i>Odkud a Kam se shodují.
                 </div>
                 <div class="form-group">
-                    <label>Čas odjezdu</label>
+                    <label><i data-lucide="clock" style="width:14px;height:14px;"></i>Čas odjezdu</label>
                     <input type="time" id="search-time">
                 </div>
-                <button class="btn" onclick="searchConnection()">Vyhledat spojení</button>
+                <button class="btn" id="search-btn" onclick="searchConnection()"><i data-lucide="search" style="width:18px;height:18px;"></i>Vyhledat spojení</button>
             </div>
             <div id="search-results"></div>
         </div>
@@ -312,17 +643,17 @@
         <div id="tab-departures" class="tab-content">
             <div class="card">
                 <div class="form-group">
-                    <label>Vyberte zastávku</label>
+                    <label><i data-lucide="map-pin" style="width:14px;height:14px;"></i>Vyberte zastávku</label>
                     <select id="dep-stop" onchange="showDepartures()"></select>
                 </div>
                 <div class="form-group">
-                    <label>Od času</label>
+                    <label><i data-lucide="clock" style="width:14px;height:14px;"></i>Od času</label>
                     <input type="time" id="dep-time" onchange="showDepartures()">
                 </div>
             </div>
 
             <div class="card">
-                <h3 style="margin-bottom: 10px;">Následující odjezdy</h3>
+                <h3 style="margin-bottom: 10px;"><i data-lucide="list" style="width:18px;height:18px;"></i>Následující odjezdy</h3>
                 <table class="timetable">
                     <thead>
                         <tr>
@@ -342,24 +673,24 @@
         <!-- JÍZDENKY -->
         <div id="tab-tickets" class="tab-content">
             <div class="card">
-                <h2>Virtuální jízdenky</h2>
-                <p style="margin-bottom: 15px; color: #5e6c84; font-size: 0.85rem;">Pro nákup jízdenky se musíte nejprve přihlásit.</p>
+                <h2><i data-lucide="ticket" style="width:20px;height:20px;"></i>Virtuální jízdenky</h2>
+                <p style="margin-bottom: 15px; color: var(--text-muted); font-size: 0.85rem;">Pro nákup jízdenky se musíte nejprve přihlásit.</p>
                 
                 <div id="ticket-buy-box" style="display: none;">
                     <div class="form-group">
-                        <label>Vyberte typ jízdenky</label>
+                        <label><i data-lucide="ticket" style="width:14px;height:14px;"></i>Vyberte typ jízdenky</label>
                         <select id="ticket-type">
                             <option value="30 min / 24 Kč">30 minutová - 24 Kč</option>
                             <option value="60 min / 32 Kč">60 minutová - 32 Kč</option>
                             <option value="24 hodin / 100 Kč">24 hodinová - 100 Kč</option>
                         </select>
                     </div>
-                    <button class="btn" style="background: var(--success);" onclick="buyTicket()">Koupit jízdenku (Zdarma)</button>
+                    <button class="btn" style="background: var(--success);" onclick="buyTicket()"><i data-lucide="credit-card" style="width:18px;height:18px;"></i>Koupit jízdenku (Zdarma)</button>
                 </div>
 
                 <div id="ticket-auth-warning">
-                    <p style="color: var(--danger); font-weight: bold; text-align: center; padding: 10px;">🔒 Pro nákup jízdenek se prosím přihlaste v záložce Účet.</p>
-                    <button class="btn btn-secondary" onclick="switchTab('account')">Přejít k přihlášení</button>
+                    <p class="auth-warning-box"><i data-lucide="lock"></i>Pro nákup jízdenek se prosím přihlaste v záložce Účet.</p>
+                    <button class="btn btn-secondary" onclick="switchTab('account')"><i data-lucide="log-in" style="width:18px;height:18px;"></i>Přejít k přihlášení</button>
                 </div>
 
                 <div id="ticket-output"></div>
@@ -374,8 +705,8 @@
         <!-- ÚČET & AUTHENTIKACE -->
         <div id="tab-account" class="tab-content">
             <div id="auth-section" class="card">
-                <h2>Přihlášení</h2>
-                <p style="margin-bottom: 15px; color: #5e6c84; font-size: 0.85rem;">Přihlaste se ke svému účtu pro nákup jízdenek.</p>
+                <h2><i data-lucide="user" style="width:20px;height:20px;"></i>Přihlášení</h2>
+                <p style="margin-bottom: 15px; color: var(--text-muted); font-size: 0.85rem;">Přihlaste se ke svému účtu pro nákup jízdenek.</p>
 
                 <button id="google-login-btn" class="btn btn-google">
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="Google">
@@ -386,10 +717,10 @@
             </div>
 
             <div id="user-profile-section" class="card" style="display: none;">
-                <h2>Váš Profil</h2>
+                <h2><i data-lucide="user-check" style="width:20px;height:20px;"></i>Váš Profil</h2>
                 <br>
                 <p style="margin-bottom: 15px;">Přihlášen jako: <strong id="user-email-display"></strong></p>
-                <button id="logout-btn" class="btn btn-danger">Odhlásit se</button>
+                <button id="logout-btn" class="btn btn-danger"><i data-lucide="log-out" style="width:18px;height:18px;"></i>Odhlásit se</button>
             </div>
         </div>
     </div>
@@ -397,23 +728,23 @@
     <!-- BOTTOM NAVIGACE -->
     <nav class="bottom-nav">
         <button class="nav-item active" id="nav-search" onclick="switchTab('search')">
-            <span class="nav-icon">🔍</span>
+            <span class="nav-icon"><i data-lucide="search"></i></span>
             <span>Spojení</span>
         </button>
         <button class="nav-item" id="nav-departures" onclick="switchTab('departures')">
-            <span class="nav-icon">⏱️</span>
+            <span class="nav-icon"><i data-lucide="clock"></i></span>
             <span>Odjezdy</span>
         </button>
         <button class="nav-item" id="nav-tickets" onclick="switchTab('tickets')">
-            <span class="nav-icon">🎫</span>
+            <span class="nav-icon"><i data-lucide="ticket"></i></span>
             <span>Jízdenky</span>
         </button>
         <button class="nav-item" id="nav-more" onclick="switchTab('more')">
-            <span class="nav-icon">📋</span>
+            <span class="nav-icon"><i data-lucide="list"></i></span>
             <span>Více</span>
         </button>
         <button class="nav-item" id="nav-account" onclick="switchTab('account')">
-            <span class="nav-icon">👤</span>
+            <span class="nav-icon"><i data-lucide="user"></i></span>
             <span>Účet</span>
         </button>
     </nav>
@@ -443,20 +774,60 @@
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
 
+        function translateAuthError(error) {
+            const code = error && error.code ? error.code : '';
+            if (!navigator.onLine) return 'Jste offline. Zkontrolujte připojení k internetu a zkuste to znovu.';
+            switch (code) {
+                case 'auth/network-request-failed':
+                    return 'Přihlášení se nezdařilo kvůli problému se sítí. Zkuste to znovu.';
+                case 'auth/popup-blocked':
+                    return 'Prohlížeč zablokoval přihlašovací okno. Povolte vyskakovací okna a zkuste to znovu.';
+                case 'auth/popup-closed-by-user':
+                case 'auth/cancelled-popup-request':
+                    return 'Přihlášení bylo zrušeno.';
+                case 'auth/too-many-requests':
+                    return 'Příliš mnoho pokusů. Zkuste to prosím za chvíli.';
+                default:
+                    return 'Přihlášení se nezdařilo. Zkuste to prosím znovu.';
+            }
+        }
+
+        function setLoginButtonState(loading) {
+            const btn = document.getElementById('google-login-btn');
+            if (!btn) return;
+            btn.disabled = loading;
+            btn.innerHTML = loading
+                ? '<span class="spinner" style="border-color: rgba(0,0,0,0.15); border-top-color: var(--primary);"></span> Přihlašuji…'
+                : '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="Google"> Přihlásit se přes Google';
+        }
+
         // PŘÍMÝ EVENT LISTENER (Nutný pro iOS Safari, aby nezablokoval Popup)
         document.getElementById("google-login-btn").addEventListener("click", () => {
+            const errElem = document.getElementById('auth-error');
+            if (errElem) errElem.innerText = '';
+
+            if (!navigator.onLine) {
+                if (errElem) errElem.innerText = 'Jste offline. Přihlášení vyžaduje připojení k internetu.';
+                return;
+            }
+
+            setLoginButtonState(true);
             signInWithPopup(auth, googleProvider)
                 .then((result) => {
                     switchTab('tickets'); // Po přihlášení rovnou na jízdenky
                 })
                 .catch((error) => {
-                    const errElem = document.getElementById('auth-error');
-                    if (errElem) errElem.innerText = 'Chyba: ' + error.message;
+                    if (errElem) errElem.innerText = translateAuthError(error);
+                })
+                .finally(() => {
+                    setLoginButtonState(false);
                 });
         });
 
         document.getElementById("logout-btn").addEventListener("click", () => {
-            signOut(auth);
+            signOut(auth).catch(() => {
+                // I když odhlášení selže síťově, lokální stav se stejně obnoví přes onAuthStateChanged při dalším připojení.
+            });
         });
 
         // SLEDOVÁNÍ STAVU PŘIHLÁŠENÍ (Řídí viditelnost)
@@ -484,7 +855,26 @@
                 if (ticketBuyBox) ticketBuyBox.style.display = 'none';
                 if (ticketWarning) ticketWarning.style.display = 'block';
             }
+        }, (error) => {
+            const errElem = document.getElementById('auth-error');
+            if (errElem) errElem.innerText = translateAuthError(error);
         });
+
+        // Globální offline/online indikace
+        window.addEventListener('offline', () => {
+            const banner = document.getElementById('offline-banner');
+            if (banner) banner.style.display = 'flex';
+        });
+        window.addEventListener('online', () => {
+            const banner = document.getElementById('offline-banner');
+            if (banner) banner.style.display = 'none';
+        });
+        if (!navigator.onLine) {
+            document.addEventListener('DOMContentLoaded', () => {
+                const banner = document.getElementById('offline-banner');
+                if (banner) banner.style.display = 'flex';
+            });
+        }
     </script>
 
     <!-- HLAVNÍ LOGIKA IDOS -->
@@ -504,9 +894,9 @@
             { type: 'troley', typeName: 'Trolejbus', name: '202', stops: ['Os. Zgody', 'Wieczista', 'Lwowska', 'Mrozka'], roundtrip: true },
             { type: 'troley', typeName: 'Trolejbus', name: '203', stops: ['Blachownia', 'Blachownia PKP', 'Warsawska', 'Dworzec Glowny'], roundtrip: true },
             { type: 'troley', typeName: 'Trolejbus', name: '204', stops: ['Gorka Narodowa', 'Dworzec Glowny', 'Warsawska', 'Blachownia PKP', 'Blachownia', 'Rynek Glowny', 'Os. 30 Lecia', 'Dworcowa', 'Kochlowice', 'Witosa', 'Rzedzin'], roundtrip: true },
-            { type: 'bus', typeName: 'Autobus', name: 'x88', stops: ['Warsawska', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzedzin'], roundtrip: true },
-            { type: 'bus', typeName: 'Autobus', name: 'x89', stops: ['Rzedzin', 'Rzedzin Petla', 'Slaska', 'Lotnisko'], roundtrip: true },
-            { type: 'bus', typeName: 'Autobus', name: 'x889', stops: ['Warsawska', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzedzin', 'Rzedzin Petla', 'Slaska', 'Lotnisko'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: 'x88', stops: ['Warsawska', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzedzin'], roundtrip: true, weekdaysOnly: true },
+            { type: 'bus', typeName: 'Autobus', name: 'x89', stops: ['Rzedzin', 'Rzedzin Petla', 'Slaska', 'Lotnisko'], roundtrip: true, weekdaysOnly: true },
+            { type: 'bus', typeName: 'Autobus', name: 'x889', stops: ['Warsawska', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzedzin', 'Rzedzin Petla', 'Slaska', 'Lotnisko'], roundtrip: true, weekdaysOnly: true },
             { type: 'bus', typeName: 'Autobus', name: '2', stops: ['Zwiry', 'Bastzowa', 'Lwowska', 'Wieczista', 'Os. Zgody', 'Kombinat'], roundtrip: true },
             { type: 'bus', typeName: 'Autobus', name: '4', stops: ['Os. Zgody', 'Wieczista', 'Mrozka', 'Dworzec Glowny', 'Al. Jana Pawla II.', 'Urząd Miasta', 'Kochłowice', 'Dworcowa', 'Os. 30 Lecia', 'Rynek Glowny', 'Blachownia'], roundtrip: true },
             { type: 'bus', typeName: 'Autobus', name: '369', stops: ['Lotnisko', 'Gorka Narodowa', 'Kochłowice', 'Rzedzin', 'Rzedzin Petla', 'Slaska', 'Lotnisko'], roundtrip: true },
@@ -553,7 +943,8 @@
                         stops: dir.stops,
                         departures: departures,
                         firstStop: dir.stops[0],
-                        lastStop: dir.stops[dir.stops.length - 1]
+                        lastStop: dir.stops[dir.stops.length - 1],
+                        weekdaysOnly: !!l.weekdaysOnly
                     });
                 });
             });
@@ -564,6 +955,41 @@
             return now.getHours() * 60 + now.getMinutes();
         }
 
+        function getEffectiveTheme() {
+            const explicit = document.documentElement.getAttribute('data-theme');
+            if (explicit === 'light' || explicit === 'dark') return explicit;
+            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        function updateThemeColorMeta(theme) {
+            const light = document.getElementById('theme-color-light');
+            const dark = document.getElementById('theme-color-dark');
+            if (!light || !dark) return;
+            // Když je motiv vynucen ručně, necháme aktivní jen odpovídající meta tag bez ohledu na media query.
+            light.setAttribute('media', theme === 'light' ? '' : '(prefers-color-scheme: light)');
+            dark.setAttribute('media', theme === 'dark' ? '' : '(prefers-color-scheme: dark)');
+        }
+
+        function toggleTheme() {
+            const current = getEffectiveTheme();
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            updateThemeColorMeta(next);
+            try {
+                localStorage.setItem('idos-theme', next);
+            } catch (e) { /* localStorage nedostupný */ }
+        }
+
+        function isWeekend(date) {
+            const day = date.getDay(); // 0 = Sunday, 6 = Saturday
+            return day === 0 || day === 6;
+        }
+
+        function isLineRunningToday(line) {
+            if (!line.weekdaysOnly) return true;
+            return !isWeekend(new Date());
+        }
+
         function updateLiveClock() {
             const now = new Date();
             const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
@@ -571,9 +997,15 @@
         }
 
         window.onload = () => {
+            updateThemeColorMeta(getEffectiveTheme());
+
             buildSchedules();
             updateLiveClock();
             setInterval(updateLiveClock, 1000);
+
+            if (isWeekend(new Date())) {
+                document.getElementById('weekend-banner').style.display = 'flex';
+            }
 
             const now = new Date();
             const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -592,10 +1024,32 @@
             });
 
             if (sortedStops.length > 1) toSelect.selectedIndex = 1;
+            syncStopSelects();
 
             renderLinesList();
             showDepartures();
+
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
         };
+
+        function syncStopSelects() {
+            const fromSelect = document.getElementById('from-stop');
+            const toSelect = document.getElementById('to-stop');
+            const warning = document.getElementById('same-stop-warning');
+            const searchBtn = document.getElementById('search-btn');
+
+            const same = fromSelect.value && fromSelect.value === toSelect.value;
+
+            Array.from(toSelect.options).forEach(opt => {
+                opt.disabled = (opt.value === fromSelect.value);
+            });
+            Array.from(fromSelect.options).forEach(opt => {
+                opt.disabled = (opt.value === toSelect.value);
+            });
+
+            warning.style.display = same ? 'flex' : 'none';
+            if (searchBtn) searchBtn.disabled = same;
+        }
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -603,6 +1057,8 @@
             
             document.getElementById(`tab-${tabId}`).classList.add('active');
             document.getElementById(`nav-${tabId}`).classList.add('active');
+
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
         }
 
         function formatTime(totalMinutes) {
@@ -617,9 +1073,9 @@
         }
 
         function getBadge(type) {
-            if (type === 'tram') return '<span class="badge badge-tram">Tramvaj</span>';
-            if (type === 'troley') return '<span class="badge badge-troley">Trolejbus</span>';
-            return '<span class="badge badge-bus">Autobus</span>';
+            if (type === 'tram') return '<span class="badge badge-tram"><i data-lucide="tram-front"></i>Tramvaj</span>';
+            if (type === 'troley') return '<span class="badge badge-troley"><i data-lucide="zap"></i>Trolejbus</span>';
+            return '<span class="badge badge-bus"><i data-lucide="bus"></i>Autobus</span>';
         }
 
         function getMinutesLeftText(targetTimeMinutes) {
@@ -641,12 +1097,14 @@
 
             if (currentMins < lineStartDeparture) {
                 return {
-                    statusText: `🅿️ Spoj na trase ještě nevyjel (vyjíždí v ${formatTime(lineStartDeparture)} ze stanice ${allStops[0]})`,
+                    statusIcon: 'parking-circle',
+                    statusText: `Spoj na trase ještě nevyjel (vyjíždí v ${formatTime(lineStartDeparture)} ze stanice ${allStops[0]})`,
                     currentStopIndex: -1
                 };
             } else if (currentMins >= lineEndArrival) {
                 return {
-                    statusText: `🏁 Spoj již dorazil do cílové stanice ${allStops[totalStops - 1]} (${formatTime(lineEndArrival)})`,
+                    statusIcon: 'flag-triangle-right',
+                    statusText: `Spoj již dorazil do cílové stanice ${allStops[totalStops - 1]} (${formatTime(lineEndArrival)})`,
                     currentStopIndex: totalStops
                 };
             } else {
@@ -655,36 +1113,42 @@
                 const nextStopName = allStops[currentStopIndex + 1] || 'Cílová stanice';
                 
                 return {
-                    statusText: `📍 Spoj se PRÁVĚ NACHÁZÍ v / poblíž stanice: **${currentStopName}** (míří do: ${nextStopName})`,
+                    statusIcon: 'navigation',
+                    statusText: `Spoj se PRÁVĚ NACHÁZÍ v / poblíž stanice: **${currentStopName}** (míří do: ${nextStopName})`,
                     currentStopIndex: currentStopIndex
                 };
             }
         }
 
         function searchConnection() {
-            const from = document.getElementById('from-stop').value;
-            const to = document.getElementById('to-stop').value;
-            const startTime = parseTime(document.getElementById('search-time').value);
             const container = document.getElementById('search-results');
+            const btn = document.getElementById('search-btn');
 
-            if (from === to) {
-                container.innerHTML = '<div class="card">Výchozí a cílová zastávka se shodují.</div>';
-                return;
-            }
+            container.innerHTML = '<div class="card"><div class="loading-box"><span class="spinner"></span>Hledám spojení…</div></div>';
+            if (btn) { btn.disabled = true; }
 
+            setTimeout(() => {
+                performSearch();
+                if (btn) { btn.disabled = false; }
+            }, 350);
+        }
+
+        function findDirectConnections(from, to, startTime, windowMins) {
             let results = [];
 
             linesData.forEach(line => {
+                if (!isLineRunningToday(line)) return;
+
                 const fromIdx = line.stops.indexOf(from);
                 const toIdx = line.stops.indexOf(to);
 
                 if (fromIdx !== -1 && toIdx !== -1 && fromIdx < toIdx) {
                     const rideDuration = toIdx - fromIdx;
-                    
+
                     line.departures.forEach(dep => {
                         const depAtFrom = dep + fromIdx;
-                        if (depAtFrom >= startTime && depAtFrom <= startTime + 120) {
-                            
+                        if (depAtFrom >= startTime && depAtFrom <= startTime + windowMins) {
+
                             let fullRouteStops = line.stops.map((stopName, idx) => ({
                                 stopName: stopName,
                                 time: dep + idx,
@@ -693,6 +1157,7 @@
                             }));
 
                             results.push({
+                                type: 'direct',
                                 lineStartDeparture: dep,
                                 depTime: depAtFrom,
                                 arrTime: depAtFrom + rideDuration,
@@ -711,68 +1176,242 @@
                 }
             });
 
-            results.sort((a, b) => a.depTime - b.depTime);
-            results = results.slice(0, 8);
+            return results;
+        }
 
-            if (results.length === 0) {
+        function findTransferConnections(from, to, startTime, windowMins) {
+            // Find one-transfer connections: from -> transferStop (line A), transferStop -> to (line B)
+            let results = [];
+            const seen = new Set(); // avoid dupes: lineA|transferStop|lineB|depTime
+
+            // Pre-filter: only lines actually running today, and lines that could plausibly
+            // serve as leg A (contain 'from') or leg B (contain 'to') at all.
+            const runningLines = linesData.filter(isLineRunningToday);
+            const candidateLinesA = runningLines.filter(l => l.stops.indexOf(from) !== -1);
+            const candidateLinesB = runningLines.filter(l => l.stops.indexOf(to) !== -1);
+
+            candidateLinesA.forEach(lineA => {
+                const fromIdx = lineA.stops.indexOf(from);
+
+                // Only departures that actually land in our search window at 'from' are relevant.
+                const relevantDeparturesA = lineA.departures.filter(depA => {
+                    const depAtFrom = depA + fromIdx;
+                    return depAtFrom >= startTime && depAtFrom <= startTime + windowMins;
+                });
+                if (relevantDeparturesA.length === 0) return;
+
+                // candidate transfer stops: every stop on lineA after 'from'
+                for (let tIdx = fromIdx + 1; tIdx < lineA.stops.length; tIdx++) {
+                    const transferStop = lineA.stops[tIdx];
+                    if (transferStop === to) continue; // that would be direct, not a transfer
+
+                    candidateLinesB.forEach(lineB => {
+                        if (lineB === lineA) return;
+                        const bFromIdx = lineB.stops.indexOf(transferStop);
+                        if (bFromIdx === -1) return;
+                        const bToIdx = lineB.stops.indexOf(to);
+                        if (bFromIdx >= bToIdx) return;
+
+                        relevantDeparturesA.forEach(depA => {
+                            const depAtFrom = depA + fromIdx;
+                            const arrAtTransfer = depA + tIdx;
+                            const minTransfer = 2; // minimum minutes to change vehicle
+
+                            // find first lineB departure at transferStop that leaves after arrival + minTransfer
+                            let bestDepB = null;
+                            for (const depB of lineB.departures) {
+                                const depBAtTransfer = depB + bFromIdx;
+                                if (depBAtTransfer >= arrAtTransfer + minTransfer) {
+                                    if (bestDepB === null || depBAtTransfer < bestDepB.depBAtTransfer) {
+                                        bestDepB = { depB, depBAtTransfer };
+                                    }
+                                }
+                            }
+                            if (!bestDepB) return;
+                            // cap wait time so we don't suggest absurd transfers
+                            if (bestDepB.depBAtTransfer - arrAtTransfer > 30) return;
+
+                            const arrAtTo = bestDepB.depB + bToIdx;
+                            const key = `${lineA.name}|${transferStop}|${lineB.name}|${depAtFrom}`;
+                            if (seen.has(key)) return;
+                            seen.add(key);
+
+                            results.push({
+                                type: 'transfer',
+                                depTime: depAtFrom,
+                                arrTime: arrAtTo,
+                                duration: arrAtTo - depAtFrom,
+                                transferStop: transferStop,
+                                transferWait: bestDepB.depBAtTransfer - arrAtTransfer,
+                                legA: {
+                                    line: lineA.name,
+                                    vehicleType: lineA.type,
+                                    depTime: depAtFrom,
+                                    arrTime: arrAtTransfer,
+                                    firstStop: lineA.firstStop,
+                                    lastStop: lineA.lastStop
+                                },
+                                legB: {
+                                    line: lineB.name,
+                                    vehicleType: lineB.type,
+                                    depTime: bestDepB.depBAtTransfer,
+                                    arrTime: arrAtTo,
+                                    firstStop: lineB.firstStop,
+                                    lastStop: lineB.lastStop
+                                }
+                            });
+                        });
+                    });
+                }
+            });
+
+            results.sort((a, b) => (a.duration - b.duration) || (a.depTime - b.depTime));
+            return results.slice(0, 4);
+        }
+
+        function renderDirectCard(res, index) {
+            const countdown = getMinutesLeftText(res.depTime);
+            const liveStatus = getLiveVehicleStatus(res.allStops, res.lineStartDeparture);
+
+            return `
+                <div class="result-card" onclick="toggleRouteDetails(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRouteDetails(${index});}" role="button" tabindex="0" aria-expanded="false">
+                    <div class="result-header">
+                        <div>
+                            ${getBadge(res.vehicleType)} <strong>Linka ${res.line}</strong>
+                            <div class="time-main">${formatTime(res.depTime)} → ${formatTime(res.arrTime)} (${res.duration} min)</div>
+                        </div>
+                        <span class="countdown-tag">${countdown}</span>
+                    </div>
+
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px; display: flex; align-items: center; justify-content: space-between;">
+                        <span style="display:flex; align-items:center; gap:5px;"><i data-lucide="route" style="width:14px;height:14px;"></i><strong>Trasa:</strong> ${res.firstStop} → ${res.lastStop}</span>
+                        <span class="detail-toggle"><i data-lucide="chevron-down" style="width:14px;height:14px;"></i>Detail</span>
+                    </div>
+
+                    <div class="route-details" id="route-details-${index}">
+                        <div class="live-status-box">
+                            <i data-lucide="${liveStatus.statusIcon}" style="width:16px;height:16px;"></i>
+                            <span>${liveStatus.statusText.replace(/\*\*(.*?)\*\*/g, '<u>$1</u>')}</span>
+                        </div>
+
+                        <h4 style="margin-top: 10px; font-size: 0.9rem;"><i data-lucide="list-ordered" style="width:16px;height:16px;"></i>Celá trasa spoje:</h4>
+                        <div class="timeline">
+                            ${res.fullRouteStops.map((s, idx) => {
+                                let tag = "";
+                                let isCurrent = idx === liveStatus.currentStopIndex;
+
+                                if (s.isBoarding) tag = ' <span class="stop-tag board"><i data-lucide="arrow-up-circle"></i>Nástup</span>';
+                                if (s.isExit) tag = ' <span class="stop-tag exit"><i data-lucide="arrow-down-circle"></i>Výstup</span>';
+
+                                return `
+                                    <div class="timeline-step ${isCurrent ? 'active' : ''}">
+                                        <strong>${formatTime(s.time)}</strong> - ${s.stopName} ${tag} ${isCurrent ? '<span class="stop-tag current"><i data-lucide="bus-front"></i>Zde je spoj</span>' : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTransferCard(res, index) {
+            const countdown = getMinutesLeftText(res.depTime);
+
+            return `
+                <div class="result-card" onclick="toggleRouteDetails(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRouteDetails(${index});}" role="button" tabindex="0" aria-expanded="false">
+                    <div class="result-header">
+                        <div>
+                            <span class="stop-tag current"><i data-lucide="shuffle"></i>Přestup</span> <strong>${res.legA.line} → ${res.legB.line}</strong>
+                            <div class="time-main">${formatTime(res.depTime)} → ${formatTime(res.arrTime)} (${res.duration} min)</div>
+                        </div>
+                        <span class="countdown-tag">${countdown}</span>
+                    </div>
+
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px; display: flex; align-items: center; justify-content: space-between;">
+                        <span style="display:flex; align-items:center; gap:5px;"><i data-lucide="map-pin" style="width:14px;height:14px;"></i>Přestup na: <strong>${res.transferStop}</strong></span>
+                        <span class="detail-toggle"><i data-lucide="chevron-down" style="width:14px;height:14px;"></i>Detail</span>
+                    </div>
+
+                    <div class="route-details" id="route-details-${index}">
+                        <div class="timeline">
+                            <div class="timeline-step active">
+                                ${getBadge(res.legA.vehicleType)} <strong>Linka ${res.legA.line}</strong><br>
+                                <strong>${formatTime(res.legA.depTime)}</strong> nástup, jízda do <strong>${res.transferStop}</strong> (příjezd ${formatTime(res.legA.arrTime)})
+                            </div>
+                            <div class="timeline-step">
+                                <span class="stop-tag current"><i data-lucide="clock"></i>Čekání na přestup: ${res.transferWait} min</span>
+                            </div>
+                            <div class="timeline-step">
+                                ${getBadge(res.legB.vehicleType)} <strong>Linka ${res.legB.line}</strong><br>
+                                <strong>${formatTime(res.legB.depTime)}</strong> nástup v <strong>${res.transferStop}</strong>, výstup v cíli (příjezd ${formatTime(res.legB.arrTime)})
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function performSearch() {
+            const from = document.getElementById('from-stop').value;
+            const to = document.getElementById('to-stop').value;
+            const startTime = parseTime(document.getElementById('search-time').value);
+            const container = document.getElementById('search-results');
+
+            if (from === to) {
+                container.innerHTML = '<div class="card">Výchozí a cílová zastávka se shodují.</div>';
+                return;
+            }
+
+            let directResults = findDirectConnections(from, to, startTime, 120);
+            directResults.sort((a, b) => a.depTime - b.depTime);
+            directResults = directResults.slice(0, 8);
+
+            let transferResults = [];
+            if (directResults.length < 3) {
+                transferResults = findTransferConnections(from, to, startTime, 120);
+            }
+
+            if (directResults.length === 0 && transferResults.length === 0) {
                 container.innerHTML = '<div class="card">Pro zadaný čas nebylo nalezeno žádné spojení.</div>';
                 return;
             }
 
             let html = '';
-            results.forEach((res, index) => {
-                const countdown = getMinutesLeftText(res.depTime);
-                const liveStatus = getLiveVehicleStatus(res.allStops, res.lineStartDeparture);
+            let index = 0;
 
-                html += `
-                    <div class="result-card" onclick="toggleRouteDetails(${index})">
-                        <div class="result-header">
-                            <div>
-                                ${getBadge(res.vehicleType)} <strong>Linka ${res.line}</strong>
-                                <div class="time-main">${formatTime(res.depTime)} → ${formatTime(res.arrTime)} (${res.duration} min)</div>
-                            </div>
-                            <span class="countdown-tag">${countdown}</span>
-                        </div>
-                        
-                        <div style="font-size: 0.85rem; color: #5e6c84; margin-top: 5px;">
-                            <strong>Trasa:</strong> ${res.firstStop} ➔ ${res.lastStop} <span style="float:right;">▼ Detail</span>
-                        </div>
+            if (directResults.length > 0) {
+                directResults.forEach(res => {
+                    html += renderDirectCard(res, index);
+                    index++;
+                });
+            }
 
-                        <div class="route-details" id="route-details-${index}">
-                            <div class="live-status-box">
-                                ${liveStatus.statusText.replace(/\*\*(.*?)\*\*/g, '<u>$1</u>')}
-                            </div>
-
-                            <h4 style="margin-top: 10px; font-size: 0.9rem;">Celá trasa spoje:</h4>
-                            <div class="timeline">
-                                ${res.fullRouteStops.map((s, idx) => {
-                                    let tag = "";
-                                    let isCurrent = idx === liveStatus.currentStopIndex;
-
-                                    if (s.isBoarding) tag = " 🟢 (Nástup)";
-                                    if (s.isExit) tag = " 🔴 (Výstup)";
-
-                                    return `
-                                        <div class="timeline-step ${isCurrent ? 'active' : ''}">
-                                            <strong>${formatTime(s.time)}</strong> - ${s.stopName} ${tag} ${isCurrent ? '👈 <b>[ZDE JESPOJ]</b>' : ''}
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
+            if (transferResults.length > 0) {
+                html += `<div style="display:flex; align-items:center; gap:6px; margin: 15px 0 8px; color: var(--text-muted); font-size: 0.8rem; font-weight: 600;">
+                    <i data-lucide="shuffle" style="width:14px;height:14px;"></i>SPOJENÍ S PŘESTUPEM
+                </div>`;
+                transferResults.forEach(res => {
+                    html += renderTransferCard(res, index);
+                    index++;
+                });
+            }
 
             container.innerHTML = html;
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
         }
 
         function toggleRouteDetails(index) {
             const elem = document.getElementById(`route-details-${index}`);
+            const card = elem.closest('.result-card');
             if (elem.style.display === 'block') {
                 elem.style.display = 'none';
+                card.classList.remove('expanded');
+                card.setAttribute('aria-expanded', 'false');
             } else {
                 elem.style.display = 'block';
+                card.classList.add('expanded');
+                card.setAttribute('aria-expanded', 'true');
             }
         }
 
@@ -784,6 +1423,7 @@
             let list = [];
 
             linesData.forEach(line => {
+                if (!isLineRunningToday(line)) return;
                 const stopIdx = line.stops.indexOf(stop);
                 if (stopIdx !== -1 && stopIdx < line.stops.length - 1) {
                     line.departures.forEach(dep => {
@@ -816,25 +1456,30 @@
                     <td>${item.dest}</td>
                 </tr>
             `).join('');
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
         }
 
         function renderLinesList() {
             const container = document.getElementById('lines-list');
-            let html = '<h2>Přehled všech linek</h2><br>';
+            let html = '<h2><i data-lucide="list" style="width:20px;height:20px;"></i>Přehled všech linek</h2><br>';
 
             rawLinesData.forEach(l => {
                 const cleanedStops = removeConsecutiveDuplicates(l.stops);
+                const weekdayTag = l.weekdaysOnly
+                    ? '<span class="stop-tag current" style="margin-left:6px;"><i data-lucide="calendar-days"></i>jen všední dny</span>'
+                    : '';
                 html += `
                     <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border);">
-                        ${getBadge(l.type)} <strong>Linka ${l.name}</strong>
-                        <div style="font-size: 0.85rem; color: #5e6c84; margin-top: 4px;">
-                            ${cleanedStops[0]} ➔ ${cleanedStops[cleanedStops.length - 1]}
+                        ${getBadge(l.type)} <strong>Linka ${l.name}</strong> ${weekdayTag}
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; display:flex; align-items:center; gap:5px;">
+                            <i data-lucide="route" style="width:13px;height:13px;"></i>${cleanedStops[0]} → ${cleanedStops[cleanedStops.length - 1]}
                         </div>
                     </div>
                 `;
             });
 
             container.innerHTML = html;
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
         }
 
         function buyTicket() {
@@ -848,15 +1493,16 @@
 
             const html = `
                 <div class="ticket-card">
-                    <h3 style="color: var(--primary);">✅ PLATNÁ JÍZDENKA</h3>
+                    <h3 class="ticket-status"><i data-lucide="check-circle-2"></i>PLATNÁ JÍZDENKA</h3>
                     <p style="margin-top: 5px;"><strong>${type}</strong></p>
                     <img src="${qrUrl}" class="ticket-qr" alt="QR Kód">
-                    <p style="font-size: 0.85rem; color: #5e6c84;">ID: <strong>${ticketId}</strong></p>
-                    <p style="font-size: 0.85rem; color: #5e6c84;">Zakoupeno: ${dateStr} ${timeStr}</p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">ID: <strong>${ticketId}</strong></p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Zakoupeno: ${dateStr} ${timeStr}</p>
                 </div>
             `;
 
             document.getElementById('ticket-output').innerHTML = html;
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
         }
     </script>
 </body>
