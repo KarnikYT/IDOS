@@ -132,13 +132,22 @@
             padding: 0;
         }
 
+        * { box-sizing: border-box; }
+
         body {
             background-color: var(--bg);
             color: var(--text);
-            padding-bottom: 70px;
+            padding-bottom: 24px;
             max-width: 600px;
             margin: 0 auto;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            overflow-x: hidden;
         }
+
+        body.menu-open { overflow: hidden; }
+
+        img, svg { max-width: 100%; }
 
         header {
             background: var(--primary);
@@ -147,6 +156,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 10px;
             position: sticky;
             top: 0;
             z-index: 10;
@@ -156,12 +166,24 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            min-width: 0;
+            overflow: hidden;
         }
+
+        .header-title h1 {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
+        }
+
+        .header-title svg { flex-shrink: 0; }
 
         .header-right {
             display: flex;
             align-items: center;
             gap: 12px;
+            flex-shrink: 0;
         }
 
         .theme-toggle-btn {
@@ -176,12 +198,15 @@
             justify-content: center;
             cursor: pointer;
             padding: 0;
-            transition: background 0.15s ease;
+            transition: background 0.15s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .theme-toggle-btn:hover {
             background: rgba(255,255,255,0.25);
+            transform: rotate(15deg);
         }
+
+        .theme-toggle-btn:active { transform: rotate(15deg) scale(0.9); }
 
         .theme-toggle-btn svg {
             width: 17px;
@@ -206,9 +231,14 @@
             font-variant-numeric: tabular-nums;
         }
 
-        h1 { font-size: 1.3rem; }
+        @media (max-width: 360px) {
+            .header-clock { display: none; }
+            .header-title h1 { font-size: 1.05rem; }
+        }
 
-        .container { padding: 15px; }
+        h1 { font-size: 1.3rem; min-width: 0; }
+
+        .container { padding: 15px; max-width: 100%; }
 
         .card {
             background: var(--card-bg);
@@ -251,7 +281,11 @@
             align-items: center;
             gap: 8px;
             transition: background 0.15s ease;
+            min-width: 0;
+            text-align: center;
         }
+
+        .btn span, .btn > * { min-width: 0; }
 
         .btn svg, label svg, .nav-icon svg, h2 svg, h3 svg, h4 svg {
             flex-shrink: 0;
@@ -270,7 +304,8 @@
         }
 
         .btn:hover { background: var(--primary-dark); }
-        .btn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
+        .btn:active { transform: scale(0.97); }
+        .btn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; transform: none; }
         select:disabled, option:disabled { color: var(--text-muted); }
 
         .spinner {
@@ -304,6 +339,21 @@
         @media (prefers-reduced-motion: reduce) {
             .spinner { animation: none; border-top-color: rgba(255,255,255,0.4); }
             .loading-box .spinner { border-top-color: var(--primary); }
+            .tab-content.active,
+            .result-card,
+            .live-pulse-icon,
+            .ticket-card,
+            .ticket-qr,
+            .ticket-status svg {
+                animation: none !important;
+            }
+            .result-card,
+            .theme-toggle-btn,
+            .nav-item,
+            .nav-icon {
+                transform: none !important;
+            }
+            .route-details { transition: none !important; }
         }
         .btn-google {
             background: var(--card-bg);
@@ -316,7 +366,15 @@
         .btn-secondary { background: var(--nav-text); margin-top: 10px; }
 
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab-content.active {
+            display: block;
+            animation: tabIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes tabIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
         .badge {
             display: inline-flex;
@@ -327,6 +385,9 @@
             color: white;
             font-weight: bold;
             font-size: 0.8rem;
+            white-space: nowrap;
+            flex-shrink: 0;
+            max-width: 100%;
         }
 
         .badge svg { width: 13px; height: 13px; }
@@ -343,6 +404,21 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             cursor: pointer;
             border: 1px solid var(--border);
+            animation: cardIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        }
+
+        .result-card:hover {
+            box-shadow: 0 6px 16px rgba(0,0,0,0.09);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .result-card:active { transform: translateY(0) scale(0.99); }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(10px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .result-card:focus-visible,
@@ -357,13 +433,20 @@
         .result-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .result-header > div:first-child {
+            min-width: 0;
+            flex: 1;
         }
 
         .time-main {
             font-size: 1.2rem;
             font-weight: bold;
             color: var(--primary);
+            overflow-wrap: anywhere;
         }
 
         .countdown-tag {
@@ -373,6 +456,8 @@
             border-radius: 12px;
             font-size: 0.85rem;
             font-weight: bold;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .live-status-box {
@@ -389,10 +474,30 @@
             gap: 8px;
         }
 
+        .live-status-box span { min-width: 0; overflow-wrap: anywhere; }
+
         .live-status-box svg { flex-shrink: 0; margin-top: 1px; }
 
+        .live-pulse-icon { animation: livePulse 1.6s ease-in-out infinite; }
+
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.55; transform: scale(0.88); }
+        }
+
         .route-details {
-            display: none;
+            display: grid;
+            grid-template-rows: 0fr;
+            opacity: 0;
+            overflow: hidden;
+            transition: grid-template-rows 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, margin-top 0.3s ease;
+        }
+
+        .route-details > div { min-height: 0; }
+
+        .result-card.expanded .route-details {
+            grid-template-rows: 1fr;
+            opacity: 1;
             margin-top: 12px;
             padding-top: 12px;
             border-top: 1px dashed var(--border);
@@ -403,6 +508,23 @@
             align-items: center;
             gap: 3px;
             white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .route-summary-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .route-summary-row > span:first-child {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 0;
+            overflow-wrap: anywhere;
         }
 
         .detail-toggle svg {
@@ -451,6 +573,82 @@
             background: var(--primary);
         }
 
+        .line-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            cursor: pointer;
+            border-radius: 4px;
+            padding: 1px 4px;
+            margin: -1px -4px;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .line-link:hover { background: var(--current-bg); color: var(--current-text); }
+
+        .line-link svg {
+            width: 12px;
+            height: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .line-link.open svg { transform: rotate(180deg); }
+
+        .line-route-expand {
+            display: grid;
+            grid-template-rows: 0fr;
+            opacity: 0;
+            overflow: hidden;
+            transition: grid-template-rows 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease, margin-top 0.28s ease;
+        }
+
+        .line-route-expand.open {
+            grid-template-rows: 1fr;
+            opacity: 1;
+            margin-top: 8px;
+        }
+
+        .line-route-inner { min-height: 0; }
+
+        .line-route-list {
+            list-style: none;
+            margin: 0;
+            padding: 8px 0 2px 14px;
+            border-left: 2px dotted var(--border);
+            font-size: 0.82rem;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        .line-route-list li {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 3px 0;
+        }
+
+        .line-route-list li em {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .line-route-list li.is-transfer {
+            color: var(--current-text);
+            font-weight: 600;
+            font-style: italic;
+        }
+
+        .line-route-time {
+            font-style: normal;
+            font-variant-numeric: tabular-nums;
+            flex-shrink: 0;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .line-route-expand { transition: none !important; }
+            .line-link svg { transition: none !important; }
+        }
+
         .stop-tag {
             display: inline-flex;
             align-items: center;
@@ -460,6 +658,8 @@
             padding: 1px 6px;
             border-radius: 10px;
             vertical-align: middle;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .stop-tag svg { width: 12px; height: 12px; }
@@ -468,55 +668,201 @@
         .stop-tag.exit { background: var(--exit-bg); color: var(--exit-text); }
         .stop-tag.current { background: var(--current-bg); color: var(--current-text); }
 
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: var(--nav-bg);
-            border-top: 1px solid var(--border);
+        /* HAMBURGER TLAČÍTKO (v headeru) */
+        .hamburger-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
             display: flex;
-            justify-content: space-around;
             align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0;
+            flex-shrink: 0;
+            position: relative;
+            transition: background 0.15s ease;
+        }
+
+        .hamburger-btn:hover { background: rgba(255,255,255,0.25); }
+        .hamburger-btn:active { transform: scale(0.92); }
+
+        .hamburger-btn .hamburger-icon {
+            position: relative;
+            width: 18px;
+            height: 14px;
+        }
+
+        .hamburger-btn .hamburger-icon span {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            border-radius: 2px;
+            background: currentColor;
+            transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.2s ease, top 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        .hamburger-btn .hamburger-icon span:nth-child(1) { top: 0; }
+        .hamburger-btn .hamburger-icon span:nth-child(2) { top: 6px; }
+        .hamburger-btn .hamburger-icon span:nth-child(3) { top: 12px; }
+
+        .hamburger-btn.open .hamburger-icon span:nth-child(1) {
+            top: 6px;
+            transform: rotate(45deg);
+        }
+        .hamburger-btn.open .hamburger-icon span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+        .hamburger-btn.open .hamburger-icon span:nth-child(3) {
+            top: 6px;
+            transform: rotate(-45deg);
+        }
+
+        /* OVERLAY POZADÍ ZA MENU */
+        .nav-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(9, 14, 24, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+        }
+
+        .nav-overlay.open {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease, visibility 0s linear 0s;
+        }
+
+        /* VÝSUVNÉ MENU (Z BOKU) */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 78%;
+            max-width: 320px;
+            background: var(--nav-bg);
             z-index: 1000;
-            max-width: 600px;
-            margin: 0 auto;
+            box-shadow: -8px 0 24px rgba(0,0,0,0.15);
+            transform: translateX(100%);
+            transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            padding: 18px 0;
+        }
+
+        .side-menu.open { transform: translateX(0); }
+
+        .side-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 20px 16px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            font-weight: bold;
+            font-size: 1.05rem;
+        }
+
+        .side-menu-header svg { color: var(--primary); flex-shrink: 0; }
+
+        .side-menu-list {
+            list-style: none;
+            margin: 0;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            overflow-y: auto;
         }
 
         .nav-item {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            font-size: 0.75rem;
+            gap: 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
             color: var(--nav-text);
             background: none;
             border: none;
             cursor: pointer;
-            width: 20%;
+            width: 100%;
+            text-align: left;
+            padding: 12px 12px;
+            border-radius: 10px;
+            transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
         }
+
+        .nav-item:hover { background: var(--bg); }
+        .nav-item:active { transform: scale(0.97); }
 
         .nav-item.active {
             color: var(--primary);
-            font-weight: bold;
+            background: var(--current-bg);
         }
 
-        .nav-icon { margin-bottom: 2px; }
-        .nav-icon svg { width: 22px; height: 22px; }
+        .nav-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .nav-icon svg { width: 21px; height: 21px; }
+        .nav-item.active .nav-icon { transform: scale(1.12); }
+
+        @media (prefers-reduced-motion: reduce) {
+            .side-menu, .nav-overlay, .hamburger-btn .hamburger-icon span, .nav-icon {
+                transition: none !important;
+            }
+        }
 
         .timetable {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
 
         .timetable th, .timetable td {
-            padding: 10px;
+            padding: 8px 6px;
             border-bottom: 1px solid var(--border);
             text-align: left;
+            overflow-wrap: anywhere;
+            vertical-align: middle;
+        }
+
+        .timetable th:nth-child(1), .timetable td:nth-child(1) { width: 22%; }
+        .timetable th:nth-child(2), .timetable td:nth-child(2) { width: 20%; }
+        .timetable th:nth-child(3), .timetable td:nth-child(3) { width: 38%; }
+        .timetable th:nth-child(4), .timetable td:nth-child(4) { width: 20%; }
+
+        .timetable .badge {
+            white-space: normal;
+            line-height: 1.2;
         }
 
         #departures-list {
             animation: fadeIn 0.2s ease;
+        }
+
+        #departures-list tr {
+            animation: rowIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        }
+
+        @keyframes rowIn {
+            from { opacity: 0; transform: translateX(-6px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #departures-list tr { animation: none !important; }
         }
 
         #weekend-banner {
@@ -553,6 +899,21 @@
             padding: 20px;
             text-align: center;
             margin-top: 15px;
+            animation: ticketPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes ticketPop {
+            from { opacity: 0; transform: scale(0.9) translateY(6px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .ticket-status svg {
+            animation: checkPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s backwards;
+        }
+
+        @keyframes checkPop {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .ticket-qr {
@@ -562,6 +923,7 @@
             background: var(--input-bg);
             padding: 5px;
             border: 1px solid var(--border);
+            animation: ticketPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s backwards;
         }
 
         .ticket-status {
@@ -583,6 +945,602 @@
             padding: 10px;
         }
 
+        .btn-fav-toggle {
+            width: 48px;
+            flex-shrink: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .btn-fav-toggle:hover { background: var(--bg); }
+
+        .btn-fav-toggle svg {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), fill 0.15s ease, color 0.15s ease;
+        }
+
+        .btn-fav-toggle.is-fav {
+            color: #ffab00;
+            border-color: #ffab00;
+        }
+
+        .btn-fav-toggle.is-fav svg {
+            fill: #ffab00;
+            transform: scale(1.15) rotate(-8deg);
+        }
+
+        .btn-fav-toggle-wide {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+
+        .btn-fav-toggle-wide:hover { background: var(--bg); }
+
+        .btn-fav-toggle-wide svg { transition: fill 0.15s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        .btn-fav-toggle-wide.is-fav {
+            color: #ffab00;
+            border-color: #ffab00;
+        }
+
+        .btn-fav-toggle-wide.is-fav svg {
+            fill: #ffab00;
+            transform: scale(1.15) rotate(-8deg);
+        }
+
+        .fav-chip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+            animation: cardIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        }
+
+        .fav-chip:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        }
+
+        .fav-chip:active { transform: translateY(0) scale(0.99); }
+
+        .fav-chip:last-child { margin-bottom: 0; }
+
+        .fav-chip-route {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            min-width: 0;
+        }
+
+        .fav-chip-route span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .fav-chip-remove {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .fav-chip-remove:hover { background: var(--exit-bg); color: var(--exit-text); }
+        .fav-chip-remove svg { width: 15px; height: 15px; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .btn-fav-toggle svg, .btn-fav-toggle-wide svg { transition: none !important; }
+            .fav-chip { animation: none !important; transform: none !important; }
+        }
+
+        /* === MEGA UPDATE: NOVÉ KOMPONENTY === */
+
+        /* TOAST NOTIFIKACE */
+        #toast-stack {
+            position: fixed;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: calc(100% - 30px);
+            max-width: 560px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            border-radius: 10px;
+            padding: 10px 14px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: auto;
+        }
+
+        .toast.leaving { animation: toastOut 0.25s ease forwards; }
+
+        .toast.success { border-left-color: var(--success); }
+        .toast.danger { border-left-color: var(--danger); }
+        .toast.info { border-left-color: var(--live-border); }
+
+        .toast svg { flex-shrink: 0; }
+        .toast span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 2px;
+            display: flex;
+            flex-shrink: 0;
+            border-radius: 50%;
+        }
+        .toast-close:hover { background: var(--bg); }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(-12px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to { opacity: 0; transform: translateY(-8px) scale(0.96); }
+        }
+
+        /* STAT KARTY (statistiky cest) */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .stat-card {
+            background: var(--bg);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-card .stat-value {
+            font-size: 1.35rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* BENEFIT LIST (výhody přihlášení) */
+        .benefit-list {
+            list-style: none;
+            margin: 12px 0 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+
+        .benefit-item .benefit-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background: var(--current-bg);
+            color: var(--current-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .benefit-item .benefit-icon svg { width: 16px; height: 16px; }
+
+        .benefit-item strong { display: block; color: var(--text); }
+        .benefit-item span.benefit-desc { color: var(--text-muted); }
+
+        /* ODZNAKY / GAMIFIKACE */
+        .badge-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .badge-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--countdown-bg);
+            color: var(--countdown-text);
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: bold;
+        }
+
+        .badge-chip.locked {
+            background: var(--bg);
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        .badge-chip svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+        /* MINI TRASOVÁ MAPA (SVG linka zastávek) */
+        .route-map {
+            display: flex;
+            align-items: center;
+            margin: 12px 0;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .route-map-stop {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+            width: 64px;
+            position: relative;
+        }
+
+        .route-map-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--border);
+            border: 2px solid var(--card-bg);
+            z-index: 1;
+        }
+
+        .route-map-stop.endpoint .route-map-dot {
+            width: 13px;
+            height: 13px;
+            background: var(--primary);
+        }
+
+        .route-map-stop.current .route-map-dot {
+            background: var(--live-border);
+            box-shadow: 0 0 0 4px var(--live-bg);
+        }
+
+        .route-map-line {
+            position: absolute;
+            top: 5px;
+            left: -32px;
+            width: 64px;
+            height: 2px;
+            background: var(--border);
+            z-index: 0;
+        }
+
+        .route-map-stop:first-child .route-map-line { display: none; }
+
+        .route-map-label {
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 4px;
+            max-width: 60px;
+            overflow-wrap: anywhere;
+            line-height: 1.2;
+        }
+
+        /* PROGRESS BAR (věrnostní/skóre) */
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background: var(--bg);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 4px;
+            transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* MODAL (obecný) */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(9, 14, 24, 0.5);
+            z-index: 1999;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.25s ease, visibility 0s linear 0s;
+        }
+
+        .modal-sheet {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 600px;
+            border-radius: 16px 16px 0 0;
+            padding: 18px;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-overlay.open .modal-sheet { transform: translateY(0); }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+
+        .modal-header h3 { display: flex; align-items: center; gap: 8px; margin: 0; min-width: 0; overflow-wrap: anywhere; }
+
+        .modal-close {
+            background: var(--bg);
+            border: none;
+            color: var(--text-muted);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* NOTIFIKACE PANEL (zvonek) */
+        .notif-btn {
+            position: relative;
+        }
+
+        .notif-dot {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--danger);
+            border: 1.5px solid var(--primary);
+            display: none;
+        }
+
+        .notif-dot.show { display: block; }
+
+        .notif-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .notif-item:last-child { border-bottom: none; }
+
+        .notif-item .notif-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--current-bg);
+            color: var(--current-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .notif-item .notif-icon svg { width: 16px; height: 16px; }
+        .notif-time { color: var(--text-muted); font-size: 0.72rem; margin-top: 2px; }
+
+        /* HISTORIE CEST */
+        .history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+        .history-item:last-child { border-bottom: none; }
+        .history-item .history-route { min-width: 0; overflow-wrap: anywhere; display: flex; align-items: center; gap: 6px; }
+        .history-item .history-meta { color: var(--text-muted); font-size: 0.72rem; flex-shrink: 0; text-align: right; }
+
+        /* SEGMENTOVANÝ PŘEPÍNAČ (filtry / motiv) */
+        .segmented {
+            display: flex;
+            background: var(--bg);
+            border-radius: 10px;
+            padding: 3px;
+            gap: 3px;
+        }
+
+        .segmented button {
+            flex: 1;
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 8px 4px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: background 0.2s ease, color 0.2s ease;
+            min-width: 0;
+        }
+
+        .segmented button.active {
+            background: var(--card-bg);
+            color: var(--primary);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+
+        .segmented button svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+        /* PULL TO REFRESH / SPINNER MALÝ */
+        .inline-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ECO / CO2 BOX */
+        .eco-box {
+            background: var(--board-bg);
+            color: var(--board-text);
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .eco-box svg { flex-shrink: 0; }
+
+        /* NASTAVENÍ ŘÁDKY (Účet -> Nastavení) */
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .settings-row:last-child { border-bottom: none; }
+        .settings-row .settings-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.88rem;
+            min-width: 0;
+        }
+        .settings-row .settings-label svg { flex-shrink: 0; color: var(--text-muted); }
+
+        /* TOGGLE SWITCH */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 42px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .switch-track {
+            position: absolute;
+            inset: 0;
+            background: var(--border);
+            border-radius: 24px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .switch-track::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            left: 3px;
+            top: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .switch input:checked + .switch-track { background: var(--primary); }
+        .switch input:checked + .switch-track::before { transform: translateX(18px); }
+
+        /* SHARE / QUICK ACTIONS ŘÁDEK */
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .quick-actions button {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 30px 15px;
+            color: var(--text-muted);
+        }
+        .empty-state svg { width: 40px; height: 40px; margin-bottom: 10px; opacity: 0.5; }
+        .empty-state p { font-size: 0.85rem; margin: 0; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .toast, .modal-sheet, .progress-fill, .switch-track, .switch-track::before, .inline-spinner {
+                transition: none !important;
+                animation: none !important;
+            }
+        }
+
         [data-lucide] { display: inline-block; }
     </style>
 </head>
@@ -602,8 +1560,50 @@
                 <i data-lucide="clock" style="width:16px;height:16px;"></i>
                 <span id="clock">--:--:--</span>
             </span>
+            <button id="notif-btn" class="theme-toggle-btn notif-btn" onclick="openNotifModal()" aria-label="Oznámení" title="Oznámení">
+                <i data-lucide="bell" style="width:16px;height:16px;"></i>
+                <span class="notif-dot" id="notif-dot"></span>
+            </button>
+            <button id="hamburger-btn" class="hamburger-btn" onclick="toggleMenu()" aria-label="Otevřít menu" aria-expanded="false" aria-controls="side-menu">
+                <span class="hamburger-icon"><span></span><span></span><span></span></span>
+            </button>
         </div>
     </header>
+
+    <div id="nav-overlay" class="nav-overlay" onclick="closeMenu()"></div>
+
+    <nav class="side-menu" id="side-menu" aria-hidden="true">
+        <div class="side-menu-header">
+            <i data-lucide="bus-front"></i>
+            <span>IDOS Doprava</span>
+        </div>
+        <ul class="side-menu-list">
+            <li><button class="nav-item active" id="nav-search" onclick="switchTab('search')">
+                <span class="nav-icon"><i data-lucide="search"></i></span>
+                <span>Spojení</span>
+            </button></li>
+            <li><button class="nav-item" id="nav-departures" onclick="switchTab('departures')">
+                <span class="nav-icon"><i data-lucide="clock"></i></span>
+                <span>Odjezdy</span>
+            </button></li>
+            <li><button class="nav-item" id="nav-tickets" onclick="switchTab('tickets')">
+                <span class="nav-icon"><i data-lucide="ticket"></i></span>
+                <span>Jízdenky</span>
+            </button></li>
+            <li><button class="nav-item" id="nav-more" onclick="switchTab('more')">
+                <span class="nav-icon"><i data-lucide="list"></i></span>
+                <span>Více</span>
+            </button></li>
+            <li><button class="nav-item" id="nav-account" onclick="switchTab('account')">
+                <span class="nav-icon"><i data-lucide="user"></i></span>
+                <span>Účet</span>
+            </button></li>
+            <li><button class="nav-item" id="nav-settings" onclick="switchTab('settings')">
+                <span class="nav-icon"><i data-lucide="settings"></i></span>
+                <span>Nastavení</span>
+            </button></li>
+        </ul>
+    </nav>
 
     <div id="offline-banner" style="padding: 8px 15px; font-size: 0.8rem; display:none; align-items:center; gap:6px; max-width:600px; margin:0 auto;">
         <i data-lucide="wifi-off" style="width:14px;height:14px; flex-shrink:0;"></i>
@@ -615,9 +1615,31 @@
         <span>Dnes je víkend – expresní linky (x88, x89, x889) dnes nejezdí.</span>
     </div>
 
+    <div id="toast-stack" aria-live="polite"></div>
+
+    <div id="notif-modal-overlay" class="modal-overlay" onclick="if(event.target===this) closeNotifModal()">
+        <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="notif-modal-title">
+            <div class="modal-header">
+                <h3 id="notif-modal-title"><i data-lucide="bell" style="width:18px;height:18px;"></i>Oznámení</h3>
+                <button class="modal-close" onclick="closeNotifModal()" aria-label="Zavřít"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+            </div>
+            <div id="notif-list"></div>
+        </div>
+    </div>
+
     <div class="container">
         <!-- SPOJENÍ -->
         <div id="tab-search" class="tab-content active">
+            <div id="nearest-widget" class="card" style="display:none;">
+                <h3 style="margin-bottom: 8px; font-size: 0.9rem; display:flex; align-items:center; gap:6px;"><i data-lucide="zap" style="width:16px;height:16px; color: var(--primary);"></i>Nejbližší odjezd</h3>
+                <div id="nearest-widget-content"></div>
+            </div>
+
+            <div id="favorites-box" class="card" style="display:none;">
+                <h3 style="margin-bottom: 10px; font-size: 0.95rem;"><i data-lucide="star" style="width:16px;height:16px;"></i>Oblíbená spojení</h3>
+                <div id="favorites-list"></div>
+            </div>
+
             <div class="card">
                 <div class="form-group">
                     <label><i data-lucide="map-pin" style="width:14px;height:14px;"></i>Odkud</label>
@@ -634,13 +1656,27 @@
                     <label><i data-lucide="clock" style="width:14px;height:14px;"></i>Čas odjezdu</label>
                     <input type="time" id="search-time">
                 </div>
-                <button class="btn" id="search-btn" onclick="searchConnection()"><i data-lucide="search" style="width:18px;height:18px;"></i>Vyhledat spojení</button>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn" id="search-btn" onclick="searchConnection()" style="flex:1;"><i data-lucide="search" style="width:18px;height:18px;"></i>Vyhledat spojení</button>
+                    <button class="btn btn-fav-toggle" id="fav-toggle-btn" onclick="toggleCurrentFavorite()" aria-label="Přidat do oblíbených" title="Přidat do oblíbených">
+                        <i data-lucide="star" id="fav-toggle-icon"></i>
+                    </button>
+                </div>
             </div>
             <div id="search-results"></div>
+            <div id="search-quick-actions" class="quick-actions" style="display:none;">
+                <button class="btn btn-secondary" onclick="shareLastSearch()"><i data-lucide="share-2" style="width:16px;height:16px;"></i>Sdílet</button>
+                <button class="btn btn-secondary" onclick="exportLastSearchToCalendar()"><i data-lucide="calendar-plus" style="width:16px;height:16px;"></i>Do kalendáře</button>
+            </div>
         </div>
 
         <!-- ODJEZDY -->
         <div id="tab-departures" class="tab-content">
+            <div id="favorite-stops-box" class="card" style="display:none;">
+                <h3 style="margin-bottom: 10px; font-size: 0.95rem;"><i data-lucide="star" style="width:16px;height:16px;"></i>Oblíbené zastávky</h3>
+                <div id="favorite-stops-list"></div>
+            </div>
+
             <div class="card">
                 <div class="form-group">
                     <label><i data-lucide="map-pin" style="width:14px;height:14px;"></i>Vyberte zastávku</label>
@@ -650,10 +1686,19 @@
                     <label><i data-lucide="clock" style="width:14px;height:14px;"></i>Od času</label>
                     <input type="time" id="dep-time" onchange="showDepartures()">
                 </div>
+                <button class="btn btn-fav-toggle-wide" id="fav-stop-toggle-btn" onclick="toggleCurrentFavoriteStop()">
+                    <i data-lucide="star" id="fav-stop-toggle-icon"></i><span id="fav-stop-toggle-text">Přidat zastávku do oblíbených</span>
+                </button>
             </div>
 
             <div class="card">
                 <h3 style="margin-bottom: 10px;"><i data-lucide="list" style="width:18px;height:18px;"></i>Následující odjezdy</h3>
+                <div class="segmented" id="dep-filter" style="margin-bottom: 12px;">
+                    <button class="active" data-filter="all" onclick="setDepartureFilter('all')"><i data-lucide="asterisk"></i>Vše</button>
+                    <button data-filter="tram" onclick="setDepartureFilter('tram')"><i data-lucide="train-front"></i>Tram</button>
+                    <button data-filter="troley" onclick="setDepartureFilter('troley')"><i data-lucide="zap"></i>Trolej</button>
+                    <button data-filter="bus" onclick="setDepartureFilter('bus')"><i data-lucide="bus-front"></i>Bus</button>
+                </div>
                 <table class="timetable">
                     <thead>
                         <tr>
@@ -695,10 +1740,21 @@
 
                 <div id="ticket-output"></div>
             </div>
+
+            <div class="card" id="ticket-history-box" style="display:none;">
+                <h3 style="margin-bottom: 10px; font-size: 0.95rem;"><i data-lucide="receipt" style="width:16px;height:16px;"></i>Historie jízdenek</h3>
+                <div id="ticket-history-list"></div>
+            </div>
         </div>
 
         <!-- VÍCE -->
         <div id="tab-more" class="tab-content">
+            <div class="card">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label><i data-lucide="search" style="width:14px;height:14px;"></i>Hledat linku</label>
+                    <input type="text" id="lines-search-input" placeholder="Např. 4, x88…" oninput="renderLinesList()">
+                </div>
+            </div>
             <div class="card" id="lines-list"></div>
         </div>
 
@@ -706,7 +1762,7 @@
         <div id="tab-account" class="tab-content">
             <div id="auth-section" class="card">
                 <h2><i data-lucide="user" style="width:20px;height:20px;"></i>Přihlášení</h2>
-                <p style="margin-bottom: 15px; color: var(--text-muted); font-size: 0.85rem;">Přihlaste se ke svému účtu pro nákup jízdenek.</p>
+                <p style="margin-bottom: 15px; color: var(--text-muted); font-size: 0.85rem;">Přihlaste se ke svému účtu a získejte víc než jen nákup jízdenek.</p>
 
                 <button id="google-login-btn" class="btn btn-google">
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="Google">
@@ -714,40 +1770,130 @@
                 </button>
 
                 <div id="auth-error" style="color: var(--danger); margin-top: 10px; font-weight: bold; text-align: center;"></div>
+
+                <ul class="benefit-list">
+                    <li class="benefit-item">
+                        <span class="benefit-icon"><i data-lucide="ticket"></i></span>
+                        <div><strong>Virtuální jízdenky</strong><span class="benefit-desc">Nákup a uložení jízdenek přímo v telefonu.</span></div>
+                    </li>
+                    <li class="benefit-item">
+                        <span class="benefit-icon"><i data-lucide="history"></i></span>
+                        <div><strong>Historie cest</strong><span class="benefit-desc">Přehled všech vyhledaných spojení a statistiky cestování.</span></div>
+                    </li>
+                    <li class="benefit-item">
+                        <span class="benefit-icon"><i data-lucide="route"></i></span>
+                        <div><strong>Plánování napříč zařízeními</strong><span class="benefit-desc">Oblíbené spoje a zastávky se ti uloží k účtu.</span></div>
+                    </li>
+                    <li class="benefit-item">
+                        <span class="benefit-icon"><i data-lucide="users"></i></span>
+                        <div><strong>Sdílení a pozvánky</strong><span class="benefit-desc">Sdílej polohu spoje nebo pozvi přátele na cestu.</span></div>
+                    </li>
+                    <li class="benefit-item">
+                        <span class="benefit-icon"><i data-lucide="bell"></i></span>
+                        <div><strong>Upozornění na odjezd</strong><span class="benefit-desc">Notifikace před odjezdem oblíbeného spoje.</span></div>
+                    </li>
+                    <li class="benefit-item">
+                        <span class="benefit-icon"><i data-lucide="award"></i></span>
+                        <div><strong>Odznaky a výzvy</strong><span class="benefit-desc">Sbírej odznaky za pravidelné cestování MHD.</span></div>
+                    </li>
+                    <li class="benefit-item">
+                        <span class="benefit-icon"><i data-lucide="leaf"></i></span>
+                        <div><strong>Eco přehled</strong><span class="benefit-desc">Kolik CO₂ jsi ušetřil/a jízdou MHD místo autem.</span></div>
+                    </li>
+                </ul>
             </div>
 
             <div id="user-profile-section" class="card" style="display: none;">
                 <h2><i data-lucide="user-check" style="width:20px;height:20px;"></i>Váš Profil</h2>
                 <br>
                 <p style="margin-bottom: 15px;">Přihlášen jako: <strong id="user-email-display"></strong></p>
-                <button id="logout-btn" class="btn btn-danger"><i data-lucide="log-out" style="width:18px;height:18px;"></i>Odhlásit se</button>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value"><i data-lucide="route" style="width:16px;height:16px;"></i><span id="stat-searches">0</span></div>
+                        <div class="stat-label">Vyhledaných spojení</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value"><i data-lucide="ticket" style="width:16px;height:16px;"></i><span id="stat-tickets">0</span></div>
+                        <div class="stat-label">Koupených jízdenek</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value"><i data-lucide="star" style="width:16px;height:16px;"></i><span id="stat-favorites">0</span></div>
+                        <div class="stat-label">Oblíbených spojů</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value"><i data-lucide="flame" style="width:16px;height:16px;"></i><span id="stat-streak">0</span></div>
+                        <div class="stat-label">Dní v řadě</div>
+                    </div>
+                </div>
+
+                <div class="eco-box">
+                    <i data-lucide="leaf" style="width:18px;height:18px;"></i>
+                    <span>Ušetřil/a jsi přibližně <strong id="eco-co2">0 kg</strong> CO₂ jízdou MHD.</span>
+                </div>
+
+                <h3 style="margin-top: 16px; margin-bottom: 4px; font-size: 0.9rem;"><i data-lucide="award" style="width:16px;height:16px;"></i>Odznaky</h3>
+                <div class="badge-chip-row" id="badge-chip-row"></div>
+
+                <h3 style="margin-top: 16px; margin-bottom: 4px; font-size: 0.9rem;"><i data-lucide="history" style="width:16px;height:16px;"></i>Poslední hledání</h3>
+                <div id="search-history-list"></div>
+
+                <div class="quick-actions">
+                    <button class="btn btn-secondary" onclick="shareApp()"><i data-lucide="users" style="width:16px;height:16px;"></i>Pozvat přátele</button>
+                    <button class="btn btn-secondary" onclick="clearSearchHistory()"><i data-lucide="trash-2" style="width:16px;height:16px;"></i>Smazat historii</button>
+                </div>
+
+                <button id="logout-btn" class="btn btn-danger" style="margin-top: 10px;"><i data-lucide="log-out" style="width:18px;height:18px;"></i>Odhlásit se</button>
+            </div>
+
+            <div class="card" id="live-location-card" style="display:none;">
+                <h3 style="margin-bottom: 8px; font-size: 0.9rem;"><i data-lucide="map-pin" style="width:16px;height:16px;"></i>Sdílet polohu spoje</h3>
+                <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 10px;">Pošli přátelům odkaz na aktuálně sledované spojení.</p>
+                <button class="btn btn-secondary" onclick="shareCurrentTrackedTrip()"><i data-lucide="share-2" style="width:16px;height:16px;"></i>Sdílet aktuální cestu</button>
+            </div>
+        </div>
+
+        <!-- NASTAVENÍ -->
+        <div id="tab-settings" class="tab-content">
+            <div class="card">
+                <h2><i data-lucide="settings" style="width:20px;height:20px;"></i>Nastavení</h2>
+
+                <div class="settings-row">
+                    <span class="settings-label"><i data-lucide="sun-moon"></i>Motiv aplikace</span>
+                </div>
+                <div class="segmented" id="theme-segmented" style="margin-bottom: 4px;">
+                    <button data-theme-choice="light" onclick="setThemeChoice('light')"><i data-lucide="sun"></i>Světlý</button>
+                    <button data-theme-choice="dark" onclick="setThemeChoice('dark')"><i data-lucide="moon"></i>Tmavý</button>
+                    <button data-theme-choice="auto" onclick="setThemeChoice('auto')"><i data-lucide="monitor"></i>Auto</button>
+                </div>
+
+                <div class="settings-row">
+                    <span class="settings-label"><i data-lucide="bell-ring"></i>Upozornění na odjezd oblíbených spojů</span>
+                    <label class="switch"><input type="checkbox" id="setting-notify-departures" onchange="saveSettings()"><span class="switch-track"></span></label>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-label"><i data-lucide="wifi-off"></i>Ukládat výsledky pro offline použití</span>
+                    <label class="switch"><input type="checkbox" id="setting-offline-cache" onchange="saveSettings()"><span class="switch-track"></span></label>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-label"><i data-lucide="zap"></i>Zobrazit widget nejbližšího odjezdu</span>
+                    <label class="switch"><input type="checkbox" id="setting-nearest-widget" onchange="saveSettings()"><span class="switch-track"></span></label>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-label"><i data-lucide="waves"></i>Omezit animace</span>
+                    <label class="switch"><input type="checkbox" id="setting-reduce-motion" onchange="saveSettings()"><span class="switch-track"></span></label>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 8px; font-size: 0.9rem;"><i data-lucide="database" style="width:16px;height:16px;"></i>Data aplikace</h3>
+                <div class="quick-actions">
+                    <button class="btn btn-secondary" onclick="exportAllDataJson()"><i data-lucide="download" style="width:16px;height:16px;"></i>Export dat</button>
+                    <button class="btn btn-danger" onclick="resetAllAppData()"><i data-lucide="trash-2" style="width:16px;height:16px;"></i>Smazat vše</button>
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- BOTTOM NAVIGACE -->
-    <nav class="bottom-nav">
-        <button class="nav-item active" id="nav-search" onclick="switchTab('search')">
-            <span class="nav-icon"><i data-lucide="search"></i></span>
-            <span>Spojení</span>
-        </button>
-        <button class="nav-item" id="nav-departures" onclick="switchTab('departures')">
-            <span class="nav-icon"><i data-lucide="clock"></i></span>
-            <span>Odjezdy</span>
-        </button>
-        <button class="nav-item" id="nav-tickets" onclick="switchTab('tickets')">
-            <span class="nav-icon"><i data-lucide="ticket"></i></span>
-            <span>Jízdenky</span>
-        </button>
-        <button class="nav-item" id="nav-more" onclick="switchTab('more')">
-            <span class="nav-icon"><i data-lucide="list"></i></span>
-            <span>Více</span>
-        </button>
-        <button class="nav-item" id="nav-account" onclick="switchTab('account')">
-            <span class="nav-icon"><i data-lucide="user"></i></span>
-            <span>Účet</span>
-        </button>
-    </nav>
 
     <!-- FIREBASE AUTH MODULE (OPRAVENO PRO POPUP BEZ REDIRECTU) -->
     <script type="module">
@@ -836,10 +1982,12 @@
             const profileSection = document.getElementById('user-profile-section');
             const ticketBuyBox = document.getElementById('ticket-buy-box');
             const ticketWarning = document.getElementById('ticket-auth-warning');
+            const liveLocationCard = document.getElementById('live-location-card');
 
             if (user) {
                 if (authSection) authSection.style.display = 'none';
                 if (profileSection) profileSection.style.display = 'block';
+                if (liveLocationCard) liveLocationCard.style.display = 'block';
                 
                 const emailElem = document.getElementById('user-email-display');
                 if (emailElem) emailElem.innerText = user.email || user.displayName;
@@ -847,9 +1995,16 @@
                 // Odemknout jízdenky
                 if (ticketBuyBox) ticketBuyBox.style.display = 'block';
                 if (ticketWarning) ticketWarning.style.display = 'none';
+
+                if (typeof renderProfileStats === 'function') renderProfileStats();
+                if (typeof renderBadges === 'function') renderBadges();
+                if (typeof renderSearchHistory === 'function') renderSearchHistory();
+                if (typeof renderTicketHistory === 'function') renderTicketHistory();
+                if (typeof showToast === 'function') showToast('success', 'user-check', `Přihlášen/a jako ${user.email || user.displayName}.`);
             } else {
                 if (authSection) authSection.style.display = 'block';
                 if (profileSection) profileSection.style.display = 'none';
+                if (liveLocationCard) liveLocationCard.style.display = 'none';
 
                 // Zamknout jízdenky
                 if (ticketBuyBox) ticketBuyBox.style.display = 'none';
@@ -883,31 +2038,33 @@
             return arr.filter((item, index) => item.trim() !== (arr[index - 1] || '').trim());
         }
 
+        // Kanonické (správné polské) názvy zastávek — sjednoceno napříč všemi linkami,
+        // aby ve výběru zastávek nevznikaly duplicity kvůli různým zápisům téhož místa.
         const rawLinesData = [
-            { type: 'tram', typeName: 'Tramvaj', name: '889', stops: ['Warsawska', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzedzin', 'Rzedzin Pętla', 'Slaska', 'Lotnisko'], roundtrip: true },
-            { type: 'tram', typeName: 'Tramvaj', name: '89', stops: ['Rzedzin Petla', 'Slaska', 'Lotnisko'], roundtrip: true },
-            { type: 'troley', typeName: 'Trolejbus', name: '1', stops: ['Os. Zgody', 'Wiczista', 'Lwowska', 'Mrożka', 'Warszawska', 'Dworcowa', 'Kochłowice'], roundtrip: true },
-            { type: 'troley', typeName: 'Trolejbus', name: '3', stops: ['Os. Zgody', 'Mrozka', 'Warsawska', 'Os. 30 Lecia', 'Rynek Glowny'], roundtrip: true },
-            { type: 'troley', typeName: 'Trolejbus', name: '4', stops: ['Os. Zgody', 'Wieczista', 'Mrozka', 'Dworzec Glowny', 'Al. Jana Pawla II.', 'Urząd Miasta', 'Kochłowice', 'Dworcowa', 'Os. 30 Lecia', 'Rynek Glowny', 'Blachownia'], roundtrip: true },
-            { type: 'troley', typeName: 'Trolejbus', name: '101', stops: ['Cementarz Mosice', 'Żwiry', 'Bastzowa', 'Lwowska', 'Mrożka', 'Warszawska', 'Dworcowa', 'Kochłowice'], roundtrip: true },
-            { type: 'troley', typeName: 'Trolejbus', name: '201', stops: ['Kochłowice', 'Dworcowa', 'Warsawska', 'Mrożka', 'Lwowska', 'Bastzowa', 'Żwiry'], roundtrip: true },
-            { type: 'troley', typeName: 'Trolejbus', name: '202', stops: ['Os. Zgody', 'Wieczista', 'Lwowska', 'Mrozka'], roundtrip: true },
-            { type: 'troley', typeName: 'Trolejbus', name: '203', stops: ['Blachownia', 'Blachownia PKP', 'Warsawska', 'Dworzec Glowny'], roundtrip: true },
-            { type: 'troley', typeName: 'Trolejbus', name: '204', stops: ['Gorka Narodowa', 'Dworzec Glowny', 'Warsawska', 'Blachownia PKP', 'Blachownia', 'Rynek Glowny', 'Os. 30 Lecia', 'Dworcowa', 'Kochlowice', 'Witosa', 'Rzedzin'], roundtrip: true },
-            { type: 'bus', typeName: 'Autobus', name: 'x88', stops: ['Warsawska', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzedzin'], roundtrip: true, weekdaysOnly: true },
-            { type: 'bus', typeName: 'Autobus', name: 'x89', stops: ['Rzedzin', 'Rzedzin Petla', 'Slaska', 'Lotnisko'], roundtrip: true, weekdaysOnly: true },
-            { type: 'bus', typeName: 'Autobus', name: 'x889', stops: ['Warsawska', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzedzin', 'Rzedzin Petla', 'Slaska', 'Lotnisko'], roundtrip: true, weekdaysOnly: true },
-            { type: 'bus', typeName: 'Autobus', name: '2', stops: ['Zwiry', 'Bastzowa', 'Lwowska', 'Wieczista', 'Os. Zgody', 'Kombinat'], roundtrip: true },
-            { type: 'bus', typeName: 'Autobus', name: '4', stops: ['Os. Zgody', 'Wieczista', 'Mrozka', 'Dworzec Glowny', 'Al. Jana Pawla II.', 'Urząd Miasta', 'Kochłowice', 'Dworcowa', 'Os. 30 Lecia', 'Rynek Glowny', 'Blachownia'], roundtrip: true },
-            { type: 'bus', typeName: 'Autobus', name: '369', stops: ['Lotnisko', 'Gorka Narodowa', 'Kochłowice', 'Rzedzin', 'Rzedzin Petla', 'Slaska', 'Lotnisko'], roundtrip: true },
-            { type: 'bus', typeName: 'Autobus', name: '370', stops: ['Rzedzin Petla', 'Rzedzin', 'Kochłowice', 'Dworcowa', 'Os. 30 Lecia', 'Rynek Glowny', 'Blachownia', 'Warszawska', 'Mrożka', 'Lwowska', 'Bastzowa', 'Żwiry', 'Cementarz Mosice'], roundtrip: true },
+            { type: 'tram', typeName: 'Tramvaj', name: '889', stops: ['Warszawska', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzędzin', 'Rzędzin Pętla', 'Śląska', 'Lotnisko'], roundtrip: true },
+            { type: 'tram', typeName: 'Tramvaj', name: '89', stops: ['Rzędzin Pętla', 'Śląska', 'Lotnisko'], roundtrip: true },
+            { type: 'troley', typeName: 'Trolejbus', name: '1', stops: ['Os. Zgody', 'Wieczysta', 'Lwowska', 'Mrożka', 'Warszawska', 'Dworcowa', 'Kochłowice'], roundtrip: true },
+            { type: 'troley', typeName: 'Trolejbus', name: '3', stops: ['Os. Zgody', 'Mrożka', 'Warszawska', 'Os. 30-lecia', 'Rynek Główny'], roundtrip: true },
+            { type: 'troley', typeName: 'Trolejbus', name: '4', stops: ['Os. Zgody', 'Wieczysta', 'Mrożka', 'Dworzec Główny', 'Al. Jana Pawła II', 'Urząd Miasta', 'Kochłowice', 'Dworcowa', 'Os. 30-lecia', 'Rynek Główny', 'Blachownia'], roundtrip: true },
+            { type: 'troley', typeName: 'Trolejbus', name: '101', stops: ['Cmentarz Mościce', 'Żwiry', 'Baszczyńska', 'Lwowska', 'Mrożka', 'Warszawska', 'Dworcowa', 'Kochłowice'], roundtrip: true },
+            { type: 'troley', typeName: 'Trolejbus', name: '201', stops: ['Kochłowice', 'Dworcowa', 'Warszawska', 'Mrożka', 'Lwowska', 'Baszczyńska', 'Żwiry'], roundtrip: true },
+            { type: 'troley', typeName: 'Trolejbus', name: '202', stops: ['Os. Zgody', 'Wieczysta', 'Lwowska', 'Mrożka'], roundtrip: true },
+            { type: 'troley', typeName: 'Trolejbus', name: '203', stops: ['Blachownia', 'Blachownia PKP', 'Warszawska', 'Dworzec Główny'], roundtrip: true },
+            { type: 'troley', typeName: 'Trolejbus', name: '204', stops: ['Górka Narodowa', 'Dworzec Główny', 'Warszawska', 'Blachownia PKP', 'Blachownia', 'Rynek Główny', 'Os. 30-lecia', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzędzin'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: 'x88', stops: ['Warszawska', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzędzin'], roundtrip: true, weekdaysOnly: true },
+            { type: 'bus', typeName: 'Autobus', name: 'x89', stops: ['Rzędzin', 'Rzędzin Pętla', 'Śląska', 'Lotnisko'], roundtrip: true, weekdaysOnly: true },
+            { type: 'bus', typeName: 'Autobus', name: 'x889', stops: ['Warszawska', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzędzin', 'Rzędzin Pętla', 'Śląska', 'Lotnisko'], roundtrip: true, weekdaysOnly: true },
+            { type: 'bus', typeName: 'Autobus', name: '2', stops: ['Żwiry', 'Baszczyńska', 'Lwowska', 'Wieczysta', 'Os. Zgody', 'Kombinat'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '4', stops: ['Os. Zgody', 'Wieczysta', 'Mrożka', 'Dworzec Główny', 'Al. Jana Pawła II', 'Urząd Miasta', 'Kochłowice', 'Dworcowa', 'Os. 30-lecia', 'Rynek Główny', 'Blachownia'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '369', stops: ['Lotnisko', 'Górka Narodowa', 'Kochłowice', 'Rzędzin', 'Rzędzin Pętla', 'Śląska', 'Lotnisko'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '370', stops: ['Rzędzin Pętla', 'Rzędzin', 'Kochłowice', 'Dworcowa', 'Os. 30-lecia', 'Rynek Główny', 'Blachownia', 'Warszawska', 'Mrożka', 'Lwowska', 'Baszczyńska', 'Żwiry', 'Cmentarz Mościce'], roundtrip: true },
             { type: 'bus', typeName: 'Autobus', name: '999', stops: ['Jablunkov Státní hranice', 'Jablunkov Nádraží'], roundtrip: true },
-            { type: 'bus', typeName: 'Autobus', name: '998', stops: ['Jablunkov Nádraží', 'Jablunkov Státní Hranice', 'Żwiry', 'Bastzowa', 'Blachownia', 'Rynek Glowny'], roundtrip: true },
-            { type: 'bus', typeName: 'Autobus', name: '291', stops: ['Kochłowice', 'Dworcowa', 'Warsawska', 'Blachownia PKP', 'Blachownia', 'Bastzowa', 'Żwiry', 'Cementarz Mosice', 'Jablunkov Nádraží'], roundtrip: true },
-            { type: 'bus', typeName: 'Autobus', name: '292', stops: ['Jablunkov Nádraží', 'Jablunkov Státní hranice', 'Żwiry', 'Bastzowa', 'Lwowska', 'Kombinat'], roundtrip: true },
-            { type: 'bus', typeName: 'Autobus', name: '293', stops: ['Jablunkov Státní Hranice', 'Żwiry'], roundtrip: true },
-            { type: 'bus', typeName: 'Autobus', name: '88', stops: ['Warsawska', 'Os. 30 Lecia', 'Rynek Glowny', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzedzin', 'Rzedzin Petla'], roundtrip: true },
-            { type: 'bus', typeName: 'Autobus', name: '159', stops: ['Blachownia', 'Blachownia PKP', 'Warsawska', 'Dworcowa', 'Kochłowice', 'Urząd Miasta', 'Lodzka', 'Slaska', 'Lotnisko'], roundtrip: true }
+            { type: 'bus', typeName: 'Autobus', name: '998', stops: ['Jablunkov Nádraží', 'Jablunkov Státní hranice', 'Żwiry', 'Baszczyńska', 'Blachownia', 'Rynek Główny'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '291', stops: ['Kochłowice', 'Dworcowa', 'Warszawska', 'Blachownia PKP', 'Blachownia', 'Baszczyńska', 'Żwiry', 'Cmentarz Mościce', 'Jablunkov Nádraží'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '292', stops: ['Jablunkov Nádraží', 'Jablunkov Státní hranice', 'Żwiry', 'Baszczyńska', 'Lwowska', 'Kombinat'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '293', stops: ['Jablunkov Státní hranice', 'Żwiry'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '88', stops: ['Warszawska', 'Os. 30-lecia', 'Rynek Główny', 'Dworcowa', 'Kochłowice', 'Witosa', 'Rzędzin', 'Rzędzin Pętla'], roundtrip: true },
+            { type: 'bus', typeName: 'Autobus', name: '159', stops: ['Blachownia', 'Blachownia PKP', 'Warszawska', 'Dworcowa', 'Kochłowice', 'Urząd Miasta', 'Łódzka', 'Śląska', 'Lotnisko'], roundtrip: true }
         ];
 
         let linesData = [];
@@ -926,8 +2083,23 @@
 
                 directions.forEach((dir, dirIdx) => {
                     dir.stops.forEach(s => allStops.add(s.trim()));
-                    const travelTime = (dir.stops.length - 1);
-                    const turnPause = 2;
+
+                    // Reálná doba jízdy mezi zastávkami se liší podle vozidla i podle konkrétního
+                    // úseku (delší/kratší mezizastávkové vzdálenosti) — místo fixní 1 minuty na
+                    // zastávku, aby se časy přestupů a jízd smysluplně lišily spoj od spoje.
+                    const baseMinutesPerStop = { tram: 3, troley: 3, bus: 4 }[l.type] || 3;
+                    const cumMinutes = [0];
+                    for (let i = 1; i < dir.stops.length; i++) {
+                        // Deterministická, ale proměnlivá varace délky úseku (±40 % základu),
+                        // odvozená z názvů zastávek, aby stejná linka měla vždy stejný jízdní řád.
+                        const seed = hashString(dir.stops[i - 1] + '|' + dir.stops[i]);
+                        const variation = (seed % 5) - 2; // -2 .. +2 minuty
+                        const segment = Math.max(1, baseMinutesPerStop + variation);
+                        cumMinutes.push(cumMinutes[i - 1] + segment);
+                    }
+
+                    const travelTime = cumMinutes[cumMinutes.length - 1];
+                    const turnPause = 3;
                     const interval = 10; 
                     let departures = [];
                     
@@ -941,6 +2113,7 @@
                         typeName: l.typeName,
                         name: l.name,
                         stops: dir.stops,
+                        cumMinutes: cumMinutes,
                         departures: departures,
                         firstStop: dir.stops[0],
                         lastStop: dir.stops[dir.stops.length - 1],
@@ -948,6 +2121,15 @@
                     });
                 });
             });
+        }
+
+        // Jednoduchý deterministický hash řetězce (pro stabilní, ale proměnlivé časy úseků).
+        function hashString(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
+            }
+            return Math.abs(hash);
         }
 
         function getCurrentMinutes() {
@@ -1028,6 +2210,12 @@
 
             renderLinesList();
             showDepartures();
+            renderFavorites();
+            renderFavoriteStops();
+            updateFavToggleState();
+            updateFavStopToggleState();
+
+            initMegaUpdate();
 
             if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
         };
@@ -1049,6 +2237,186 @@
 
             warning.style.display = same ? 'flex' : 'none';
             if (searchBtn) searchBtn.disabled = same;
+            updateFavToggleState();
+        }
+
+        // ===== OBLÍBENÉ (spojení + zastávky) =====
+        const FAVORITES_KEY = 'idos-favorite-routes';
+        const FAVORITE_STOPS_KEY = 'idos-favorite-stops';
+
+        function loadFavorites() {
+            try {
+                const raw = localStorage.getItem(FAVORITES_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveFavorites(list) {
+            try { localStorage.setItem(FAVORITES_KEY, JSON.stringify(list)); } catch (e) { /* localStorage nedostupný */ }
+        }
+
+        function loadFavoriteStops() {
+            try {
+                const raw = localStorage.getItem(FAVORITE_STOPS_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveFavoriteStops(list) {
+            try { localStorage.setItem(FAVORITE_STOPS_KEY, JSON.stringify(list)); } catch (e) { /* localStorage nedostupný */ }
+        }
+
+        function isCurrentRouteFavorite() {
+            const from = document.getElementById('from-stop').value;
+            const to = document.getElementById('to-stop').value;
+            return loadFavorites().some(f => f.from === from && f.to === to);
+        }
+
+        function updateFavToggleState() {
+            const btn = document.getElementById('fav-toggle-btn');
+            if (!btn) return;
+            const isFav = isCurrentRouteFavorite();
+            btn.classList.toggle('is-fav', isFav);
+            btn.title = isFav ? 'Odebrat z oblíbených' : 'Přidat do oblíbených';
+            btn.setAttribute('aria-label', btn.title);
+        }
+
+        function toggleCurrentFavorite() {
+            const from = document.getElementById('from-stop').value;
+            const to = document.getElementById('to-stop').value;
+            if (!from || !to || from === to) return;
+
+            let list = loadFavorites();
+            const idx = list.findIndex(f => f.from === from && f.to === to);
+
+            if (idx !== -1) {
+                list.splice(idx, 1);
+            } else {
+                list.unshift({ from, to });
+                list = list.slice(0, 8);
+            }
+
+            saveFavorites(list);
+            updateFavToggleState();
+            renderFavorites();
+        }
+
+        function removeFavorite(event, from, to) {
+            event.stopPropagation();
+            let list = loadFavorites().filter(f => !(f.from === from && f.to === to));
+            saveFavorites(list);
+            renderFavorites();
+            updateFavToggleState();
+        }
+
+        function useFavorite(from, to) {
+            document.getElementById('from-stop').value = from;
+            document.getElementById('to-stop').value = to;
+            syncStopSelects();
+            searchConnection();
+        }
+
+        function renderFavorites() {
+            const box = document.getElementById('favorites-box');
+            const list = document.getElementById('favorites-list');
+            if (!box || !list) return;
+
+            const favs = loadFavorites();
+
+            if (favs.length === 0) {
+                box.style.display = 'none';
+                return;
+            }
+
+            box.style.display = 'block';
+            list.innerHTML = favs.map((f, i) => `
+                <div class="fav-chip" style="animation-delay: ${Math.min(i * 40, 200)}ms" onclick="useFavorite('${f.from.replace(/'/g, "\\'")}', '${f.to.replace(/'/g, "\\'")}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){useFavorite('${f.from.replace(/'/g, "\\'")}', '${f.to.replace(/'/g, "\\'")}')}">
+                    <span class="fav-chip-route">
+                        <i data-lucide="star" style="width:14px;height:14px; fill:#ffab00; color:#ffab00; flex-shrink:0;"></i>
+                        <span>${f.from} → ${f.to}</span>
+                    </span>
+                    <button class="fav-chip-remove" onclick="removeFavorite(event, '${f.from.replace(/'/g, "\\'")}', '${f.to.replace(/'/g, "\\'")}')" aria-label="Odebrat z oblíbených" title="Odebrat z oblíbených">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+        }
+
+        function isCurrentStopFavorite() {
+            const stop = document.getElementById('dep-stop').value;
+            return loadFavoriteStops().includes(stop);
+        }
+
+        function updateFavStopToggleState() {
+            const btn = document.getElementById('fav-stop-toggle-btn');
+            const text = document.getElementById('fav-stop-toggle-text');
+            if (!btn || !text) return;
+            const isFav = isCurrentStopFavorite();
+            btn.classList.toggle('is-fav', isFav);
+            text.innerText = isFav ? 'Odebrat zastávku z oblíbených' : 'Přidat zastávku do oblíbených';
+        }
+
+        function toggleCurrentFavoriteStop() {
+            const stop = document.getElementById('dep-stop').value;
+            if (!stop) return;
+
+            let list = loadFavoriteStops();
+            const idx = list.indexOf(stop);
+
+            if (idx !== -1) {
+                list.splice(idx, 1);
+            } else {
+                list.unshift(stop);
+                list = list.slice(0, 8);
+            }
+
+            saveFavoriteStops(list);
+            updateFavStopToggleState();
+            renderFavoriteStops();
+        }
+
+        function removeFavoriteStop(event, stop) {
+            event.stopPropagation();
+            let list = loadFavoriteStops().filter(s => s !== stop);
+            saveFavoriteStops(list);
+            renderFavoriteStops();
+            updateFavStopToggleState();
+        }
+
+        function useFavoriteStop(stop) {
+            document.getElementById('dep-stop').value = stop;
+            showDepartures();
+            updateFavStopToggleState();
+        }
+
+        function renderFavoriteStops() {
+            const box = document.getElementById('favorite-stops-box');
+            const list = document.getElementById('favorite-stops-list');
+            if (!box || !list) return;
+
+            const favs = loadFavoriteStops();
+
+            if (favs.length === 0) {
+                box.style.display = 'none';
+                return;
+            }
+
+            box.style.display = 'block';
+            list.innerHTML = favs.map((stop, i) => `
+                <div class="fav-chip" style="animation-delay: ${Math.min(i * 40, 200)}ms" onclick="useFavoriteStop('${stop.replace(/'/g, "\\'")}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){useFavoriteStop('${stop.replace(/'/g, "\\'")}')}">
+                    <span class="fav-chip-route">
+                        <i data-lucide="star" style="width:14px;height:14px; fill:#ffab00; color:#ffab00; flex-shrink:0;"></i>
+                        <span>${stop}</span>
+                    </span>
+                    <button class="fav-chip-remove" onclick="removeFavoriteStop(event, '${stop.replace(/'/g, "\\'")}')" aria-label="Odebrat z oblíbených" title="Odebrat z oblíbených">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
         }
 
         function switchTab(tabId) {
@@ -1059,6 +2427,32 @@
             document.getElementById(`nav-${tabId}`).classList.add('active');
 
             if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+
+            closeMenu();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function openMenu() {
+            document.getElementById('side-menu').classList.add('open');
+            document.getElementById('nav-overlay').classList.add('open');
+            document.getElementById('hamburger-btn').classList.add('open');
+            document.getElementById('hamburger-btn').setAttribute('aria-expanded', 'true');
+            document.getElementById('side-menu').setAttribute('aria-hidden', 'false');
+            document.body.classList.add('menu-open');
+        }
+
+        function closeMenu() {
+            document.getElementById('side-menu').classList.remove('open');
+            document.getElementById('nav-overlay').classList.remove('open');
+            document.getElementById('hamburger-btn').classList.remove('open');
+            document.getElementById('hamburger-btn').setAttribute('aria-expanded', 'false');
+            document.getElementById('side-menu').setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('menu-open');
+        }
+
+        function toggleMenu() {
+            const isOpen = document.getElementById('side-menu').classList.contains('open');
+            if (isOpen) { closeMenu(); } else { openMenu(); }
         }
 
         function formatTime(totalMinutes) {
@@ -1090,10 +2484,10 @@
             return `za ${diff} minut`;
         }
 
-        function getLiveVehicleStatus(allStops, lineStartDeparture) {
+        function getLiveVehicleStatus(allStops, lineStartDeparture, cumMinutes) {
             const currentMins = getCurrentMinutes();
             const totalStops = allStops.length;
-            const lineEndArrival = lineStartDeparture + totalStops - 1;
+            const lineEndArrival = lineStartDeparture + cumMinutes[totalStops - 1];
 
             if (currentMins < lineStartDeparture) {
                 return {
@@ -1108,7 +2502,13 @@
                     currentStopIndex: totalStops
                 };
             } else {
-                const currentStopIndex = currentMins - lineStartDeparture;
+                const elapsed = currentMins - lineStartDeparture;
+                // Najdeme poslední zastávku, kterou spoj už projel podle kumulativní doby jízdy.
+                let currentStopIndex = 0;
+                for (let i = 0; i < cumMinutes.length; i++) {
+                    if (cumMinutes[i] <= elapsed) currentStopIndex = i;
+                    else break;
+                }
                 const currentStopName = allStops[currentStopIndex];
                 const nextStopName = allStops[currentStopIndex + 1] || 'Cílová stanice';
                 
@@ -1130,6 +2530,16 @@
             setTimeout(() => {
                 performSearch();
                 if (btn) { btn.disabled = false; }
+
+                const from = document.getElementById('from-stop').value;
+                const to = document.getElementById('to-stop').value;
+                if (from !== to) {
+                    addSearchToHistory(from, to);
+                    checkAndAwardBadges();
+                }
+
+                const quickActions = document.getElementById('search-quick-actions');
+                if (quickActions) quickActions.style.display = 'flex';
             }, 350);
         }
 
@@ -1143,15 +2553,15 @@
                 const toIdx = line.stops.indexOf(to);
 
                 if (fromIdx !== -1 && toIdx !== -1 && fromIdx < toIdx) {
-                    const rideDuration = toIdx - fromIdx;
+                    const rideDuration = line.cumMinutes[toIdx] - line.cumMinutes[fromIdx];
 
                     line.departures.forEach(dep => {
-                        const depAtFrom = dep + fromIdx;
+                        const depAtFrom = dep + line.cumMinutes[fromIdx];
                         if (depAtFrom >= startTime && depAtFrom <= startTime + windowMins) {
 
                             let fullRouteStops = line.stops.map((stopName, idx) => ({
                                 stopName: stopName,
-                                time: dep + idx,
+                                time: dep + line.cumMinutes[idx],
                                 isBoarding: idx === fromIdx,
                                 isExit: idx === toIdx
                             }));
@@ -1169,7 +2579,8 @@
                                 firstStop: line.firstStop,
                                 lastStop: line.lastStop,
                                 fullRouteStops: fullRouteStops,
-                                allStops: line.stops
+                                allStops: line.stops,
+                                cumMinutes: line.cumMinutes
                             });
                         }
                     });
@@ -1195,7 +2606,7 @@
 
                 // Only departures that actually land in our search window at 'from' are relevant.
                 const relevantDeparturesA = lineA.departures.filter(depA => {
-                    const depAtFrom = depA + fromIdx;
+                    const depAtFrom = depA + lineA.cumMinutes[fromIdx];
                     return depAtFrom >= startTime && depAtFrom <= startTime + windowMins;
                 });
                 if (relevantDeparturesA.length === 0) return;
@@ -1213,14 +2624,14 @@
                         if (bFromIdx >= bToIdx) return;
 
                         relevantDeparturesA.forEach(depA => {
-                            const depAtFrom = depA + fromIdx;
-                            const arrAtTransfer = depA + tIdx;
+                            const depAtFrom = depA + lineA.cumMinutes[fromIdx];
+                            const arrAtTransfer = depA + lineA.cumMinutes[tIdx];
                             const minTransfer = 2; // minimum minutes to change vehicle
 
                             // find first lineB departure at transferStop that leaves after arrival + minTransfer
                             let bestDepB = null;
                             for (const depB of lineB.departures) {
-                                const depBAtTransfer = depB + bFromIdx;
+                                const depBAtTransfer = depB + lineB.cumMinutes[bFromIdx];
                                 if (depBAtTransfer >= arrAtTransfer + minTransfer) {
                                     if (bestDepB === null || depBAtTransfer < bestDepB.depBAtTransfer) {
                                         bestDepB = { depB, depBAtTransfer };
@@ -1231,7 +2642,7 @@
                             // cap wait time so we don't suggest absurd transfers
                             if (bestDepB.depBAtTransfer - arrAtTransfer > 30) return;
 
-                            const arrAtTo = bestDepB.depB + bToIdx;
+                            const arrAtTo = bestDepB.depB + lineB.cumMinutes[bToIdx];
                             const key = `${lineA.name}|${transferStop}|${lineB.name}|${depAtFrom}`;
                             if (seen.has(key)) return;
                             seen.add(key);
@@ -1249,7 +2660,10 @@
                                     depTime: depAtFrom,
                                     arrTime: arrAtTransfer,
                                     firstStop: lineA.firstStop,
-                                    lastStop: lineA.lastStop
+                                    lastStop: lineA.lastStop,
+                                    stops: lineA.stops,
+                                    cumMinutes: lineA.cumMinutes,
+                                    lineStartDeparture: depA
                                 },
                                 legB: {
                                     line: lineB.name,
@@ -1257,7 +2671,10 @@
                                     depTime: bestDepB.depBAtTransfer,
                                     arrTime: arrAtTo,
                                     firstStop: lineB.firstStop,
-                                    lastStop: lineB.lastStop
+                                    lastStop: lineB.lastStop,
+                                    stops: lineB.stops,
+                                    cumMinutes: lineB.cumMinutes,
+                                    lineStartDeparture: bestDepB.depB
                                 }
                             });
                         });
@@ -1271,10 +2688,10 @@
 
         function renderDirectCard(res, index) {
             const countdown = getMinutesLeftText(res.depTime);
-            const liveStatus = getLiveVehicleStatus(res.allStops, res.lineStartDeparture);
+            const liveStatus = getLiveVehicleStatus(res.allStops, res.lineStartDeparture, res.cumMinutes);
 
             return `
-                <div class="result-card" onclick="toggleRouteDetails(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRouteDetails(${index});}" role="button" tabindex="0" aria-expanded="false">
+                <div class="result-card" style="animation-delay: ${Math.min(index * 45, 300)}ms" onclick="toggleRouteDetails(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRouteDetails(${index});}" role="button" tabindex="0" aria-expanded="false">
                     <div class="result-header">
                         <div>
                             ${getBadge(res.vehicleType)} <strong>Linka ${res.line}</strong>
@@ -1283,43 +2700,71 @@
                         <span class="countdown-tag">${countdown}</span>
                     </div>
 
-                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px; display: flex; align-items: center; justify-content: space-between;">
-                        <span style="display:flex; align-items:center; gap:5px;"><i data-lucide="route" style="width:14px;height:14px;"></i><strong>Trasa:</strong> ${res.firstStop} → ${res.lastStop}</span>
+                    <div class="route-summary-row" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">
+                        <span><i data-lucide="route" style="width:14px;height:14px; flex-shrink:0;"></i><strong>Trasa:</strong> ${res.firstStop} → ${res.lastStop}</span>
                         <span class="detail-toggle"><i data-lucide="chevron-down" style="width:14px;height:14px;"></i>Detail</span>
                     </div>
 
                     <div class="route-details" id="route-details-${index}">
-                        <div class="live-status-box">
-                            <i data-lucide="${liveStatus.statusIcon}" style="width:16px;height:16px;"></i>
-                            <span>${liveStatus.statusText.replace(/\*\*(.*?)\*\*/g, '<u>$1</u>')}</span>
-                        </div>
+                        <div>
+                            <div class="live-status-box">
+                                <i data-lucide="${liveStatus.statusIcon}" class="${liveStatus.currentStopIndex >= 0 && liveStatus.currentStopIndex < res.fullRouteStops.length ? 'live-pulse-icon' : ''}" style="width:16px;height:16px;"></i>
+                                <span>${liveStatus.statusText.replace(/\*\*(.*?)\*\*/g, '<u>$1</u>')}</span>
+                            </div>
 
-                        <h4 style="margin-top: 10px; font-size: 0.9rem;"><i data-lucide="list-ordered" style="width:16px;height:16px;"></i>Celá trasa spoje:</h4>
-                        <div class="timeline">
-                            ${res.fullRouteStops.map((s, idx) => {
-                                let tag = "";
-                                let isCurrent = idx === liveStatus.currentStopIndex;
+                            ${renderRouteMap(res.fullRouteStops, liveStatus.currentStopIndex)}
 
-                                if (s.isBoarding) tag = ' <span class="stop-tag board"><i data-lucide="arrow-up-circle"></i>Nástup</span>';
-                                if (s.isExit) tag = ' <span class="stop-tag exit"><i data-lucide="arrow-down-circle"></i>Výstup</span>';
+                            <h4 style="margin-top: 10px; font-size: 0.9rem;"><i data-lucide="list-ordered" style="width:16px;height:16px;"></i>Celá trasa spoje:</h4>
+                            <div class="timeline">
+                                ${res.fullRouteStops.map((s, idx) => {
+                                    let tag = "";
+                                    let isCurrent = idx === liveStatus.currentStopIndex;
 
-                                return `
-                                    <div class="timeline-step ${isCurrent ? 'active' : ''}">
-                                        <strong>${formatTime(s.time)}</strong> - ${s.stopName} ${tag} ${isCurrent ? '<span class="stop-tag current"><i data-lucide="bus-front"></i>Zde je spoj</span>' : ''}
-                                    </div>
-                                `;
-                            }).join('')}
+                                    if (s.isBoarding) tag = ' <span class="stop-tag board"><i data-lucide="arrow-up-circle"></i>Nástup</span>';
+                                    if (s.isExit) tag = ' <span class="stop-tag exit"><i data-lucide="arrow-down-circle"></i>Výstup</span>';
+
+                                    return `
+                                        <div class="timeline-step ${isCurrent ? 'active' : ''}">
+                                            <strong>${formatTime(s.time)}</strong> - ${s.stopName} ${tag} ${isCurrent ? '<span class="stop-tag current"><i data-lucide="bus-front"></i>Zde je spoj</span>' : ''}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+
+                            <div class="quick-actions">
+                                <button class="btn btn-secondary" onclick="event.stopPropagation(); shareTrip('${res.line}', '${res.firstStop.replace(/'/g,"\\'")}', '${res.lastStop.replace(/'/g,"\\'")}', '${formatTime(res.depTime)}')"><i data-lucide="share-2" style="width:16px;height:16px;"></i>Sdílet spoj</button>
+                                <button class="btn btn-secondary" onclick="event.stopPropagation(); exportTripToCalendar('${res.line}', '${res.firstStop.replace(/'/g,"\\'")}', '${res.lastStop.replace(/'/g,"\\'")}', ${res.depTime}, ${res.arrTime})"><i data-lucide="calendar-plus" style="width:16px;height:16px;"></i>Kalendář</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             `;
         }
 
+        function renderLineRouteList(leg, highlightStop) {
+            if (!leg.stops || !leg.cumMinutes) return '';
+            return `<ol class="line-route-list">${leg.stops.map((s, i) => {
+                const isHighlight = s === highlightStop;
+                const t = formatTime(leg.lineStartDeparture + leg.cumMinutes[i]);
+                return `<li class="${isHighlight ? 'is-transfer' : ''}"><em>${s}</em> <span class="line-route-time">${t}</span></li>`;
+            }).join('')}</ol>`;
+        }
+
+        function toggleLineRoute(event, index, leg) {
+            event.stopPropagation();
+            const wrap = document.getElementById(`line-route-${index}-${leg}`);
+            if (!wrap) return;
+            wrap.classList.toggle('open');
+            const strongEl = wrap.closest('.timeline-step').querySelector('.line-link');
+            if (strongEl) strongEl.classList.toggle('open');
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+        }
+
         function renderTransferCard(res, index) {
             const countdown = getMinutesLeftText(res.depTime);
 
             return `
-                <div class="result-card" onclick="toggleRouteDetails(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRouteDetails(${index});}" role="button" tabindex="0" aria-expanded="false">
+                <div class="result-card" style="animation-delay: ${Math.min(index * 45, 300)}ms" onclick="toggleRouteDetails(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRouteDetails(${index});}" role="button" tabindex="0" aria-expanded="false">
                     <div class="result-header">
                         <div>
                             <span class="stop-tag current"><i data-lucide="shuffle"></i>Přestup</span> <strong>${res.legA.line} → ${res.legB.line}</strong>
@@ -1328,28 +2773,34 @@
                         <span class="countdown-tag">${countdown}</span>
                     </div>
 
-                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px; display: flex; align-items: center; justify-content: space-between;">
-                        <span style="display:flex; align-items:center; gap:5px;"><i data-lucide="map-pin" style="width:14px;height:14px;"></i>Přestup na: <strong>${res.transferStop}</strong></span>
+                    <div class="route-summary-row" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">
+                        <span><i data-lucide="map-pin" style="width:14px;height:14px; flex-shrink:0;"></i>Přestup na: <strong>${res.transferStop}</strong></span>
                         <span class="detail-toggle"><i data-lucide="chevron-down" style="width:14px;height:14px;"></i>Detail</span>
                     </div>
 
                     <div class="route-details" id="route-details-${index}">
                         <div class="timeline">
                             <div class="timeline-step active">
-                                ${getBadge(res.legA.vehicleType)} <strong>Linka ${res.legA.line}</strong><br>
+                                ${getBadge(res.legA.vehicleType)} <strong class="line-link" tabindex="0" role="button" onclick="toggleLineRoute(event, ${index}, 'A')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();toggleLineRoute(event, ${index}, 'A');}">Linka ${res.legA.line} <i data-lucide="chevron-down" style="width:12px;height:12px;"></i></strong><br>
                                 <strong>${formatTime(res.legA.depTime)}</strong> nástup, jízda do <strong>${res.transferStop}</strong> (příjezd ${formatTime(res.legA.arrTime)})
+                                <div class="line-route-expand" id="line-route-${index}-A">
+                                    <div class="line-route-inner">${renderLineRouteList(res.legA, res.transferStop)}</div>
+                                </div>
                             </div>
                             <div class="timeline-step">
                                 <span class="stop-tag current"><i data-lucide="clock"></i>Čekání na přestup: ${res.transferWait} min</span>
                             </div>
                             <div class="timeline-step">
-                                ${getBadge(res.legB.vehicleType)} <strong>Linka ${res.legB.line}</strong><br>
+                                ${getBadge(res.legB.vehicleType)} <strong class="line-link" tabindex="0" role="button" onclick="toggleLineRoute(event, ${index}, 'B')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();toggleLineRoute(event, ${index}, 'B');}">Linka ${res.legB.line} <i data-lucide="chevron-down" style="width:12px;height:12px;"></i></strong><br>
                                 <strong>${formatTime(res.legB.depTime)}</strong> nástup v <strong>${res.transferStop}</strong>, výstup v cíli (příjezd ${formatTime(res.legB.arrTime)})
+                                <div class="line-route-expand" id="line-route-${index}-B">
+                                    <div class="line-route-inner">${renderLineRouteList(res.legB, res.transferStop)}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            `;
+            `; // .timeline je jediný přímý potomek → sedí s .route-details > div selektorem
         }
 
         function performSearch() {
@@ -1404,30 +2855,35 @@
         function toggleRouteDetails(index) {
             const elem = document.getElementById(`route-details-${index}`);
             const card = elem.closest('.result-card');
-            if (elem.style.display === 'block') {
-                elem.style.display = 'none';
-                card.classList.remove('expanded');
-                card.setAttribute('aria-expanded', 'false');
-            } else {
-                elem.style.display = 'block';
-                card.classList.add('expanded');
-                card.setAttribute('aria-expanded', 'true');
-            }
+            const isExpanded = card.classList.toggle('expanded');
+            card.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+        }
+
+        let departureFilter = 'all';
+
+        function setDepartureFilter(type) {
+            departureFilter = type;
+            document.querySelectorAll('#dep-filter button').forEach(b => {
+                b.classList.toggle('active', b.dataset.filter === type);
+            });
+            showDepartures();
         }
 
         function showDepartures() {
             const stop = document.getElementById('dep-stop').value;
             const time = parseTime(document.getElementById('dep-time').value);
             const tbody = document.getElementById('departures-list');
+            updateFavStopToggleState();
 
             let list = [];
 
             linesData.forEach(line => {
                 if (!isLineRunningToday(line)) return;
+                if (departureFilter !== 'all' && line.type !== departureFilter) return;
                 const stopIdx = line.stops.indexOf(stop);
                 if (stopIdx !== -1 && stopIdx < line.stops.length - 1) {
                     line.departures.forEach(dep => {
-                        const depTime = dep + stopIdx;
+                        const depTime = dep + line.cumMinutes[stopIdx];
                         if (depTime >= time) {
                             list.push({
                                 time: depTime,
@@ -1448,8 +2904,8 @@
                 return;
             }
 
-            tbody.innerHTML = list.map(item => `
-                <tr>
+            tbody.innerHTML = list.map((item, i) => `
+                <tr style="animation-delay: ${Math.min(i * 35, 250)}ms">
                     <td><strong>${formatTime(item.time)}</strong></td>
                     <td><span class="countdown-tag">${getMinutesLeftText(item.time)}</span></td>
                     <td>${getBadge(item.type)} ${item.line}</td>
@@ -1457,13 +2913,27 @@
                 </tr>
             `).join('');
             if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+
+            cacheDeparturesOffline(stop, list);
         }
 
         function renderLinesList() {
             const container = document.getElementById('lines-list');
+            const searchInput = document.getElementById('lines-search-input');
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
             let html = '<h2><i data-lucide="list" style="width:20px;height:20px;"></i>Přehled všech linek</h2><br>';
 
-            rawLinesData.forEach(l => {
+            const filtered = rawLinesData.filter(l => !query || l.name.toLowerCase().includes(query));
+
+            if (filtered.length === 0) {
+                html += `<div class="empty-state"><i data-lucide="search-x"></i><p>Žádná linka neodpovídá hledání „${query}".</p></div>`;
+                container.innerHTML = html;
+                if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+                return;
+            }
+
+            filtered.forEach(l => {
                 const cleanedStops = removeConsecutiveDuplicates(l.stops);
                 const weekdayTag = l.weekdaysOnly
                     ? '<span class="stop-tag current" style="margin-left:6px;"><i data-lucide="calendar-days"></i>jen všední dny</span>'
@@ -1503,7 +2973,589 @@
 
             document.getElementById('ticket-output').innerHTML = html;
             if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+
+            addTicketToHistory({ id: ticketId, type, date: dateStr, time: timeStr });
+            incrementStat('tickets');
+            showToast('success', 'check-circle-2', `Jízdenka ${ticketId} zakoupena.`);
+            checkAndAwardBadges();
         }
+
+        /* ============================================================
+           MEGA UPDATE — TOAST NOTIFIKACE
+           ============================================================ */
+        function showToast(kind, icon, message, duration = 3500) {
+            const stack = document.getElementById('toast-stack');
+            if (!stack) return;
+            const el = document.createElement('div');
+            el.className = `toast ${kind}`;
+            el.innerHTML = `<i data-lucide="${icon}" style="width:18px;height:18px;"></i><span></span><button class="toast-close" aria-label="Zavřít"><i data-lucide="x" style="width:14px;height:14px;"></i></button>`;
+            el.querySelector('span').textContent = message;
+            const remove = () => {
+                el.classList.add('leaving');
+                setTimeout(() => el.remove(), 250);
+            };
+            el.querySelector('.toast-close').addEventListener('click', remove);
+            stack.appendChild(el);
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+            setTimeout(remove, duration);
+        }
+
+        /* ============================================================
+           MEGA UPDATE — NASTAVENÍ (persistováno v localStorage)
+           ============================================================ */
+        const SETTINGS_KEY = 'idos-settings';
+
+        function loadSettings() {
+            try {
+                const raw = localStorage.getItem(SETTINGS_KEY);
+                return raw ? JSON.parse(raw) : {
+                    themeChoice: 'auto',
+                    notifyDepartures: false,
+                    offlineCache: true,
+                    nearestWidget: true,
+                    reduceMotion: false
+                };
+            } catch (e) { return { themeChoice: 'auto', notifyDepartures: false, offlineCache: true, nearestWidget: true, reduceMotion: false }; }
+        }
+
+        function persistSettings(settings) {
+            try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) { /* localStorage nedostupný */ }
+        }
+
+        let appSettings = loadSettings();
+
+        function applySettingsToUI() {
+            const notifyEl = document.getElementById('setting-notify-departures');
+            const offlineEl = document.getElementById('setting-offline-cache');
+            const nearestEl = document.getElementById('setting-nearest-widget');
+            const reduceEl = document.getElementById('setting-reduce-motion');
+            if (notifyEl) notifyEl.checked = !!appSettings.notifyDepartures;
+            if (offlineEl) offlineEl.checked = !!appSettings.offlineCache;
+            if (nearestEl) nearestEl.checked = !!appSettings.nearestWidget;
+            if (reduceEl) reduceEl.checked = !!appSettings.reduceMotion;
+
+            document.querySelectorAll('#theme-segmented button').forEach(b => {
+                b.classList.toggle('active', b.dataset.themeChoice === appSettings.themeChoice);
+            });
+
+            document.body.style.setProperty('--force-reduce-motion', appSettings.reduceMotion ? '1' : '0');
+            if (appSettings.reduceMotion) {
+                document.documentElement.style.setProperty('scroll-behavior', 'auto');
+            }
+
+            const nearestWidget = document.getElementById('nearest-widget');
+            if (nearestWidget && !appSettings.nearestWidget) nearestWidget.style.display = 'none';
+        }
+
+        function saveSettings() {
+            appSettings.notifyDepartures = document.getElementById('setting-notify-departures').checked;
+            appSettings.offlineCache = document.getElementById('setting-offline-cache').checked;
+            appSettings.nearestWidget = document.getElementById('setting-nearest-widget').checked;
+            appSettings.reduceMotion = document.getElementById('setting-reduce-motion').checked;
+            persistSettings(appSettings);
+            showToast('info', 'settings', 'Nastavení uloženo.');
+            renderNearestDepartureWidget();
+            if (!appSettings.nearestWidget) {
+                const w = document.getElementById('nearest-widget');
+                if (w) w.style.display = 'none';
+            }
+        }
+
+        function setThemeChoice(choice) {
+            appSettings.themeChoice = choice;
+            persistSettings(appSettings);
+            document.querySelectorAll('#theme-segmented button').forEach(b => {
+                b.classList.toggle('active', b.dataset.themeChoice === choice);
+            });
+            if (choice === 'auto') {
+                document.documentElement.removeAttribute('data-theme');
+                try { localStorage.removeItem('idos-theme'); } catch (e) { /* ignore */ }
+            } else {
+                document.documentElement.setAttribute('data-theme', choice);
+                try { localStorage.setItem('idos-theme', choice); } catch (e) { /* ignore */ }
+            }
+            updateThemeColorMeta(getEffectiveTheme());
+            showToast('info', 'sun-moon', 'Motiv aplikace změněn.');
+        }
+
+        function resetAllAppData() {
+            if (!confirm('Opravdu chceš smazat všechna lokální data aplikace (oblíbené, historii, nastavení)? Tuto akci nelze vrátit zpět.')) return;
+            [FAVORITES_KEY, FAVORITE_STOPS_KEY, SETTINGS_KEY, SEARCH_HISTORY_KEY, TICKET_HISTORY_KEY, STATS_KEY, NOTIF_KEY, BADGES_KEY].forEach(k => {
+                try { localStorage.removeItem(k); } catch (e) { /* ignore */ }
+            });
+            showToast('success', 'trash-2', 'Všechna lokální data byla smazána.');
+            setTimeout(() => location.reload(), 1200);
+        }
+
+        function exportAllDataJson() {
+            const data = {
+                favorites: loadFavorites(),
+                favoriteStops: loadFavoriteStops(),
+                settings: appSettings,
+                searchHistory: loadSearchHistory(),
+                ticketHistory: loadTicketHistory(),
+                stats: loadStats()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'idos-data-export.json';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            showToast('success', 'download', 'Data byla exportována do souboru.');
+        }
+
+        /* ============================================================
+           MEGA UPDATE — HISTORIE HLEDANÝCH SPOJENÍ
+           ============================================================ */
+        const SEARCH_HISTORY_KEY = 'idos-search-history';
+
+        function loadSearchHistory() {
+            try {
+                const raw = localStorage.getItem(SEARCH_HISTORY_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveSearchHistory(list) {
+            try { localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(list.slice(0, 25))); } catch (e) { /* ignore */ }
+        }
+
+        function addSearchToHistory(from, to) {
+            const list = loadSearchHistory();
+            const now = new Date();
+            list.unshift({ from, to, at: now.toISOString() });
+            saveSearchHistory(list);
+            incrementStat('searches');
+            renderSearchHistory();
+        }
+
+        function clearSearchHistory() {
+            saveSearchHistory([]);
+            renderSearchHistory();
+            showToast('info', 'trash-2', 'Historie hledání byla vymazána.');
+        }
+
+        function renderSearchHistory() {
+            const container = document.getElementById('search-history-list');
+            if (!container) return;
+            const list = loadSearchHistory();
+
+            if (list.length === 0) {
+                container.innerHTML = '<div class="empty-state"><i data-lucide="history"></i><p>Zatím jsi nic nehledal/a.</p></div>';
+                if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+                return;
+            }
+
+            container.innerHTML = list.slice(0, 8).map(item => {
+                const d = new Date(item.at);
+                const dateLabel = d.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' }) + ' ' + d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+                return `
+                    <div class="history-item">
+                        <span class="history-route"><i data-lucide="route" style="width:14px;height:14px; flex-shrink:0; color: var(--text-muted);"></i>${item.from} → ${item.to}</span>
+                        <span class="history-meta">${dateLabel}</span>
+                    </div>
+                `;
+            }).join('');
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+        }
+
+        /* ============================================================
+           MEGA UPDATE — HISTORIE JÍZDENEK
+           ============================================================ */
+        const TICKET_HISTORY_KEY = 'idos-ticket-history';
+
+        function loadTicketHistory() {
+            try {
+                const raw = localStorage.getItem(TICKET_HISTORY_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveTicketHistory(list) {
+            try { localStorage.setItem(TICKET_HISTORY_KEY, JSON.stringify(list.slice(0, 30))); } catch (e) { /* ignore */ }
+        }
+
+        function addTicketToHistory(ticket) {
+            const list = loadTicketHistory();
+            list.unshift(ticket);
+            saveTicketHistory(list);
+            renderTicketHistory();
+        }
+
+        function renderTicketHistory() {
+            const box = document.getElementById('ticket-history-box');
+            const container = document.getElementById('ticket-history-list');
+            if (!box || !container) return;
+            const list = loadTicketHistory();
+
+            if (list.length === 0) {
+                box.style.display = 'none';
+                return;
+            }
+
+            box.style.display = 'block';
+            container.innerHTML = list.slice(0, 10).map(t => `
+                <div class="history-item">
+                    <span class="history-route"><i data-lucide="ticket" style="width:14px;height:14px; flex-shrink:0; color: var(--text-muted);"></i>${t.type}</span>
+                    <span class="history-meta">${t.date} ${t.time}</span>
+                </div>
+            `).join('');
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+        }
+
+        /* ============================================================
+           MEGA UPDATE — STATISTIKY & ECO PŘEHLED
+           ============================================================ */
+        const STATS_KEY = 'idos-stats';
+
+        function loadStats() {
+            try {
+                const raw = localStorage.getItem(STATS_KEY);
+                return raw ? JSON.parse(raw) : { searches: 0, tickets: 0, lastActiveDate: null, streak: 0 };
+            } catch (e) { return { searches: 0, tickets: 0, lastActiveDate: null, streak: 0 }; }
+        }
+
+        function saveStats(stats) {
+            try { localStorage.setItem(STATS_KEY, JSON.stringify(stats)); } catch (e) { /* ignore */ }
+        }
+
+        function incrementStat(key) {
+            const stats = loadStats();
+            stats[key] = (stats[key] || 0) + 1;
+
+            const todayStr = new Date().toDateString();
+            if (stats.lastActiveDate !== todayStr) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                stats.streak = stats.lastActiveDate === yesterday.toDateString() ? (stats.streak || 0) + 1 : 1;
+                stats.lastActiveDate = todayStr;
+            }
+
+            saveStats(stats);
+            renderProfileStats();
+        }
+
+        function renderProfileStats() {
+            const stats = loadStats();
+            const favorites = loadFavorites();
+
+            const searchesEl = document.getElementById('stat-searches');
+            const ticketsEl = document.getElementById('stat-tickets');
+            const favEl = document.getElementById('stat-favorites');
+            const streakEl = document.getElementById('stat-streak');
+            const ecoEl = document.getElementById('eco-co2');
+
+            if (searchesEl) searchesEl.textContent = stats.searches || 0;
+            if (ticketsEl) ticketsEl.textContent = stats.tickets || 0;
+            if (favEl) favEl.textContent = favorites.length;
+            if (streakEl) streakEl.textContent = stats.streak || 0;
+
+            // Odhad: průměrná cesta MHD ušetří cca 0.12 kg CO2 oproti autu na cestu
+            const co2Saved = ((stats.searches || 0) * 0.12).toFixed(1);
+            if (ecoEl) ecoEl.textContent = `${co2Saved} kg`;
+        }
+
+        /* ============================================================
+           MEGA UPDATE — ODZNAKY / GAMIFIKACE
+           ============================================================ */
+        const BADGES_KEY = 'idos-badges';
+
+        const BADGE_DEFS = [
+            { id: 'first-search', icon: 'search', label: 'První hledání', check: (s) => s.searches >= 1 },
+            { id: 'explorer', icon: 'compass', label: 'Průzkumník (10 hledání)', check: (s) => s.searches >= 10 },
+            { id: 'first-ticket', icon: 'ticket', label: 'První jízdenka', check: (s) => s.tickets >= 1 },
+            { id: 'regular', icon: 'flame', label: 'Pravidelný cestující (3 dny v řadě)', check: (s) => (s.streak || 0) >= 3 },
+            { id: 'collector', icon: 'star', label: 'Sběratel oblíbených (3+)', check: (s) => loadFavorites().length >= 3 }
+        ];
+
+        function loadEarnedBadges() {
+            try {
+                const raw = localStorage.getItem(BADGES_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveEarnedBadges(list) {
+            try { localStorage.setItem(BADGES_KEY, JSON.stringify(list)); } catch (e) { /* ignore */ }
+        }
+
+        function checkAndAwardBadges() {
+            const stats = loadStats();
+            const earned = loadEarnedBadges();
+            let newlyEarned = null;
+
+            BADGE_DEFS.forEach(b => {
+                if (!earned.includes(b.id) && b.check(stats)) {
+                    earned.push(b.id);
+                    newlyEarned = b;
+                }
+            });
+
+            if (newlyEarned) {
+                saveEarnedBadges(earned);
+                showToast('success', 'award', `Nový odznak: ${newlyEarned.label}`);
+                addNotification('award', `Získal/a jsi odznak „${newlyEarned.label}"!`);
+            }
+
+            renderBadges();
+        }
+
+        function renderBadges() {
+            const container = document.getElementById('badge-chip-row');
+            if (!container) return;
+            const earned = loadEarnedBadges();
+
+            container.innerHTML = BADGE_DEFS.map(b => `
+                <span class="badge-chip ${earned.includes(b.id) ? '' : 'locked'}">
+                    <i data-lucide="${earned.includes(b.id) ? b.icon : 'lock'}"></i>${b.label}
+                </span>
+            `).join('');
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+        }
+
+        /* ============================================================
+           MEGA UPDATE — OZNÁMENÍ (in-app notifikační centrum)
+           ============================================================ */
+        const NOTIF_KEY = 'idos-notifications';
+
+        function loadNotifications() {
+            try {
+                const raw = localStorage.getItem(NOTIF_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveNotifications(list) {
+            try { localStorage.setItem(NOTIF_KEY, JSON.stringify(list.slice(0, 20))); } catch (e) { /* ignore */ }
+        }
+
+        function addNotification(icon, text) {
+            const list = loadNotifications();
+            list.unshift({ icon, text, at: new Date().toISOString(), read: false });
+            saveNotifications(list);
+            updateNotifDot();
+        }
+
+        function updateNotifDot() {
+            const dot = document.getElementById('notif-dot');
+            if (!dot) return;
+            const hasUnread = loadNotifications().some(n => !n.read);
+            dot.classList.toggle('show', hasUnread);
+        }
+
+        function openNotifModal() {
+            const list = loadNotifications();
+            const container = document.getElementById('notif-list');
+
+            if (list.length === 0) {
+                container.innerHTML = '<div class="empty-state"><i data-lucide="bell-off"></i><p>Zatím žádná oznámení.</p></div>';
+            } else {
+                container.innerHTML = list.map(n => {
+                    const d = new Date(n.at);
+                    const timeLabel = d.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' }) + ' ' + d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+                    return `
+                        <div class="notif-item">
+                            <span class="notif-icon"><i data-lucide="${n.icon}"></i></span>
+                            <div>
+                                <div>${n.text}</div>
+                                <div class="notif-time">${timeLabel}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+
+            const list2 = loadNotifications().map(n => ({ ...n, read: true }));
+            saveNotifications(list2);
+            updateNotifDot();
+
+            document.getElementById('notif-modal-overlay').classList.add('open');
+            document.body.classList.add('menu-open');
+        }
+
+        function closeNotifModal() {
+            document.getElementById('notif-modal-overlay').classList.remove('open');
+            document.body.classList.remove('menu-open');
+        }
+
+        /* ============================================================
+           MEGA UPDATE — NEJBLIŽŠÍ ODJEZD WIDGET
+           ============================================================ */
+        function renderNearestDepartureWidget() {
+            const widget = document.getElementById('nearest-widget');
+            const content = document.getElementById('nearest-widget-content');
+            if (!widget || !content) return;
+
+            if (!appSettings.nearestWidget) { widget.style.display = 'none'; return; }
+
+            const favStops = loadFavoriteStops();
+            const referenceStop = favStops[0] || (linesData[0] ? linesData[0].stops[0] : null);
+            if (!referenceStop) { widget.style.display = 'none'; return; }
+
+            const now = getCurrentMinutes();
+            let best = null;
+
+            linesData.forEach(line => {
+                if (!isLineRunningToday(line)) return;
+                const stopIdx = line.stops.indexOf(referenceStop);
+                if (stopIdx === -1 || stopIdx >= line.stops.length - 1) return;
+                line.departures.forEach(dep => {
+                    const depTime = dep + line.cumMinutes[stopIdx];
+                    if (depTime >= now && (!best || depTime < best.depTime)) {
+                        best = { depTime, line: line.name, type: line.type, dest: line.lastStop, stop: referenceStop };
+                    }
+                });
+            });
+
+            if (!best) { widget.style.display = 'none'; return; }
+
+            widget.style.display = 'block';
+            content.innerHTML = `
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                    <span style="display:flex; align-items:center; gap:6px; min-width:0; overflow-wrap:anywhere; font-size:0.85rem;">
+                        ${getBadge(best.type)} <strong>${best.line}</strong> ze zastávky <strong>${best.stop}</strong>
+                    </span>
+                    <span class="countdown-tag">${getMinutesLeftText(best.depTime)}</span>
+                </div>
+                <div style="font-size:0.78rem; color:var(--text-muted); margin-top:6px;">Odjezd v ${formatTime(best.depTime)} → ${best.dest}</div>
+            `;
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+        }
+
+        /* ============================================================
+           MEGA UPDATE — MINI TRASOVÁ MAPA
+           ============================================================ */
+        function renderRouteMap(stops, currentIndex) {
+            if (!stops || stops.length === 0) return '';
+            return `
+                <div class="route-map">
+                    ${stops.map((s, idx) => {
+                        const isEndpoint = idx === 0 || idx === stops.length - 1;
+                        const isCurrent = idx === currentIndex;
+                        return `
+                            <div class="route-map-stop ${isEndpoint ? 'endpoint' : ''} ${isCurrent ? 'current' : ''}">
+                                <div class="route-map-line"></div>
+                                <div class="route-map-dot"></div>
+                                <div class="route-map-label">${s.stopName}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        /* ============================================================
+           MEGA UPDATE — SDÍLENÍ & EXPORT DO KALENDÁŘE
+           ============================================================ */
+        function shareText(title, text) {
+            if (navigator.share) {
+                navigator.share({ title, text }).catch(() => { /* uživatel zrušil sdílení */ });
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('success', 'copy', 'Zkopírováno do schránky.');
+                }).catch(() => {
+                    showToast('danger', 'alert-triangle', 'Sdílení se nezdařilo.');
+                });
+            } else {
+                showToast('danger', 'alert-triangle', 'Sdílení není v tomto prohlížeči podporováno.');
+            }
+        }
+
+        function shareTrip(line, from, to, depTimeLabel) {
+            shareText('Moje spojení IDOS', `Jedu linkou ${line} z ${from} do ${to}, odjezd v ${depTimeLabel}. Sleduj to se mnou v IDOS Doprava!`);
+        }
+
+        function shareLastSearch() {
+            const from = document.getElementById('from-stop').value;
+            const to = document.getElementById('to-stop').value;
+            shareText('Moje spojení IDOS', `Hledám spojení z ${from} do ${to} v aplikaci IDOS Doprava.`);
+        }
+
+        function shareApp() {
+            shareText('IDOS Doprava', 'Zkus aplikaci IDOS Doprava pro vyhledávání spojů, odjezdů a jízdenek MHD!');
+        }
+
+        function shareCurrentTrackedTrip() {
+            shareText('Sleduj mou cestu', 'Právě jedu MHD, sleduj moje spojení v aplikaci IDOS Doprava.');
+        }
+
+        function formatIcsDate(totalMinutes) {
+            const now = new Date();
+            const h = Math.floor(totalMinutes / 60) % 24;
+            const m = totalMinutes % 60;
+            const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
+            return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        }
+
+        function downloadIcs(filename, summary, description, startMinutes, endMinutes) {
+            const ics = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//IDOS Doprava//CS',
+                'BEGIN:VEVENT',
+                `DTSTART:${formatIcsDate(startMinutes)}`,
+                `DTEND:${formatIcsDate(endMinutes)}`,
+                `SUMMARY:${summary}`,
+                `DESCRIPTION:${description}`,
+                'END:VEVENT',
+                'END:VCALENDAR'
+            ].join('\r\n');
+
+            const blob = new Blob([ics], { type: 'text/calendar' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            showToast('success', 'calendar-check', 'Událost byla stažena do kalendáře.');
+        }
+
+        function exportTripToCalendar(line, from, to, depMinutes, arrMinutes) {
+            downloadIcs('spojeni-idos.ics', `Linka ${line}: ${from} → ${to}`, `Spojení MHD linkou ${line} z ${from} do ${to}.`, depMinutes, arrMinutes);
+        }
+
+        function exportLastSearchToCalendar() {
+            const from = document.getElementById('from-stop').value;
+            const to = document.getElementById('to-stop').value;
+            const startTime = parseTime(document.getElementById('search-time').value);
+            downloadIcs('spojeni-idos.ics', `Cesta: ${from} → ${to}`, `Naplánovaná cesta MHD z ${from} do ${to}.`, startTime, startTime + 30);
+        }
+
+        /* ============================================================
+           MEGA UPDATE — OFFLINE CACHE ODJEZDŮ
+           ============================================================ */
+        function cacheDeparturesOffline(stop, list) {
+            if (!appSettings.offlineCache) return;
+            try {
+                localStorage.setItem('idos-offline-departures-' + stop, JSON.stringify({ list, cachedAt: Date.now() }));
+            } catch (e) { /* ignore */ }
+        }
+
+        /* ============================================================
+           MEGA UPDATE — INICIALIZACE NOVÝCH FUNKCÍ
+           ============================================================ */
+        function initMegaUpdate() {
+            applySettingsToUI();
+            renderSearchHistory();
+            renderTicketHistory();
+            renderProfileStats();
+            renderBadges();
+            updateNotifDot();
+            renderNearestDepartureWidget();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') { closeMenu(); closeNotifModal(); }
+        });
     </script>
 </body>
 </html>
