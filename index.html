@@ -61,6 +61,15 @@
             --ticket-bg: #eef5ff;
             --nav-bg: #ffffff;
             --nav-text: #6b778c;
+            --delay-orange-bg: #fff4e0;
+            --delay-orange-text: #7a4a00;
+            --delay-orange-border: #ff991f;
+            --delay-red-bg: #ffebe6;
+            --delay-red-text: #bf2600;
+            --delay-red-border: #de350b;
+            --delay-purple-bg: #f3e8ff;
+            --delay-purple-text: #5c1d99;
+            --delay-purple-border: #8f3ce8;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -92,6 +101,15 @@
                 --ticket-bg: #101d33;
                 --nav-bg: #182234;
                 --nav-text: #92a2b8;
+                --delay-orange-bg: #3a2a0d;
+                --delay-orange-text: #ffc266;
+                --delay-orange-border: #ffab40;
+                --delay-red-bg: #3a1712;
+                --delay-red-text: #ff9c86;
+                --delay-red-border: #ff6b52;
+                --delay-purple-bg: #2a1640;
+                --delay-purple-text: #d8a8ff;
+                --delay-purple-border: #b366ff;
             }
         }
 
@@ -123,6 +141,15 @@
             --ticket-bg: #101d33;
             --nav-bg: #182234;
             --nav-text: #92a2b8;
+            --delay-orange-bg: #3a2a0d;
+            --delay-orange-text: #ffc266;
+            --delay-orange-border: #ffab40;
+            --delay-red-bg: #3a1712;
+            --delay-red-text: #ff9c86;
+            --delay-red-border: #ff6b52;
+            --delay-purple-bg: #2a1640;
+            --delay-purple-text: #d8a8ff;
+            --delay-purple-border: #b366ff;
         }
 
         * {
@@ -336,6 +363,44 @@
             border-top-color: var(--primary);
         }
 
+        /* MEGA UPDATE #10 — SKELETON LOADING */
+        @keyframes skeletonShimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .skeleton-card {
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+
+        .skeleton-line {
+            height: 14px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, var(--bg) 25%, var(--border) 50%, var(--bg) 75%);
+            background-size: 200% 100%;
+            animation: skeletonShimmer 1.4s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+
+        .skeleton-line.w-40 { width: 40%; }
+        .skeleton-line.w-60 { width: 60%; }
+        .skeleton-line.w-80 { width: 80%; }
+        .skeleton-line.w-100 { width: 100%; }
+        .skeleton-line.h-large { height: 22px; }
+        .skeleton-line:last-child { margin-bottom: 0; }
+
+        .skeleton-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .skeleton-line { animation: none; background: var(--border); }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             .spinner { animation: none; border-top-color: rgba(255,255,255,0.4); }
             .loading-box .spinner { border-top-color: var(--primary); }
@@ -459,6 +524,79 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
+
+        /* ZPOŽDĚNÍ SPOJŮ */
+        .countdown-tag.delay-orange {
+            background: var(--delay-orange-bg);
+            color: var(--delay-orange-text);
+        }
+        .countdown-tag.delay-red {
+            background: var(--delay-red-bg);
+            color: var(--delay-red-text);
+        }
+        .countdown-tag.delay-purple {
+            background: var(--delay-purple-bg);
+            color: var(--delay-purple-text);
+        }
+
+        .delay-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            white-space: nowrap;
+            flex-shrink: 0;
+            border: 1px solid transparent;
+        }
+        .delay-badge svg { width: 11px; height: 11px; flex-shrink: 0; }
+
+        .delay-badge.delay-orange {
+            background: var(--delay-orange-bg);
+            color: var(--delay-orange-text);
+            border-color: var(--delay-orange-border);
+        }
+        .delay-badge.delay-red {
+            background: var(--delay-red-bg);
+            color: var(--delay-red-text);
+            border-color: var(--delay-red-border);
+        }
+        .delay-badge.delay-purple {
+            background: var(--delay-purple-bg);
+            color: var(--delay-purple-text);
+            border-color: var(--delay-purple-border);
+        }
+
+        @keyframes delayPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.55; }
+        }
+        .delay-badge.delay-red, .delay-badge.delay-purple {
+            animation: delayPulse 1.8s ease-in-out infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .delay-badge { animation: none !important; }
+        }
+
+        .timetable tr.has-delay td:first-child { position: relative; }
+        .timetable tr.has-delay td:first-child::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 4px;
+            bottom: 4px;
+            width: 3px;
+            border-radius: 2px;
+        }
+        .timetable tr.delay-orange td:first-child::before { background: var(--delay-orange-border); }
+        .timetable tr.delay-red td:first-child::before { background: var(--delay-red-border); }
+        .timetable tr.delay-purple td:first-child::before { background: var(--delay-purple-border); }
+
+        .result-card.delay-orange { border-left: 4px solid var(--delay-orange-border); }
+        .result-card.delay-red { border-left: 4px solid var(--delay-red-border); }
+        .result-card.delay-purple { border-left: 4px solid var(--delay-purple-border); }
 
         .live-status-box {
             background: var(--live-bg);
@@ -838,10 +976,17 @@
             vertical-align: middle;
         }
 
-        .timetable th:nth-child(1), .timetable td:nth-child(1) { width: 22%; }
-        .timetable th:nth-child(2), .timetable td:nth-child(2) { width: 20%; }
-        .timetable th:nth-child(3), .timetable td:nth-child(3) { width: 38%; }
+        .timetable th:nth-child(1), .timetable td:nth-child(1) { width: 20%; }
+        .timetable th:nth-child(2), .timetable td:nth-child(2) { width: 26%; }
+        .timetable th:nth-child(3), .timetable td:nth-child(3) { width: 34%; }
         .timetable th:nth-child(4), .timetable td:nth-child(4) { width: 20%; }
+
+        .timetable td:nth-child(2) {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px;
+        }
 
         .timetable .badge {
             white-space: normal;
@@ -873,6 +1018,33 @@
         #offline-banner {
             background: #ffebe6;
             color: #bf2600;
+        }
+
+        #live-delay-banner {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            max-width: 600px;
+            margin: 0 auto;
+            cursor: pointer;
+            animation: bannerSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #live-delay-banner span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+        #live-delay-banner svg { flex-shrink: 0; }
+        #live-delay-banner.delay-orange { background: var(--delay-orange-bg); color: var(--delay-orange-text); }
+        #live-delay-banner.delay-red { background: var(--delay-red-bg); color: var(--delay-red-text); }
+        #live-delay-banner.delay-purple { background: var(--delay-purple-bg); color: var(--delay-purple-text); }
+
+        @keyframes bannerSlideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #live-delay-banner { animation: none !important; }
         }
 
         @media (prefers-color-scheme: dark) {
@@ -992,9 +1164,8 @@
 
         .fav-chip {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
+            flex-direction: column;
+            gap: 6px;
             background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 10px;
@@ -1003,6 +1174,13 @@
             cursor: pointer;
             transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
             animation: cardIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        }
+
+        .fav-chip-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
         }
 
         .fav-chip:hover {
@@ -1030,7 +1208,14 @@
             white-space: nowrap;
         }
 
-        .fav-chip-remove {
+        .fav-chip-actions {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+
+        .fav-chip-remove, .fav-chip-schedule-btn {
             background: none;
             border: none;
             color: var(--text-muted);
@@ -1044,6 +1229,19 @@
 
         .fav-chip-remove:hover { background: var(--exit-bg); color: var(--exit-text); }
         .fav-chip-remove svg { width: 15px; height: 15px; }
+        .fav-chip-schedule-btn:hover { background: var(--current-bg); color: var(--current-text); }
+        .fav-chip-schedule-btn.has-schedule { color: var(--primary); }
+        .fav-chip-schedule-btn svg { width: 15px; height: 15px; }
+
+        .fav-chip-schedule-badge {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.72rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .fav-chip-schedule-badge svg { width: 12px; height: 12px; flex-shrink: 0; }
 
         @media (prefers-reduced-motion: reduce) {
             .btn-fav-toggle svg, .btn-fav-toggle-wide svg { transition: none !important; }
@@ -1517,12 +1715,13 @@
         /* SHARE / QUICK ACTIONS ŘÁDEK */
         .quick-actions {
             display: flex;
+            flex-wrap: wrap;
             gap: 8px;
             margin-top: 10px;
         }
         .quick-actions button {
             flex: 1;
-            min-width: 0;
+            min-width: 100px;
         }
 
         /* EMPTY STATE */
@@ -1615,6 +1814,14 @@
         <span>Dnes je víkend – expresní linky (x88, x89, x889) dnes nejezdí.</span>
     </div>
 
+    <div id="live-delay-banner">
+        <i data-lucide="alert-triangle" style="width:16px;height:16px; flex-shrink:0;" onclick="switchTab('search')"></i>
+        <span id="live-delay-banner-text" onclick="switchTab('search')" style="cursor:pointer;"></span>
+        <button id="live-delay-banner-share" onclick="event.stopPropagation(); shareCurrentBannerDelay();" aria-label="Sdílet zpoždění" title="Sdílet zpoždění" style="background:none; border:none; color:inherit; cursor:pointer; display:flex; padding:2px; flex-shrink:0;">
+            <i data-lucide="share-2" style="width:15px;height:15px;"></i>
+        </button>
+    </div>
+
     <div id="toast-stack" aria-live="polite"></div>
 
     <div id="notif-modal-overlay" class="modal-overlay" onclick="if(event.target===this) closeNotifModal()">
@@ -1624,6 +1831,62 @@
                 <button class="modal-close" onclick="closeNotifModal()" aria-label="Zavřít"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
             </div>
             <div id="notif-list"></div>
+        </div>
+    </div>
+
+    <div id="schedule-modal-overlay" class="modal-overlay" onclick="if(event.target===this) closeScheduleModal()">
+        <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="schedule-modal-title">
+            <div class="modal-header">
+                <h3 id="schedule-modal-title"><i data-lucide="calendar-clock" style="width:18px;height:18px;"></i>Pravidelná trasa</h3>
+                <button class="modal-close" onclick="closeScheduleModal()" aria-label="Zavřít"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+            </div>
+            <p style="font-size:0.82rem; color: var(--text-muted); margin-bottom: 10px;">Nastav dny a čas, kdy touto trasou pravidelně jezdíš. Widget nejbližšího odjezdu ji pak zvýhodní ve správný čas.</p>
+            <div class="form-group">
+                <label><i data-lucide="calendar" style="width:14px;height:14px;"></i>Dny v týdnu</label>
+                <div class="segmented" id="schedule-days-picker" style="flex-wrap: wrap;">
+                    <button type="button" data-day="1" onclick="toggleScheduleDay(1)">Po</button>
+                    <button type="button" data-day="2" onclick="toggleScheduleDay(2)">Út</button>
+                    <button type="button" data-day="3" onclick="toggleScheduleDay(3)">St</button>
+                    <button type="button" data-day="4" onclick="toggleScheduleDay(4)">Čt</button>
+                    <button type="button" data-day="5" onclick="toggleScheduleDay(5)">Pá</button>
+                    <button type="button" data-day="6" onclick="toggleScheduleDay(6)">So</button>
+                    <button type="button" data-day="0" onclick="toggleScheduleDay(0)">Ne</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label><i data-lucide="clock" style="width:14px;height:14px;"></i>Obvyklý čas odjezdu</label>
+                <input type="time" id="schedule-time-input">
+            </div>
+            <div class="quick-actions">
+                <button class="btn btn-secondary" onclick="clearRouteSchedule()"><i data-lucide="x" style="width:16px;height:16px;"></i>Zrušit</button>
+                <button class="btn" onclick="saveRouteSchedule()"><i data-lucide="check" style="width:16px;height:16px;"></i>Uložit</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="report-modal-overlay" class="modal-overlay" onclick="if(event.target===this) closeReportModal()">
+        <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="report-modal-title">
+            <div class="modal-header">
+                <h3 id="report-modal-title"><i data-lucide="flag" style="width:18px;height:18px;"></i>Nahlásit problém</h3>
+                <button class="modal-close" onclick="closeReportModal()" aria-label="Zavřít"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+            </div>
+            <p id="report-modal-subtitle" style="font-size:0.82rem; color: var(--text-muted); margin-bottom: 12px;"></p>
+            <div class="form-group">
+                <label><i data-lucide="list" style="width:14px;height:14px;"></i>Typ problému</label>
+                <select id="report-issue-type">
+                    <option value="delay">Větší zpoždění, než je uvedeno</option>
+                    <option value="crowded">Přeplněný spoj</option>
+                    <option value="cancelled">Spoj vůbec nepřijel</option>
+                    <option value="wrong-info">Špatně uvedené informace</option>
+                    <option value="vehicle">Technický problém s vozidlem</option>
+                    <option value="other">Jiný problém</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label><i data-lucide="message-square" style="width:14px;height:14px;"></i>Poznámka (nepovinné)</label>
+                <textarea id="report-note" rows="3" placeholder="Popiš, co se stalo…" style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--border); background: var(--input-bg); color: var(--text); font-family:inherit; font-size:0.9rem; resize:vertical;"></textarea>
+            </div>
+            <button class="btn" onclick="submitReport()"><i data-lucide="send" style="width:16px;height:16px;"></i>Odeslat nahlášení</button>
         </div>
     </div>
 
@@ -1693,12 +1956,19 @@
 
             <div class="card">
                 <h3 style="margin-bottom: 10px;"><i data-lucide="list" style="width:18px;height:18px;"></i>Následující odjezdy</h3>
-                <div class="segmented" id="dep-filter" style="margin-bottom: 12px;">
+                <div class="segmented" id="dep-filter" style="margin-bottom: 10px;">
                     <button class="active" data-filter="all" onclick="setDepartureFilter('all')"><i data-lucide="asterisk"></i>Vše</button>
                     <button data-filter="tram" onclick="setDepartureFilter('tram')"><i data-lucide="train-front"></i>Tram</button>
                     <button data-filter="troley" onclick="setDepartureFilter('troley')"><i data-lucide="zap"></i>Trolej</button>
                     <button data-filter="bus" onclick="setDepartureFilter('bus')"><i data-lucide="bus-front"></i>Bus</button>
                 </div>
+                <label style="display:flex; align-items:center; gap:8px; margin-bottom: 12px; font-size: 0.82rem; color: var(--text-muted); cursor: pointer;">
+                    <span class="switch">
+                        <input type="checkbox" id="dep-hide-delayed" onchange="toggleHideDelayed()">
+                        <span class="switch-track"></span>
+                    </span>
+                    Zobrazit jen spoje bez zpoždění
+                </label>
                 <table class="timetable">
                     <thead>
                         <tr>
@@ -1744,6 +2014,26 @@
             <div class="card" id="ticket-history-box" style="display:none;">
                 <h3 style="margin-bottom: 10px; font-size: 0.95rem;"><i data-lucide="receipt" style="width:16px;height:16px;"></i>Historie jízdenek</h3>
                 <div id="ticket-history-list"></div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 6px; font-size: 0.95rem;"><i data-lucide="calculator" style="width:16px;height:16px;"></i>Kalkulačka jízdného</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Zjisti, jestli se ti víc vyplatí jednotlivé jízdenky, nebo předplatné.</p>
+
+                <div class="form-group">
+                    <label><i data-lucide="repeat" style="width:14px;height:14px;"></i>Kolik jízd MHD uděláš týdně?</label>
+                    <input type="number" id="fare-calc-rides" min="1" max="70" value="10" oninput="calculateFare()">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label><i data-lucide="ticket" style="width:14px;height:14px;"></i>Obvyklý typ jízdenky</label>
+                    <select id="fare-calc-ticket-type" onchange="calculateFare()">
+                        <option value="24">30 minutová - 24 Kč</option>
+                        <option value="32">60 minutová - 32 Kč</option>
+                        <option value="100">24 hodinová - 100 Kč</option>
+                    </select>
+                </div>
+
+                <div id="fare-calc-result" style="margin-top: 14px;"></div>
             </div>
         </div>
 
@@ -2329,19 +2619,173 @@
             }
 
             box.style.display = 'block';
-            list.innerHTML = favs.map((f, i) => `
-                <div class="fav-chip" style="animation-delay: ${Math.min(i * 40, 200)}ms" onclick="useFavorite('${f.from.replace(/'/g, "\\'")}', '${f.to.replace(/'/g, "\\'")}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){useFavorite('${f.from.replace(/'/g, "\\'")}', '${f.to.replace(/'/g, "\\'")}')}">
-                    <span class="fav-chip-route">
-                        <i data-lucide="star" style="width:14px;height:14px; fill:#ffab00; color:#ffab00; flex-shrink:0;"></i>
-                        <span>${f.from} → ${f.to}</span>
-                    </span>
-                    <button class="fav-chip-remove" onclick="removeFavorite(event, '${f.from.replace(/'/g, "\\'")}', '${f.to.replace(/'/g, "\\'")}')" aria-label="Odebrat z oblíbených" title="Odebrat z oblíbených">
-                        <i data-lucide="x"></i>
-                    </button>
+            list.innerHTML = favs.map((f, i) => {
+                const hasSchedule = f.schedule && f.schedule.days && f.schedule.days.length > 0 && f.schedule.time;
+                return `
+                <div class="fav-chip" style="animation-delay: ${Math.min(i * 40, 200)}ms">
+                    <div class="fav-chip-top-row" onclick="useFavorite('${f.from.replace(/'/g, "\\'")}', '${f.to.replace(/'/g, "\\'")}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){useFavorite('${f.from.replace(/'/g, "\\'")}', '${f.to.replace(/'/g, "\\'")}')}">
+                        <span class="fav-chip-route">
+                            <i data-lucide="star" style="width:14px;height:14px; fill:#ffab00; color:#ffab00; flex-shrink:0;"></i>
+                            <span>${f.from} → ${f.to}</span>
+                        </span>
+                        <span class="fav-chip-actions">
+                            <button class="fav-chip-schedule-btn ${hasSchedule ? 'has-schedule' : ''}" onclick="event.stopPropagation(); openScheduleModal('${f.from.replace(/'/g, "\\'")}', '${f.to.replace(/'/g, "\\'")}')" aria-label="Nastavit pravidelnou trasu" title="Nastavit pravidelnou trasu">
+                                <i data-lucide="calendar-clock"></i>
+                            </button>
+                            <button class="fav-chip-remove" onclick="event.stopPropagation(); removeFavorite(event, '${f.from.replace(/'/g, "\\'")}', '${f.to.replace(/'/g, "\\'")}')" aria-label="Odebrat z oblíbených" title="Odebrat z oblíbených">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </span>
+                    </div>
+                    ${hasSchedule ? `
+                        <div class="fav-chip-schedule-badge">
+                            <i data-lucide="calendar-clock"></i>
+                            <span>${formatScheduleDays(f.schedule.days)} v ${f.schedule.time}</span>
+                        </div>
+                    ` : ''}
                 </div>
-            `).join('');
+            `;
+            }).join('');
 
             if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+        }
+
+        /* ============================================================
+           MEGA UPDATE #6 — PRAVIDELNÁ TRASA (dny v týdnu + čas)
+           ============================================================ */
+        const DAY_LABELS = { 0: 'Ne', 1: 'Po', 2: 'Út', 3: 'St', 4: 'Čt', 5: 'Pá', 6: 'So' };
+        const WORKDAYS = [1, 2, 3, 4, 5];
+        let scheduleModalTarget = null;
+        let scheduleModalSelectedDays = [];
+
+        function formatScheduleDays(days) {
+            const sorted = [...days].sort();
+            if (sorted.length === 5 && WORKDAYS.every(d => sorted.includes(d))) return 'Po–Pá';
+            if (sorted.length === 7) return 'Denně';
+            if (sorted.length === 2 && sorted.includes(0) && sorted.includes(6)) return 'So–Ne';
+            return sorted.map(d => DAY_LABELS[d]).join(', ');
+        }
+
+        function openScheduleModal(from, to) {
+            scheduleModalTarget = { from, to };
+            const favs = loadFavorites();
+            const fav = favs.find(f => f.from === from && f.to === to);
+            scheduleModalSelectedDays = (fav && fav.schedule && fav.schedule.days) ? [...fav.schedule.days] : [...WORKDAYS];
+
+            document.getElementById('schedule-time-input').value = (fav && fav.schedule && fav.schedule.time) ? fav.schedule.time : '07:30';
+            renderScheduleDaysPicker();
+
+            document.getElementById('schedule-modal-overlay').classList.add('open');
+            document.body.classList.add('menu-open');
+        }
+
+        function closeScheduleModal() {
+            document.getElementById('schedule-modal-overlay').classList.remove('open');
+            document.body.classList.remove('menu-open');
+            scheduleModalTarget = null;
+        }
+
+        function renderScheduleDaysPicker() {
+            document.querySelectorAll('#schedule-days-picker button').forEach(btn => {
+                const day = Number(btn.dataset.day);
+                btn.classList.toggle('active', scheduleModalSelectedDays.includes(day));
+            });
+        }
+
+        function toggleScheduleDay(day) {
+            const idx = scheduleModalSelectedDays.indexOf(day);
+            if (idx === -1) scheduleModalSelectedDays.push(day);
+            else scheduleModalSelectedDays.splice(idx, 1);
+            renderScheduleDaysPicker();
+        }
+
+        function saveRouteSchedule() {
+            if (!scheduleModalTarget) return;
+            const time = document.getElementById('schedule-time-input').value;
+
+            if (scheduleModalSelectedDays.length === 0 || !time) {
+                showToast('danger', 'alert-triangle', 'Vyber alespoň jeden den a čas.');
+                return;
+            }
+
+            let favs = loadFavorites();
+            const idx = favs.findIndex(f => f.from === scheduleModalTarget.from && f.to === scheduleModalTarget.to);
+            if (idx !== -1) {
+                favs[idx].schedule = { days: [...scheduleModalSelectedDays], time };
+                saveFavorites(favs);
+                renderFavorites();
+                showToast('success', 'calendar-check', 'Pravidelná trasa uložena.');
+            }
+            closeScheduleModal();
+        }
+
+        function clearRouteSchedule() {
+            if (!scheduleModalTarget) return;
+            let favs = loadFavorites();
+            const idx = favs.findIndex(f => f.from === scheduleModalTarget.from && f.to === scheduleModalTarget.to);
+            if (idx !== -1 && favs[idx].schedule) {
+                delete favs[idx].schedule;
+                saveFavorites(favs);
+                renderFavorites();
+                showToast('info', 'x', 'Pravidelná trasa zrušena.');
+            }
+            closeScheduleModal();
+        }
+
+        /* ============================================================
+           MEGA UPDATE #8 — NAHLÁSIT ZPOŽDĚNÍ / PROBLÉM
+           Crowdsourcovaný pocit — nahlášení se uloží lokálně a odešle
+           se toast s poděkováním (bez skutečného backendu).
+           ============================================================ */
+        let reportModalTarget = null;
+        const REPORTS_KEY = 'idos-user-reports';
+
+        function loadReports() {
+            try {
+                const raw = localStorage.getItem(REPORTS_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveReports(list) {
+            try { localStorage.setItem(REPORTS_KEY, JSON.stringify(list.slice(0, 50))); } catch (e) { /* ignore */ }
+        }
+
+        function openReportModal(lineName, depTime) {
+            reportModalTarget = { lineName, depTime };
+            document.getElementById('report-modal-subtitle').textContent = `Linka ${lineName}, odjezd v ${formatTime(depTime)}`;
+            document.getElementById('report-issue-type').value = 'delay';
+            document.getElementById('report-note').value = '';
+            document.getElementById('report-modal-overlay').classList.add('open');
+            document.body.classList.add('menu-open');
+        }
+
+        function closeReportModal() {
+            document.getElementById('report-modal-overlay').classList.remove('open');
+            document.body.classList.remove('menu-open');
+            reportModalTarget = null;
+        }
+
+        function submitReport() {
+            if (!reportModalTarget) return;
+            const issueType = document.getElementById('report-issue-type').value;
+            const note = document.getElementById('report-note').value.trim();
+
+            const report = {
+                line: reportModalTarget.lineName,
+                depTime: reportModalTarget.depTime,
+                issueType,
+                note,
+                at: new Date().toISOString()
+            };
+
+            const reports = loadReports();
+            reports.unshift(report);
+            saveReports(reports);
+
+            closeReportModal();
+            showToast('success', 'check-circle-2', 'Díky za nahlášení, pomůže to ostatním cestujícím.');
+            addNotification('flag', `Nahlásil/a jsi problém u linky ${reportModalTarget.lineName}.`);
         }
 
         function isCurrentStopFavorite() {
@@ -2474,14 +2918,108 @@
 
         function getMinutesLeftText(targetTimeMinutes) {
             const currentMins = getCurrentMinutes();
-            let diff = targetTimeMinutes - currentMins;
+            const normalizedTarget = ((targetTimeMinutes % 1440) + 1440) % 1440;
+            let diff = normalizedTarget - currentMins;
 
-            if (diff < 0) diff += 1440;
+            diff = ((diff % 1440) + 1440) % 1440;
 
             if (diff === 0) return 'Právě jedou';
             if (diff === 1) return 'za 1 minutu';
             if (diff >= 2 && diff <= 4) return `za ${diff} minuty`;
             return `za ${diff} minut`;
+        }
+
+        /* ============================================================
+           ZPOŽDĚNÍ SPOJŮ
+           Oranžové: 5–10 min | Červené: 10–30 min | Fialové: 30+ min
+           Zpoždění je odvozeno deterministicky (hash z linky + odjezdu),
+           takže je pro daný spoj stabilní napříč všemi zobrazeními
+           a nepřepočítává se náhodně při každém překreslení.
+           ============================================================ */
+        function hashStringToInt(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = (hash << 5) - hash + str.charCodeAt(i);
+                hash |= 0;
+            }
+            return Math.abs(hash);
+        }
+
+        function getDelayMinutes(lineName, depTimeMinutes) {
+            // Klíč se mění každých 5 minut, aby zpoždění nebylo statické navždy,
+            // ale zároveň se neměnilo při každém překreslení v rámci pár vteřin.
+            const bucket = Math.floor(Date.now() / (5 * 60 * 1000));
+            const key = `${lineName}|${depTimeMinutes}|${bucket}`;
+            const hash = hashStringToInt(key);
+            const roll = hash % 100;
+
+            // Rozložení pravděpodobnosti: ~62 % spojů jede včas,
+            // zbytek má zpoždění v některém z pásem.
+            if (roll < 62) return 0;
+            if (roll < 80) return 5 + (hash % 6);        // 5–10 min → oranžové
+            if (roll < 94) return 11 + (hash % 20);       // 11–30 min → červené
+            return 31 + (hash % 20);                      // 31–50 min → fialové
+        }
+
+        function getDelayCategory(delayMinutes) {
+            if (delayMinutes >= 30) return { key: 'delay-purple', label: 'Velké zpoždění', icon: 'octagon-alert' };
+            if (delayMinutes >= 10) return { key: 'delay-red', label: 'Zpoždění', icon: 'alert-triangle' };
+            if (delayMinutes >= 5) return { key: 'delay-orange', label: 'Menší zpoždění', icon: 'alert-circle' };
+            return null;
+        }
+
+        function getDelayInfo(lineName, depTimeMinutes) {
+            const delayMinutes = getDelayMinutes(lineName, depTimeMinutes);
+            const category = getDelayCategory(delayMinutes);
+            return {
+                delayMinutes,
+                category,
+                actualDepTime: depTimeMinutes + delayMinutes
+            };
+        }
+
+        function renderDelayBadge(delayInfo) {
+            if (!delayInfo || !delayInfo.category) return '';
+            const { key, label, icon } = delayInfo.category;
+            return `<span class="delay-badge ${key}" title="${label}: +${delayInfo.delayMinutes} min"><i data-lucide="${icon}"></i>+${delayInfo.delayMinutes} min</span>`;
+        }
+
+        function getCountdownClassForDelay(delayInfo) {
+            if (!delayInfo || !delayInfo.category) return '';
+            return delayInfo.category.key;
+        }
+
+        /* ============================================================
+           MEGA UPDATE #3 — HISTORIE SPOLEHLIVOSTI LINKY
+           Deterministický "průměr za posledních 30 dní" odvozený z čísla
+           linky, aby byl konzistentní napříč zobrazeními.
+           ============================================================ */
+        function getLineReliability(lineName) {
+            const hash = hashStringToInt(`reliability|${lineName}`);
+            const avgDelay = hash % 9; // 0–8 min průměrné zpoždění
+            const onTimePercent = 100 - avgDelay * 6 - (hash % 7); // hrubý odhad spolehlivosti
+
+            let level = 'good';
+            if (onTimePercent < 70) level = 'bad';
+            else if (onTimePercent < 88) level = 'ok';
+
+            return {
+                avgDelay,
+                onTimePercent: Math.max(40, Math.min(99, onTimePercent)),
+                level
+            };
+        }
+
+        function renderReliabilityRow(lineName) {
+            const rel = getLineReliability(lineName);
+            const icon = rel.level === 'good' ? 'thumbs-up' : rel.level === 'ok' ? 'minus-circle' : 'thumbs-down';
+            const colorVar = rel.level === 'good' ? 'var(--success)' : rel.level === 'ok' ? 'var(--delay-orange-text)' : 'var(--danger)';
+            return `
+                <div style="display:flex; align-items:center; gap:6px; font-size: 0.78rem; color: var(--text-muted); margin-top: 6px;">
+                    <i data-lucide="${icon}" style="width:13px;height:13px; flex-shrink:0; color: ${colorVar};"></i>
+                    <span>Linka ${lineName}: v průměru ${rel.onTimePercent}&nbsp;% spojů včas (Ø zpoždění ${rel.avgDelay}&nbsp;min za 30 dní)</span>
+                </div>
+            `;
         }
 
         function getLiveVehicleStatus(allStops, lineStartDeparture, cumMinutes) {
@@ -2520,11 +3058,28 @@
             }
         }
 
+        function renderSkeletonCards(count = 3) {
+            let html = '';
+            for (let i = 0; i < count; i++) {
+                html += `
+                    <div class="card skeleton-card" style="animation-delay: ${i * 60}ms">
+                        <div class="skeleton-row" style="margin-bottom: 10px;">
+                            <div class="skeleton-line w-40"></div>
+                            <div class="skeleton-line w-40" style="width: 60px;"></div>
+                        </div>
+                        <div class="skeleton-line h-large w-80"></div>
+                        <div class="skeleton-line w-60"></div>
+                    </div>
+                `;
+            }
+            return html;
+        }
+
         function searchConnection() {
             const container = document.getElementById('search-results');
             const btn = document.getElementById('search-btn');
 
-            container.innerHTML = '<div class="card"><div class="loading-box"><span class="spinner"></span>Hledám spojení…</div></div>';
+            container.innerHTML = renderSkeletonCards(3);
             if (btn) { btn.disabled = true; }
 
             setTimeout(() => {
@@ -2541,6 +3096,15 @@
                 const quickActions = document.getElementById('search-quick-actions');
                 if (quickActions) quickActions.style.display = 'flex';
             }, 350);
+        }
+
+        /* MEGA UPDATE #5 — ALTERNATIVNÍ SPOJENÍ PŘI VELKÉM ZPOŽDĚNÍ */
+        function suggestAlternative(afterDepTime) {
+            const newTime = (afterDepTime + 1) % 1440;
+            document.getElementById('search-time').value = formatTime(newTime);
+            showToast('info', 'refresh-cw', 'Hledám spojení až po tomto zpožděném spoji…');
+            searchConnection();
+            document.getElementById('search-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function findDirectConnections(from, to, startTime, windowMins) {
@@ -2687,23 +3251,29 @@
         }
 
         function renderDirectCard(res, index) {
-            const countdown = getMinutesLeftText(res.depTime);
+            const delayInfo = res.vehicleType === 'bus' ? getDelayInfo(res.line, res.depTime) : null;
+            const actualDep = delayInfo ? delayInfo.actualDepTime : res.depTime;
+            const countdown = getMinutesLeftText(actualDep);
+            const delayClass = getCountdownClassForDelay(delayInfo);
+            const cardDelayClass = delayInfo && delayInfo.category ? delayInfo.category.key : '';
             const liveStatus = getLiveVehicleStatus(res.allStops, res.lineStartDeparture, res.cumMinutes);
 
             return `
-                <div class="result-card" style="animation-delay: ${Math.min(index * 45, 300)}ms" onclick="toggleRouteDetails(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRouteDetails(${index});}" role="button" tabindex="0" aria-expanded="false">
+                <div class="result-card ${cardDelayClass}" style="animation-delay: ${Math.min(index * 45, 300)}ms" onclick="toggleRouteDetails(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRouteDetails(${index});}" role="button" tabindex="0" aria-expanded="false">
                     <div class="result-header">
                         <div>
                             ${getBadge(res.vehicleType)} <strong>Linka ${res.line}</strong>
                             <div class="time-main">${formatTime(res.depTime)} → ${formatTime(res.arrTime)} (${res.duration} min)</div>
+                            ${delayInfo && delayInfo.category ? `<div style="margin-top:4px;">${renderDelayBadge(delayInfo)}</div>` : ''}
                         </div>
-                        <span class="countdown-tag">${countdown}</span>
+                        <span class="countdown-tag ${delayClass}">${countdown}</span>
                     </div>
 
                     <div class="route-summary-row" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">
                         <span><i data-lucide="route" style="width:14px;height:14px; flex-shrink:0;"></i><strong>Trasa:</strong> ${res.firstStop} → ${res.lastStop}</span>
                         <span class="detail-toggle"><i data-lucide="chevron-down" style="width:14px;height:14px;"></i>Detail</span>
                     </div>
+                    ${res.vehicleType === 'bus' ? renderReliabilityRow(res.line) : ''}
 
                     <div class="route-details" id="route-details-${index}">
                         <div>
@@ -2734,7 +3304,13 @@
                             <div class="quick-actions">
                                 <button class="btn btn-secondary" onclick="event.stopPropagation(); shareTrip('${res.line}', '${res.firstStop.replace(/'/g,"\\'")}', '${res.lastStop.replace(/'/g,"\\'")}', '${formatTime(res.depTime)}')"><i data-lucide="share-2" style="width:16px;height:16px;"></i>Sdílet spoj</button>
                                 <button class="btn btn-secondary" onclick="event.stopPropagation(); exportTripToCalendar('${res.line}', '${res.firstStop.replace(/'/g,"\\'")}', '${res.lastStop.replace(/'/g,"\\'")}', ${res.depTime}, ${res.arrTime})"><i data-lucide="calendar-plus" style="width:16px;height:16px;"></i>Kalendář</button>
+                                <button class="btn btn-secondary" onclick="event.stopPropagation(); openReportModal('${res.line.replace(/'/g,"\\'")}', ${res.depTime})"><i data-lucide="flag" style="width:16px;height:16px;"></i>Nahlásit</button>
                             </div>
+                            ${delayInfo && delayInfo.category && delayInfo.category.key === 'delay-purple' ? `
+                            <button class="btn" style="background: var(--delay-purple-border); margin-top: 8px;" onclick="event.stopPropagation(); suggestAlternative(${res.depTime})">
+                                <i data-lucide="refresh-cw" style="width:16px;height:16px;"></i>Toto mešká — zkusit jiné spojení
+                            </button>
+                            ` : ''}
                         </div>
                     </div>
                 </div>
@@ -2761,16 +3337,22 @@
         }
 
         function renderTransferCard(res, index) {
-            const countdown = getMinutesLeftText(res.depTime);
+            const delayInfoA = res.legA.vehicleType === 'bus' ? getDelayInfo(res.legA.line, res.depTime) : null;
+            const actualDep = delayInfoA ? delayInfoA.actualDepTime : res.depTime;
+            const countdown = getMinutesLeftText(actualDep);
+            const delayClass = getCountdownClassForDelay(delayInfoA);
+            const cardDelayClass = delayInfoA && delayInfoA.category ? delayInfoA.category.key : '';
+            const delayInfoB = res.legB.vehicleType === 'bus' ? getDelayInfo(res.legB.line, res.legB.depTime) : null;
 
             return `
-                <div class="result-card" style="animation-delay: ${Math.min(index * 45, 300)}ms" onclick="toggleRouteDetails(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRouteDetails(${index});}" role="button" tabindex="0" aria-expanded="false">
+                <div class="result-card ${cardDelayClass}" style="animation-delay: ${Math.min(index * 45, 300)}ms" onclick="toggleRouteDetails(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRouteDetails(${index});}" role="button" tabindex="0" aria-expanded="false">
                     <div class="result-header">
                         <div>
                             <span class="stop-tag current"><i data-lucide="shuffle"></i>Přestup</span> <strong>${res.legA.line} → ${res.legB.line}</strong>
                             <div class="time-main">${formatTime(res.depTime)} → ${formatTime(res.arrTime)} (${res.duration} min)</div>
+                            ${delayInfoA && delayInfoA.category ? `<div style="margin-top:4px;">${renderDelayBadge(delayInfoA)}</div>` : ''}
                         </div>
-                        <span class="countdown-tag">${countdown}</span>
+                        <span class="countdown-tag ${delayClass}">${countdown}</span>
                     </div>
 
                     <div class="route-summary-row" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">
@@ -2781,7 +3363,7 @@
                     <div class="route-details" id="route-details-${index}">
                         <div class="timeline">
                             <div class="timeline-step active">
-                                ${getBadge(res.legA.vehicleType)} <strong class="line-link" tabindex="0" role="button" onclick="toggleLineRoute(event, ${index}, 'A')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();toggleLineRoute(event, ${index}, 'A');}">Linka ${res.legA.line} <i data-lucide="chevron-down" style="width:12px;height:12px;"></i></strong><br>
+                                ${getBadge(res.legA.vehicleType)} <strong class="line-link" tabindex="0" role="button" onclick="toggleLineRoute(event, ${index}, 'A')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();toggleLineRoute(event, ${index}, 'A');}">Linka ${res.legA.line} <i data-lucide="chevron-down" style="width:12px;height:12px;"></i></strong> ${renderDelayBadge(delayInfoA)}<br>
                                 <strong>${formatTime(res.legA.depTime)}</strong> nástup, jízda do <strong>${res.transferStop}</strong> (příjezd ${formatTime(res.legA.arrTime)})
                                 <div class="line-route-expand" id="line-route-${index}-A">
                                     <div class="line-route-inner">${renderLineRouteList(res.legA, res.transferStop)}</div>
@@ -2791,7 +3373,7 @@
                                 <span class="stop-tag current"><i data-lucide="clock"></i>Čekání na přestup: ${res.transferWait} min</span>
                             </div>
                             <div class="timeline-step">
-                                ${getBadge(res.legB.vehicleType)} <strong class="line-link" tabindex="0" role="button" onclick="toggleLineRoute(event, ${index}, 'B')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();toggleLineRoute(event, ${index}, 'B');}">Linka ${res.legB.line} <i data-lucide="chevron-down" style="width:12px;height:12px;"></i></strong><br>
+                                ${getBadge(res.legB.vehicleType)} <strong class="line-link" tabindex="0" role="button" onclick="toggleLineRoute(event, ${index}, 'B')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();toggleLineRoute(event, ${index}, 'B');}">Linka ${res.legB.line} <i data-lucide="chevron-down" style="width:12px;height:12px;"></i></strong> ${renderDelayBadge(delayInfoB)}<br>
                                 <strong>${formatTime(res.legB.depTime)}</strong> nástup v <strong>${res.transferStop}</strong>, výstup v cíli (příjezd ${formatTime(res.legB.arrTime)})
                                 <div class="line-route-expand" id="line-route-${index}-B">
                                     <div class="line-route-inner">${renderLineRouteList(res.legB, res.transferStop)}</div>
@@ -2869,6 +3451,13 @@
             showDepartures();
         }
 
+        let hideDelayedDepartures = false;
+
+        function toggleHideDelayed() {
+            hideDelayedDepartures = document.getElementById('dep-hide-delayed').checked;
+            showDepartures();
+        }
+
         function showDepartures() {
             const stop = document.getElementById('dep-stop').value;
             const time = parseTime(document.getElementById('dep-time').value);
@@ -2885,11 +3474,13 @@
                     line.departures.forEach(dep => {
                         const depTime = dep + line.cumMinutes[stopIdx];
                         if (depTime >= time) {
+                            const delayInfo = line.type === 'bus' ? getDelayInfo(line.name, depTime) : null;
                             list.push({
                                 time: depTime,
                                 line: line.name,
                                 type: line.type,
-                                dest: line.lastStop
+                                dest: line.lastStop,
+                                delayInfo
                             });
                         }
                     });
@@ -2897,21 +3488,34 @@
             });
 
             list.sort((a, b) => a.time - b.time);
+
+            if (hideDelayedDepartures) {
+                list = list.filter(item => !item.delayInfo || !item.delayInfo.category);
+            }
+
             list = list.slice(0, 12);
 
             if (list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4">Žádné odjezdy v nejbližší době.</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="4">${hideDelayedDepartures ? 'Žádné spoje bez zpoždění v nejbližší době.' : 'Žádné odjezdy v nejbližší době.'}</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = list.map((item, i) => `
-                <tr style="animation-delay: ${Math.min(i * 35, 250)}ms">
+            tbody.innerHTML = list.map((item, i) => {
+                const delayInfo = item.delayInfo;
+                const delayClass = getCountdownClassForDelay(delayInfo);
+                const rowDelayClass = delayInfo && delayInfo.category ? `has-delay ${delayInfo.category.key}` : '';
+                return `
+                <tr class="${rowDelayClass}" style="animation-delay: ${Math.min(i * 35, 250)}ms">
                     <td><strong>${formatTime(item.time)}</strong></td>
-                    <td><span class="countdown-tag">${getMinutesLeftText(item.time)}</span></td>
+                    <td>
+                        <span class="countdown-tag ${delayClass}">${getMinutesLeftText(delayInfo ? delayInfo.actualDepTime : item.time)}</span>
+                        ${renderDelayBadge(delayInfo)}
+                    </td>
                     <td>${getBadge(item.type)} ${item.line}</td>
                     <td>${item.dest}</td>
                 </tr>
-            `).join('');
+            `;
+            }).join('');
             if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
 
             cacheDeparturesOffline(stop, list);
@@ -2978,6 +3582,58 @@
             incrementStat('tickets');
             showToast('success', 'check-circle-2', `Jízdenka ${ticketId} zakoupena.`);
             checkAndAwardBadges();
+        }
+
+        /* ============================================================
+           MEGA UPDATE #7 — KALKULAČKA JÍZDNÉHO
+           Porovnává jednotlivé jízdenky s typickými cenami předplatného.
+           ============================================================ */
+        const SUBSCRIPTION_OPTIONS = [
+            { label: '30denní předplatné', price: 550, days: 30 },
+            { label: '90denní předplatné', price: 1500, days: 90 },
+            { label: 'Roční předplatné', price: 3650, days: 365 }
+        ];
+
+        function calculateFare() {
+            const ridesPerWeekInput = document.getElementById('fare-calc-rides');
+            const ticketTypeSelect = document.getElementById('fare-calc-ticket-type');
+            const resultBox = document.getElementById('fare-calc-result');
+            if (!ridesPerWeekInput || !ticketTypeSelect || !resultBox) return;
+
+            const ridesPerWeek = Math.max(1, Math.min(70, Number(ridesPerWeekInput.value) || 1));
+            const ticketPrice = Number(ticketTypeSelect.value);
+
+            const ridesPerMonth = ridesPerWeek * 4.33;
+            const monthlySingleCost = Math.round(ridesPerMonth * ticketPrice);
+
+            const rows = SUBSCRIPTION_OPTIONS.map(sub => {
+                const monthlyEquivalent = sub.price / (sub.days / 30);
+                const savings = monthlySingleCost - monthlyEquivalent;
+                const worthIt = savings > 0;
+                return { ...sub, monthlyEquivalent, savings, worthIt };
+            });
+
+            const bestOption = rows.reduce((best, r) => (r.savings > (best ? best.savings : -Infinity) ? r : best), null);
+
+            resultBox.innerHTML = `
+                <div class="stat-card" style="margin-bottom: 10px;">
+                    <div class="stat-value"><i data-lucide="wallet" style="width:16px;height:16px;"></i>${monthlySingleCost}&nbsp;Kč</div>
+                    <div class="stat-label">Odhad měsíčních výdajů za jednotlivé jízdenky</div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    ${rows.map(r => `
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; background: var(--bg); border-radius: 8px; ${bestOption && r.label === bestOption.label && bestOption.worthIt ? 'border: 1px solid var(--success);' : ''}">
+                            <span style="font-size:0.82rem; min-width:0; overflow-wrap:anywhere;">
+                                ${bestOption && r.label === bestOption.label && bestOption.worthIt ? '<i data-lucide="trophy" style="width:13px;height:13px; color: var(--success); flex-shrink:0;"></i> ' : ''}${r.label} (${r.price}&nbsp;Kč / ${r.days}&nbsp;dní)
+                            </span>
+                            <span style="font-size:0.78rem; font-weight:700; color: ${r.worthIt ? 'var(--success)' : 'var(--danger)'}; white-space:nowrap; flex-shrink:0;">
+                                ${r.worthIt ? `Ušetříš ${Math.round(r.savings)}&nbsp;Kč/měs.` : `Dražší o ${Math.round(-r.savings)}&nbsp;Kč/měs.`}
+                            </span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
         }
 
         /* ============================================================
@@ -3387,6 +4043,30 @@
         /* ============================================================
            MEGA UPDATE — NEJBLIŽŠÍ ODJEZD WIDGET
            ============================================================ */
+        function findActiveScheduledRoute() {
+            const now = new Date();
+            const currentDay = now.getDay();
+            const currentMins = getCurrentMinutes();
+            const favs = loadFavorites();
+
+            let best = null;
+            favs.forEach(f => {
+                if (!f.schedule || !f.schedule.days || !f.schedule.days.includes(currentDay) || !f.schedule.time) return;
+                const scheduledMins = parseTime(f.schedule.time);
+                // "Aktivní" okno: od 60 minut před plánovaným časem do 20 minut po něm
+                const diff = ((scheduledMins - currentMins) % 1440 + 1440) % 1440;
+                const diffBack = ((currentMins - scheduledMins) % 1440 + 1440) % 1440;
+                if (diff <= 60 || diffBack <= 20) {
+                    const distanceScore = Math.min(diff, diffBack);
+                    if (!best || distanceScore < best.distanceScore) {
+                        best = { from: f.from, to: f.to, distanceScore };
+                    }
+                }
+            });
+
+            return best;
+        }
+
         function renderNearestDepartureWidget() {
             const widget = document.getElementById('nearest-widget');
             const content = document.getElementById('nearest-widget-content');
@@ -3394,8 +4074,9 @@
 
             if (!appSettings.nearestWidget) { widget.style.display = 'none'; return; }
 
+            const scheduledRoute = findActiveScheduledRoute();
             const favStops = loadFavoriteStops();
-            const referenceStop = favStops[0] || (linesData[0] ? linesData[0].stops[0] : null);
+            const referenceStop = scheduledRoute ? scheduledRoute.from : (favStops[0] || (linesData[0] ? linesData[0].stops[0] : null));
             if (!referenceStop) { widget.style.display = 'none'; return; }
 
             const now = getCurrentMinutes();
@@ -3405,6 +4086,13 @@
                 if (!isLineRunningToday(line)) return;
                 const stopIdx = line.stops.indexOf(referenceStop);
                 if (stopIdx === -1 || stopIdx >= line.stops.length - 1) return;
+
+                // Pokud sledujeme pravidelnou trasu, upřednostníme spoje, které skutečně jedou k cíli.
+                if (scheduledRoute) {
+                    const toIdx = line.stops.indexOf(scheduledRoute.to);
+                    if (toIdx === -1 || toIdx <= stopIdx) return;
+                }
+
                 line.departures.forEach(dep => {
                     const depTime = dep + line.cumMinutes[stopIdx];
                     if (depTime >= now && (!best || depTime < best.depTime)) {
@@ -3415,17 +4103,128 @@
 
             if (!best) { widget.style.display = 'none'; return; }
 
+            const delayInfo = best.type === 'bus' ? getDelayInfo(best.line, best.depTime) : null;
+            const delayClass = getCountdownClassForDelay(delayInfo);
+            const actualDep = delayInfo ? delayInfo.actualDepTime : best.depTime;
+
             widget.style.display = 'block';
             content.innerHTML = `
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                ${scheduledRoute ? `
+                <div style="display:flex; align-items:center; gap:5px; font-size:0.72rem; color: var(--primary); font-weight:700; margin-bottom:6px;">
+                    <i data-lucide="calendar-clock" style="width:12px;height:12px; flex-shrink:0;"></i>
+                    <span>Tvoje pravidelná trasa: ${scheduledRoute.from} → ${scheduledRoute.to}</span>
+                </div>
+                ` : ''}
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap: wrap;">
                     <span style="display:flex; align-items:center; gap:6px; min-width:0; overflow-wrap:anywhere; font-size:0.85rem;">
                         ${getBadge(best.type)} <strong>${best.line}</strong> ze zastávky <strong>${best.stop}</strong>
                     </span>
-                    <span class="countdown-tag">${getMinutesLeftText(best.depTime)}</span>
+                    <span style="display:flex; align-items:center; gap:6px; flex-wrap: wrap;">
+                        <span class="countdown-tag ${delayClass}">${getMinutesLeftText(actualDep)}</span>
+                        ${renderDelayBadge(delayInfo)}
+                    </span>
                 </div>
-                <div style="font-size:0.78rem; color:var(--text-muted); margin-top:6px;">Odjezd v ${formatTime(best.depTime)} → ${best.dest}</div>
+                <div style="font-size:0.78rem; color:var(--text-muted); margin-top:6px;">
+                    Odjezd v ${formatTime(best.depTime)}${delayInfo && delayInfo.category ? ` (reálně ${formatTime(actualDep)})` : ''} → ${best.dest}
+                </div>
             `;
             if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+        }
+
+        /* ============================================================
+           MEGA UPDATE #2 — LIVE BANNER + NOTIFIKACE PŘI ZPOŽDĚNÍ
+           Sleduje oblíbené trasy a zastávky; pokud je nejbližší autobus
+           na některé z nich zpožděný, ukáže banner nahoře a jednou
+           pošle notifikaci (aby nespamovala při každém překreslení).
+           ============================================================ */
+        const NOTIFIED_DELAYS_KEY = 'idos-notified-delays';
+
+        function loadNotifiedDelays() {
+            try {
+                const raw = sessionStorage.getItem(NOTIFIED_DELAYS_KEY);
+                return raw ? JSON.parse(raw) : {};
+            } catch (e) { return {}; }
+        }
+
+        function saveNotifiedDelays(map) {
+            try { sessionStorage.setItem(NOTIFIED_DELAYS_KEY, JSON.stringify(map)); } catch (e) { /* ignore */ }
+        }
+
+        function findWorstDelayOnFavorites() {
+            const favStops = loadFavoriteStops();
+            const favRoutes = loadFavorites();
+            const stopsToCheck = new Set(favStops);
+            favRoutes.forEach(f => stopsToCheck.add(f.from));
+
+            if (stopsToCheck.size === 0) return null;
+
+            const now = getCurrentMinutes();
+            let worst = null;
+
+            linesData.forEach(line => {
+                if (line.type !== 'bus') return;
+                if (!isLineRunningToday(line)) return;
+
+                stopsToCheck.forEach(stop => {
+                    const stopIdx = line.stops.indexOf(stop);
+                    if (stopIdx === -1 || stopIdx >= line.stops.length - 1) return;
+
+                    line.departures.forEach(dep => {
+                        const depTime = dep + line.cumMinutes[stopIdx];
+                        const diff = ((depTime - now) % 1440 + 1440) % 1440;
+                        if (diff > 45) return; // jen blízké odjezdy nás zajímají
+
+                        const delayInfo = getDelayInfo(line.name, depTime);
+                        if (!delayInfo.category) return;
+
+                        const rank = { 'delay-orange': 1, 'delay-red': 2, 'delay-purple': 3 }[delayInfo.category.key];
+                        if (!worst || rank > worst.rank) {
+                            worst = { ...delayInfo, line: line.name, stop, depTime, rank };
+                        }
+                    });
+                });
+            });
+
+            return worst;
+        }
+
+        let currentBannerDelay = null;
+
+        function updateLiveDelayBanner() {
+            const banner = document.getElementById('live-delay-banner');
+            const textEl = document.getElementById('live-delay-banner-text');
+            if (!banner || !textEl) return;
+
+            const worst = findWorstDelayOnFavorites();
+            currentBannerDelay = worst;
+
+            if (!worst) {
+                banner.style.display = 'none';
+                banner.className = '';
+                return;
+            }
+
+            banner.style.display = 'flex';
+            banner.className = worst.category.key;
+            textEl.textContent = `Linka ${worst.line} ze zastávky ${worst.stop} má zpoždění ${worst.delayMinutes} min.`;
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+
+            const notified = loadNotifiedDelays();
+            const notifyKey = `${worst.line}|${worst.stop}|${worst.depTime}|${worst.category.key}`;
+            if (!notified[notifyKey]) {
+                notified[notifyKey] = true;
+                saveNotifiedDelays(notified);
+                if (appSettings.notifyDepartures) {
+                    showToast(worst.category.key === 'delay-purple' ? 'danger' : 'info', worst.category.icon,
+                        `Linka ${worst.line} (${worst.stop}) mešká ${worst.delayMinutes} min.`);
+                }
+                addNotification(worst.category.icon, `Linka ${worst.line} ze zastávky ${worst.stop} má zpoždění ${worst.delayMinutes} min.`);
+            }
+        }
+
+        function shareCurrentBannerDelay() {
+            if (!currentBannerDelay) return;
+            shareDelayReport(currentBannerDelay.line, currentBannerDelay.stop, currentBannerDelay.delayMinutes);
         }
 
         /* ============================================================
@@ -3469,6 +4268,11 @@
 
         function shareTrip(line, from, to, depTimeLabel) {
             shareText('Moje spojení IDOS', `Jedu linkou ${line} z ${from} do ${to}, odjezd v ${depTimeLabel}. Sleduj to se mnou v IDOS Doprava!`);
+        }
+
+        /* MEGA UPDATE #9 — SDÍLET ZPOŽDĚNÍ */
+        function shareDelayReport(line, stop, delayMinutes) {
+            shareText('Zpoždění MHD', `Pozor, linka ${line} ze zastávky ${stop} má aktuálně zpoždění ${delayMinutes} min. Sleduj aktuální stav v IDOS Doprava.`);
         }
 
         function shareLastSearch() {
@@ -3551,6 +4355,14 @@
             renderBadges();
             updateNotifDot();
             renderNearestDepartureWidget();
+            updateLiveDelayBanner();
+            calculateFare();
+
+            // Průběžná aktualizace živých dat (widget nejbližšího odjezdu, banner zpoždění)
+            setInterval(() => {
+                renderNearestDepartureWidget();
+                updateLiveDelayBanner();
+            }, 30000);
         }
 
         document.addEventListener('keydown', (e) => {
