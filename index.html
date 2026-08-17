@@ -1377,6 +1377,20 @@
         .benefit-item strong { display: block; color: var(--text); }
         .benefit-item span.benefit-desc { color: var(--text-muted); }
 
+        /* Text, který má být vždy dobře čitelný: černý ve světlém, bílý v tmavém režimu.
+           Nejprve fallback dle systémového media query, pak přebito atributem
+           data-theme (ruční přepínač v aplikaci) - funguje tedy i tam, kde by
+           samotné prefers-color-scheme selhalo. */
+        .admin-contact-email {
+            color: #000000;
+            font-weight: 600;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .admin-contact-email { color: #ffffff; }
+        }
+        :root[data-theme="dark"] .admin-contact-email { color: #ffffff !important; }
+        :root[data-theme="light"] .admin-contact-email { color: #000000 !important; }
+
         /* ODZNAKY / GAMIFIKACE */
         .badge-chip-row {
             display: flex;
@@ -1543,6 +1557,390 @@
         /* NOTIFIKACE PANEL (zvonek) */
         .notif-btn {
             position: relative;
+        }
+
+        /* ============================================================
+           TADXPAY — SIMULOVANÁ PLATEBNÍ BRÁNA
+           Vlastní vizuální identita, oddělená od zbytku appky.
+           ============================================================ */
+        .tp-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(4, 4, 16, 0.72);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 3000;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+        }
+        .tp-overlay.open {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease, visibility 0s linear 0s;
+        }
+        @media (min-width: 640px) {
+            .tp-overlay { align-items: center; }
+        }
+
+        .tp-sheet {
+            width: 100%;
+            max-width: 420px;
+            max-height: 92vh;
+            overflow-y: auto;
+            background: linear-gradient(180deg, #12122a 0%, #0b0b1e 100%);
+            color: #f1eeff;
+            border-radius: 24px 24px 0 0;
+            padding: 22px 20px 26px;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            box-shadow: 0 -20px 60px rgba(92, 63, 224, 0.35);
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        @media (min-width: 640px) {
+            .tp-sheet { border-radius: 24px; transform: translateY(24px) scale(0.96); }
+        }
+        .tp-overlay.open .tp-sheet { transform: translateY(0) scale(1); }
+
+        .tp-sheet::before {
+            content: '';
+            position: absolute;
+            top: -80px;
+            right: -60px;
+            width: 220px;
+            height: 220px;
+            background: radial-gradient(circle, rgba(124, 92, 252, 0.45), transparent 70%);
+            pointer-events: none;
+        }
+
+        .tp-drag-handle {
+            width: 40px;
+            height: 4px;
+            border-radius: 4px;
+            background: rgba(241, 238, 255, 0.2);
+            margin: 0 auto 14px;
+        }
+        @media (min-width: 640px) { .tp-drag-handle { display: none; } }
+
+        .tp-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            position: relative;
+            z-index: 1;
+        }
+        .tp-brand {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-weight: 800;
+            font-size: 1.15rem;
+            letter-spacing: -0.02em;
+        }
+        .tp-brand-mark {
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, #7c5cfc, #4a2fd6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px rgba(124, 92, 252, 0.5);
+            flex-shrink: 0;
+        }
+        .tp-brand-mark svg { width: 17px; height: 17px; color: #fff; }
+        .tp-brand span.tp-x { color: #a78bfa; }
+
+        .tp-sim-badge {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            background: rgba(255, 196, 74, 0.15);
+            color: #ffc94a;
+            border: 1px solid rgba(255, 196, 74, 0.35);
+            padding: 4px 8px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .tp-close {
+            background: rgba(241, 238, 255, 0.08);
+            border: none;
+            color: #cfc9f5;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* Animovaná platební karta */
+        .tp-card {
+            position: relative;
+            z-index: 1;
+            border-radius: 18px;
+            padding: 20px;
+            height: 168px;
+            background:
+                radial-gradient(circle at 15% 15%, rgba(255,255,255,0.14), transparent 45%),
+                linear-gradient(135deg, #6d47f5 0%, #4a2fd6 55%, #2c1a8f 100%);
+            box-shadow: 0 18px 40px -12px rgba(74, 47, 214, 0.65);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            animation: tpCardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        }
+        @keyframes tpCardIn {
+            from { opacity: 0; transform: translateY(14px) rotateX(8deg); }
+            to { opacity: 1; transform: translateY(0) rotateX(0); }
+        }
+
+        .tp-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,0.18) 35%, transparent 50%);
+            transform: translateX(-100%);
+            animation: tpCardSheen 3.2s ease-in-out infinite;
+        }
+        @keyframes tpCardSheen {
+            0%, 40% { transform: translateX(-120%); }
+            65%, 100% { transform: translateX(120%); }
+        }
+
+        .tp-card-top { display: flex; align-items: center; justify-content: space-between; }
+        .tp-chip {
+            width: 34px;
+            height: 25px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #ffe9a8, #d9b45c);
+        }
+        .tp-card-network { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; color: rgba(255,255,255,0.85); }
+
+        .tp-card-number {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 1.12rem;
+            letter-spacing: 0.12em;
+            color: #fff;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.25);
+        }
+
+        .tp-card-bottom { display: flex; align-items: flex-end; justify-content: space-between; }
+        .tp-card-label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.55); margin-bottom: 2px; }
+        .tp-card-value { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; font-size: 0.85rem; color: #fff; }
+
+        /* Souhrn platby */
+        .tp-summary {
+            margin-top: 18px;
+            background: rgba(241, 238, 255, 0.05);
+            border: 1px solid rgba(241, 238, 255, 0.09);
+            border-radius: 14px;
+            padding: 14px 16px;
+            position: relative;
+            z-index: 1;
+        }
+        .tp-summary-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 5px 0; font-size: 0.85rem; }
+        .tp-summary-row .tp-label { color: #a9a2d6; }
+        .tp-summary-row .tp-value { font-weight: 600; text-align: right; }
+        .tp-summary-total {
+            border-top: 1px dashed rgba(241, 238, 255, 0.15);
+            margin-top: 6px;
+            padding-top: 10px;
+            font-size: 1rem;
+        }
+        .tp-summary-total .tp-value { font-size: 1.25rem; font-weight: 800; color: #b9a4ff; }
+
+        /* PIN vstup */
+        .tp-pin-section { margin-top: 20px; position: relative; z-index: 1; }
+        .tp-pin-label {
+            font-size: 0.75rem;
+            color: #a9a2d6;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .tp-pin-dots {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+        .tp-pin-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(241, 238, 255, 0.35);
+            transition: background 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+        }
+        .tp-pin-dot.filled {
+            background: linear-gradient(135deg, #a78bfa, #7c5cfc);
+            border-color: transparent;
+            transform: scale(1.15);
+        }
+        .tp-pin-dot.shake { animation: tpShake 0.4s ease; }
+        @keyframes tpShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-5px); }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+
+        .tp-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .tp-key {
+            background: rgba(241, 238, 255, 0.06);
+            border: 1px solid rgba(241, 238, 255, 0.1);
+            color: #f1eeff;
+            font-size: 1.15rem;
+            font-weight: 600;
+            border-radius: 14px;
+            padding: 14px 0;
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tp-key:active { transform: scale(0.92); background: rgba(124, 92, 252, 0.35); }
+        .tp-key.tp-key-ghost { background: transparent; border: none; cursor: default; }
+        .tp-key.tp-key-ghost:active { transform: none; background: transparent; }
+
+        .tp-pay-btn {
+            width: 100%;
+            margin-top: 20px;
+            border: none;
+            border-radius: 14px;
+            padding: 15px;
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #7c5cfc, #4a2fd6);
+            box-shadow: 0 10px 24px -8px rgba(124, 92, 252, 0.65);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.15s ease, opacity 0.2s ease;
+        }
+        .tp-pay-btn:active { transform: scale(0.98); }
+        .tp-pay-btn:disabled { opacity: 0.55; cursor: default; }
+
+        .tp-secure-note {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 12px;
+            font-size: 0.7rem;
+            color: #837bb0;
+            position: relative;
+            z-index: 1;
+        }
+        .tp-secure-note svg { width: 12px; height: 12px; }
+
+        /* Stav: zpracování platby */
+        .tp-processing {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 34px 10px 10px;
+            position: relative;
+            z-index: 1;
+        }
+        .tp-scan-ring {
+            width: 78px;
+            height: 78px;
+            border-radius: 50%;
+            border: 3px solid rgba(124, 92, 252, 0.2);
+            border-top-color: #a78bfa;
+            animation: tpSpin 0.9s linear infinite;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .tp-scan-ring::after {
+            content: '';
+            position: absolute;
+            inset: 10px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(124,92,252,0.35), transparent 70%);
+            animation: tpPulseCore 1.4s ease-in-out infinite;
+        }
+        @keyframes tpSpin { to { transform: rotate(360deg); } }
+        @keyframes tpPulseCore { 0%, 100% { opacity: 0.4; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1.05); } }
+
+        .tp-processing-text { font-size: 0.92rem; font-weight: 600; color: #e6e0ff; margin-bottom: 4px; }
+        .tp-processing-sub { font-size: 0.76rem; color: #837bb0; text-align: center; }
+
+        /* Stav: úspěch */
+        .tp-success {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 10px 10px;
+            position: relative;
+            z-index: 1;
+        }
+        .tp-success-ring {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 245, 160, 0.25), transparent 72%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            animation: tpPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .tp-success-ring svg {
+            width: 46px;
+            height: 46px;
+            color: #00f5a0;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: tpDrawCheck 0.5s ease-out 0.15s forwards;
+        }
+        @keyframes tpPopIn {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes tpDrawCheck { to { stroke-dashoffset: 0; } }
+
+        .tp-success-title { font-size: 1.08rem; font-weight: 800; color: #fff; margin-bottom: 4px; }
+        .tp-success-sub { font-size: 0.8rem; color: #837bb0; text-align: center; margin-bottom: 4px; }
+        .tp-success-id {
+            margin-top: 10px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.78rem;
+            color: #a9a2d6;
+            background: rgba(241, 238, 255, 0.06);
+            border: 1px solid rgba(241, 238, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .tp-card::after, .tp-scan-ring, .tp-scan-ring::after, .tp-success-ring svg,
+            .tp-card, .tp-success-ring, .tp-pin-dot.shake {
+                animation: none !important;
+            }
         }
 
         .notif-dot {
@@ -1890,6 +2288,111 @@
         </div>
     </div>
 
+    <!-- TADXPAY — SIMULOVANÁ PLATEBNÍ BRÁNA -->
+    <div id="tadxpay-overlay" class="tp-overlay" onclick="if(event.target===this) closeTadxPay()">
+        <div class="tp-sheet" role="dialog" aria-modal="true" aria-labelledby="tp-title">
+            <div class="tp-drag-handle"></div>
+            <div class="tp-header">
+                <div class="tp-brand">
+                    <span class="tp-brand-mark"><i data-lucide="zap"></i></span>
+                    <span id="tp-title">Tad<span class="tp-x">x</span>Pay</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="tp-sim-badge">Simulace</span>
+                    <button class="tp-close" onclick="closeTadxPay()" aria-label="Zavřít"><i data-lucide="x" style="width:15px;height:15px;"></i></button>
+                </div>
+            </div>
+
+            <!-- KROK 1: KARTA + SOUHRN + PIN -->
+            <div id="tp-pay-step">
+                <div class="tp-card">
+                    <div class="tp-card-top">
+                        <div class="tp-chip"></div>
+                        <span class="tp-card-network">TADXPAY</span>
+                    </div>
+                    <div class="tp-card-number">•••• •••• •••• 4471</div>
+                    <div class="tp-card-bottom">
+                        <div>
+                            <div class="tp-card-label">Držitel karty</div>
+                            <div class="tp-card-value" id="tp-cardholder">TESTOVACÍ ÚČET</div>
+                        </div>
+                        <div>
+                            <div class="tp-card-label">Platnost</div>
+                            <div class="tp-card-value">12/29</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tp-summary">
+                    <div class="tp-summary-row">
+                        <span class="tp-label">Jízdenka</span>
+                        <span class="tp-value" id="tp-summary-type">—</span>
+                    </div>
+                    <div class="tp-summary-row">
+                        <span class="tp-label">Kategorie</span>
+                        <span class="tp-value" id="tp-summary-category">—</span>
+                    </div>
+                    <div class="tp-summary-row tp-summary-total">
+                        <span class="tp-label">Celkem k úhradě</span>
+                        <span class="tp-value" id="tp-summary-price">0 Kč</span>
+                    </div>
+                </div>
+
+                <div class="tp-pin-section">
+                    <p class="tp-pin-label">Zadejte PIN pro potvrzení platby (simulace — libovolné 4 číslice)</p>
+                    <div class="tp-pin-dots" id="tp-pin-dots">
+                        <div class="tp-pin-dot"></div>
+                        <div class="tp-pin-dot"></div>
+                        <div class="tp-pin-dot"></div>
+                        <div class="tp-pin-dot"></div>
+                    </div>
+                    <div class="tp-keypad" id="tp-keypad">
+                        <button class="tp-key" onclick="tpPressKey('1')">1</button>
+                        <button class="tp-key" onclick="tpPressKey('2')">2</button>
+                        <button class="tp-key" onclick="tpPressKey('3')">3</button>
+                        <button class="tp-key" onclick="tpPressKey('4')">4</button>
+                        <button class="tp-key" onclick="tpPressKey('5')">5</button>
+                        <button class="tp-key" onclick="tpPressKey('6')">6</button>
+                        <button class="tp-key" onclick="tpPressKey('7')">7</button>
+                        <button class="tp-key" onclick="tpPressKey('8')">8</button>
+                        <button class="tp-key" onclick="tpPressKey('9')">9</button>
+                        <button class="tp-key tp-key-ghost"></button>
+                        <button class="tp-key" onclick="tpPressKey('0')">0</button>
+                        <button class="tp-key" onclick="tpPressKey('back')"><i data-lucide="delete" style="width:18px;height:18px;"></i></button>
+                    </div>
+                </div>
+
+                <button class="tp-pay-btn" id="tp-pay-btn" disabled onclick="tpStartProcessing()">
+                    <i data-lucide="lock" style="width:16px;height:16px;"></i>
+                    <span>Zaplatit</span>
+                </button>
+                <div class="tp-secure-note">
+                    <i data-lucide="shield-check"></i>
+                    <span>Simulovaná platba TadxPay — nedochází k reálné transakci</span>
+                </div>
+            </div>
+
+            <!-- KROK 2: ZPRACOVÁNÍ -->
+            <div class="tp-processing" id="tp-processing-step">
+                <div class="tp-scan-ring"></div>
+                <div class="tp-processing-text">Zpracovávám platbu…</div>
+                <div class="tp-processing-sub">Ověřuji transakci u TadxPay (simulace)</div>
+            </div>
+
+            <!-- KROK 3: ÚSPĚCH -->
+            <div class="tp-success" id="tp-success-step">
+                <div class="tp-success-ring">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="4 12 9 18 20 6"></polyline>
+                    </svg>
+                </div>
+                <div class="tp-success-title">Platba proběhla úspěšně</div>
+                <div class="tp-success-sub">Jízdenka byla aktivována a je připravená k použití.</div>
+                <div class="tp-success-id" id="tp-success-id">TXN-000000</div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <!-- SPOJENÍ -->
         <div id="tab-search" class="tab-content active">
@@ -1995,12 +2498,28 @@
                     <div class="form-group">
                         <label><i data-lucide="ticket" style="width:14px;height:14px;"></i>Vyberte typ jízdenky</label>
                         <select id="ticket-type">
-                            <option value="30 min / 24 Kč">30 minutová - 24 Kč</option>
-                            <option value="60 min / 32 Kč">60 minutová - 32 Kč</option>
-                            <option value="24 hodin / 100 Kč">24 hodinová - 100 Kč</option>
+                            <optgroup label="Jednotlivé jízdenky">
+                                <option value="30 min / 24 Kč" data-validity-days="0" data-validity-minutes="30" data-price="24">30 minutová - 24 Kč</option>
+                                <option value="60 min / 32 Kč" data-validity-days="0" data-validity-minutes="60" data-price="32">60 minutová - 32 Kč</option>
+                                <option value="24 hodin / 100 Kč" data-validity-days="1" data-validity-minutes="0" data-price="100">24 hodinová - 100 Kč</option>
+                            </optgroup>
+                            <optgroup label="Předplatné">
+                                <option value="Týdenní jízdenka / 250 Kč" data-validity-days="7" data-validity-minutes="0" data-price="250">Týdenní - 250 Kč</option>
+                                <option value="Měsíční jízdenka / 550 Kč" data-validity-days="30" data-validity-minutes="0" data-price="550">Měsíční - 550 Kč</option>
+                                <option value="6měsíční jízdenka / 2750 Kč" data-validity-days="182" data-validity-minutes="0" data-price="2750">6 měsíční - 2750 Kč</option>
+                                <option value="Roční jízdenka / 3650 Kč" data-validity-days="365" data-validity-minutes="0" data-price="3650">Roční - 3650 Kč</option>
+                            </optgroup>
                         </select>
                     </div>
-                    <button class="btn" style="background: var(--success);" onclick="buyTicket()"><i data-lucide="credit-card" style="width:18px;height:18px;"></i>Koupit jízdenku (Zdarma)</button>
+                    <div class="form-group">
+                        <label><i data-lucide="users" style="width:14px;height:14px;"></i>Kategorie cestujícího</label>
+                        <select id="ticket-category">
+                            <option value="Základní (15+)">Základní (15+)</option>
+                            <option value="Dítě/žák (6-15)">Dítě / žák (6-15 let)</option>
+                            <option value="Senior (65+)">Senior (65+)</option>
+                        </select>
+                    </div>
+                    <button class="btn" style="background: var(--success);" onclick="openTadxPay()"><i data-lucide="credit-card" style="width:18px;height:18px;"></i>Koupit jízdenku</button>
                 </div>
 
                 <div id="ticket-auth-warning">
@@ -2046,6 +2565,21 @@
                 </div>
             </div>
             <div class="card" id="lines-list"></div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 6px; font-size: 0.95rem;"><i data-lucide="shield-check" style="width:16px;height:16px;"></i>Správci hlášení zpoždění</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Tito administrátoři mohou spravovat a upravovat hlášení zpoždění v aplikaci.</p>
+                <ul class="benefit-list">
+                    <li class="benefit-item">
+                        <span class="benefit-icon"><i data-lucide="mail"></i></span>
+                        <div><strong>Admin 1</strong><span class="benefit-desc admin-contact-email">tad.studio.cz@gmail.com</span></div>
+                    </li>
+                    <li class="benefit-item">
+                        <span class="benefit-icon"><i data-lucide="mail"></i></span>
+                        <div><strong>Admin 2</strong><span class="benefit-desc admin-contact-email">milovnikmhd@gmail.com</span></div>
+                    </li>
+                </ul>
+            </div>
         </div>
 
         <!-- ÚČET & AUTHENTIKACE -->
@@ -2121,6 +2655,10 @@
                     <i data-lucide="leaf" style="width:18px;height:18px;"></i>
                     <span>Ušetřil/a jsi přibližně <strong id="eco-co2">0 kg</strong> CO₂ jízdou MHD.</span>
                 </div>
+
+                <h3 style="margin-top: 16px; margin-bottom: 4px; font-size: 0.9rem;"><i data-lucide="ticket-check" style="width:16px;height:16px;"></i>Aktivní jízdenky</h3>
+                <div id="active-tickets-list"></div>
+                <button class="btn btn-secondary" style="margin-top: 8px;" onclick="switchTab('tickets')"><i data-lucide="list" style="width:16px;height:16px;"></i>Zobrazit všechny jízdenky</button>
 
                 <h3 style="margin-top: 16px; margin-bottom: 4px; font-size: 0.9rem;"><i data-lucide="award" style="width:16px;height:16px;"></i>Odznaky</h3>
                 <div class="badge-chip-row" id="badge-chip-row"></div>
@@ -3557,11 +4095,21 @@
         }
 
         function buyTicket() {
-            const type = document.getElementById('ticket-type').value;
+            const typeSelect = document.getElementById('ticket-type');
+            const categorySelect = document.getElementById('ticket-category');
+            const type = typeSelect.value;
+            const category = categorySelect ? categorySelect.value : 'Základní (15+)';
+            const selectedOption = typeSelect.options[typeSelect.selectedIndex];
+            const validityDays = Number(selectedOption.dataset.validityDays || 0);
+            const validityMinutes = Number(selectedOption.dataset.validityMinutes || 0);
+
             const now = new Date();
             const timeStr = now.toLocaleTimeString('cs-CZ');
             const dateStr = now.toLocaleDateString('cs-CZ');
             const ticketId = 'TCK-' + Math.floor(100000 + Math.random() * 900000);
+
+            const expiresAt = new Date(now.getTime() + validityDays * 86400000 + validityMinutes * 60000);
+            const expiresLabel = `${expiresAt.toLocaleDateString('cs-CZ')} ${expiresAt.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}`;
 
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${ticketId}`;
 
@@ -3569,19 +4117,108 @@
                 <div class="ticket-card">
                     <h3 class="ticket-status"><i data-lucide="check-circle-2"></i>PLATNÁ JÍZDENKA</h3>
                     <p style="margin-top: 5px;"><strong>${type}</strong></p>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">${category}</p>
                     <img src="${qrUrl}" class="ticket-qr" alt="QR Kód">
                     <p style="font-size: 0.85rem; color: var(--text-muted);">ID: <strong>${ticketId}</strong></p>
                     <p style="font-size: 0.85rem; color: var(--text-muted);">Zakoupeno: ${dateStr} ${timeStr}</p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Platnost do: <strong>${expiresLabel}</strong></p>
                 </div>
             `;
 
             document.getElementById('ticket-output').innerHTML = html;
             if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
 
-            addTicketToHistory({ id: ticketId, type, date: dateStr, time: timeStr });
+            addTicketToHistory({ id: ticketId, type, category, date: dateStr, time: timeStr, expiresAt: expiresAt.toISOString(), expiresLabel });
             incrementStat('tickets');
             showToast('success', 'check-circle-2', `Jízdenka ${ticketId} zakoupena.`);
             checkAndAwardBadges();
+
+            return ticketId;
+        }
+
+        /* ============================================================
+           TADXPAY — SIMULOVANÁ PLATEBNÍ BRÁNA
+           Zcela klientská simulace (žádná reálná platba, žádný přenos dat).
+           ============================================================ */
+        let tpPin = '';
+        let tpBusy = false;
+
+        function openTadxPay() {
+            const typeSelect = document.getElementById('ticket-type');
+            const categorySelect = document.getElementById('ticket-category');
+            if (!typeSelect) return;
+
+            const selectedOption = typeSelect.options[typeSelect.selectedIndex];
+            const price = Number(selectedOption.dataset.price || 0);
+            const category = categorySelect ? categorySelect.value : 'Základní (15+)';
+
+            document.getElementById('tp-summary-type').textContent = selectedOption.textContent.trim();
+            document.getElementById('tp-summary-category').textContent = category;
+            document.getElementById('tp-summary-price').textContent = `${price}\u00A0Kč`;
+
+            const userEmailEl = document.getElementById('user-email-display');
+            const userLabel = userEmailEl && userEmailEl.textContent.trim();
+            document.getElementById('tp-cardholder').textContent = userLabel ? userLabel.toUpperCase() : 'TESTOVACÍ ÚČET';
+
+            tpPin = '';
+            tpUpdatePinDots();
+            tpBusy = false;
+
+            document.getElementById('tp-pay-step').style.display = 'block';
+            document.getElementById('tp-processing-step').style.display = 'none';
+            document.getElementById('tp-success-step').style.display = 'none';
+            document.getElementById('tp-pay-btn').disabled = true;
+
+            const overlay = document.getElementById('tadxpay-overlay');
+            overlay.classList.add('open');
+            document.body.classList.add('menu-open');
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+        }
+
+        function closeTadxPay() {
+            if (tpBusy) return; // nelze zavřít uprostřed "zpracování" platby
+            document.getElementById('tadxpay-overlay').classList.remove('open');
+            document.body.classList.remove('menu-open');
+        }
+
+        function tpUpdatePinDots() {
+            const dots = document.querySelectorAll('#tp-pin-dots .tp-pin-dot');
+            dots.forEach((dot, i) => dot.classList.toggle('filled', i < tpPin.length));
+            const payBtn = document.getElementById('tp-pay-btn');
+            if (payBtn) payBtn.disabled = tpPin.length !== 4;
+        }
+
+        function tpPressKey(key) {
+            if (tpBusy) return;
+            if (key === 'back') {
+                tpPin = tpPin.slice(0, -1);
+            } else if (tpPin.length < 4) {
+                tpPin += key;
+            }
+            tpUpdatePinDots();
+        }
+
+        function tpStartProcessing() {
+            if (tpPin.length !== 4 || tpBusy) return;
+            tpBusy = true;
+
+            document.getElementById('tp-pay-step').style.display = 'none';
+            document.getElementById('tp-processing-step').style.display = 'flex';
+
+            // Simulace ověřování transakce u (fiktivní) platební brány
+            setTimeout(() => {
+                const ticketId = buyTicket();
+
+                document.getElementById('tp-processing-step').style.display = 'none';
+                document.getElementById('tp-success-step').style.display = 'flex';
+                document.getElementById('tp-success-id').textContent = `TXN-${ticketId.replace('TCK-', '')}`;
+                if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+
+                setTimeout(() => {
+                    tpBusy = false;
+                    closeTadxPay();
+                }, 1600);
+            }, 1700);
         }
 
         /* ============================================================
@@ -3850,14 +4487,44 @@
 
             if (list.length === 0) {
                 box.style.display = 'none';
+                renderActiveTickets();
                 return;
             }
 
             box.style.display = 'block';
-            container.innerHTML = list.slice(0, 10).map(t => `
+            container.innerHTML = list.slice(0, 10).map(t => {
+                const isValid = t.expiresAt ? new Date(t.expiresAt).getTime() > Date.now() : false;
+                const statusLabel = t.expiresAt ? (isValid ? 'Platná' : 'Prošlá') : '';
+                return `
                 <div class="history-item">
-                    <span class="history-route"><i data-lucide="ticket" style="width:14px;height:14px; flex-shrink:0; color: var(--text-muted);"></i>${t.type}</span>
-                    <span class="history-meta">${t.date} ${t.time}</span>
+                    <span class="history-route"><i data-lucide="ticket" style="width:14px;height:14px; flex-shrink:0; color: var(--text-muted);"></i>${t.type}${t.category ? ` · ${t.category}` : ''}</span>
+                    <span class="history-meta">
+                        ${t.date} ${t.time}
+                        ${t.expiresLabel ? `<br>Platnost do: ${t.expiresLabel}` : ''}
+                        ${statusLabel ? `<br><span style="color: ${isValid ? 'var(--success)' : 'var(--danger)'};">${statusLabel}</span>` : ''}
+                    </span>
+                </div>
+            `;
+            }).join('');
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+
+            renderActiveTickets();
+        }
+
+        function renderActiveTickets() {
+            const container = document.getElementById('active-tickets-list');
+            if (!container) return;
+            const list = loadTicketHistory().filter(t => t.expiresAt && new Date(t.expiresAt).getTime() > Date.now());
+
+            if (list.length === 0) {
+                container.innerHTML = `<p style="font-size: 0.82rem; color: var(--text-muted);">Nemáš žádnou aktivní jízdenku.</p>`;
+                return;
+            }
+
+            container.innerHTML = list.slice(0, 5).map(t => `
+                <div class="history-item">
+                    <span class="history-route"><i data-lucide="ticket-check" style="width:14px;height:14px; flex-shrink:0; color: var(--success);"></i>${t.type}${t.category ? ` · ${t.category}` : ''}</span>
+                    <span class="history-meta">Platí do: <strong style="color: var(--success);">${t.expiresLabel}</strong></span>
                 </div>
             `).join('');
             if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
@@ -4366,7 +5033,7 @@
         }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') { closeMenu(); closeNotifModal(); }
+            if (e.key === 'Escape') { closeMenu(); closeNotifModal(); closeTadxPay(); }
         });
     </script>
 </body>
