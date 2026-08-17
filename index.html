@@ -514,6 +514,11 @@
             overflow-wrap: anywhere;
         }
 
+        /* KOMPAKTNÍ ZOBRAZENÍ KARET SPOJENÍ */
+        body.compact-cards .result-card { padding: 9px 12px; margin-bottom: 6px; }
+        body.compact-cards .time-main { font-size: 0.92rem; }
+        body.compact-cards .route-summary-row { margin-top: 2px !important; font-size: 0.76rem !important; }
+
         .countdown-tag {
             background: var(--countdown-bg);
             color: var(--countdown-text);
@@ -2060,6 +2065,34 @@
         }
         .eco-box svg { flex-shrink: 0; }
 
+        /* CHANGELOG */
+        .changelog-list { display: flex; flex-direction: column; gap: 16px; }
+        .changelog-entry { position: relative; padding-left: 18px; border-left: 2px solid var(--border); padding-bottom: 4px; }
+        .changelog-entry:last-child { border-left-color: transparent; }
+        .changelog-entry::before {
+            content: ''; position: absolute; left: -5px; top: 3px;
+            width: 8px; height: 8px; border-radius: 50%; background: var(--primary);
+        }
+        .changelog-version { font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .changelog-date { color: var(--text-muted); font-size: 0.72rem; font-weight: 500; }
+        .changelog-tag {
+            font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 20px;
+            text-transform: uppercase; letter-spacing: 0.02em;
+        }
+        .changelog-tag.new { background: rgba(34,197,94,0.15); color: var(--success); }
+        .changelog-tag.improve { background: rgba(59,130,246,0.15); color: #3b82f6; }
+        .changelog-tag.fix { background: rgba(239,68,68,0.15); color: var(--danger); }
+        .changelog-items { margin-top: 6px; padding-left: 18px; font-size: 0.82rem; color: var(--text-muted); }
+        .changelog-items li { margin-bottom: 3px; }
+
+        /* ÚČTENKA */
+        .receipt-box {
+            background: var(--bg); border: 1px dashed var(--border); border-radius: 10px;
+            padding: 12px 14px; font-size: 0.8rem; margin-top: 10px;
+        }
+        .receipt-row { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; }
+        .receipt-row.total { border-top: 1px dashed var(--border); margin-top: 4px; padding-top: 6px; font-weight: 700; }
+
         /* NASTAVENÍ ŘÁDKY (Účet -> Nastavení) */
         .settings-row {
             display: flex;
@@ -2288,6 +2321,16 @@
         </div>
     </div>
 
+    <div id="changelog-modal-overlay" class="modal-overlay" onclick="if(event.target===this) closeChangelogModal()">
+        <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="changelog-modal-title">
+            <div class="modal-header">
+                <h3 id="changelog-modal-title"><i data-lucide="sparkles" style="width:18px;height:18px;"></i>Co je nového</h3>
+                <button class="modal-close" onclick="closeChangelogModal()" aria-label="Zavřít"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+            </div>
+            <div id="changelog-list" class="changelog-list"></div>
+        </div>
+    </div>
+
     <!-- TADXPAY — SIMULOVANÁ PLATEBNÍ BRÁNA -->
     <div id="tadxpay-overlay" class="tp-overlay" onclick="if(event.target===this) closeTadxPay()">
         <div class="tp-sheet" role="dialog" aria-modal="true" aria-labelledby="tp-title">
@@ -2389,6 +2432,10 @@
                 <div class="tp-success-title">Platba proběhla úspěšně</div>
                 <div class="tp-success-sub">Jízdenka byla aktivována a je připravená k použití.</div>
                 <div class="tp-success-id" id="tp-success-id">TXN-000000</div>
+                <div class="quick-actions" style="margin-top: 14px;">
+                    <button class="btn btn-secondary" onclick="copyLastTxnId()"><i data-lucide="copy" style="width:16px;height:16px;"></i>Kopírovat ID</button>
+                    <button class="btn btn-secondary" onclick="downloadLastReceipt()"><i data-lucide="receipt" style="width:16px;height:16px;"></i>Účtenka</button>
+                </div>
             </div>
         </div>
     </div>
@@ -2432,6 +2479,7 @@
             <div id="search-results"></div>
             <div id="search-quick-actions" class="quick-actions" style="display:none;">
                 <button class="btn btn-secondary" onclick="shareLastSearch()"><i data-lucide="share-2" style="width:16px;height:16px;"></i>Sdílet</button>
+                <button class="btn btn-secondary" onclick="copyLastSearchSummary()"><i data-lucide="copy" style="width:16px;height:16px;"></i>Kopírovat</button>
                 <button class="btn btn-secondary" onclick="exportLastSearchToCalendar()"><i data-lucide="calendar-plus" style="width:16px;height:16px;"></i>Do kalendáře</button>
             </div>
         </div>
@@ -2465,13 +2513,11 @@
                     <button data-filter="troley" onclick="setDepartureFilter('troley')"><i data-lucide="zap"></i>Trolej</button>
                     <button data-filter="bus" onclick="setDepartureFilter('bus')"><i data-lucide="bus-front"></i>Bus</button>
                 </div>
-                <label style="display:flex; align-items:center; gap:8px; margin-bottom: 12px; font-size: 0.82rem; color: var(--text-muted); cursor: pointer;">
-                    <span class="switch">
-                        <input type="checkbox" id="dep-hide-delayed" onchange="toggleHideDelayed()">
-                        <span class="switch-track"></span>
-                    </span>
-                    Zobrazit jen spoje bez zpoždění
-                </label>
+                <div class="segmented" id="dep-delay-filter" style="margin-bottom: 12px;">
+                    <button class="active" data-delay-mode="all" onclick="setDelayFilterMode('all')">Vše</button>
+                    <button data-delay-mode="no-delay" onclick="setDelayFilterMode('no-delay')">Bez zpoždění</button>
+                    <button data-delay-mode="only-delay" onclick="setDelayFilterMode('only-delay')">Jen zpožděné</button>
+                </div>
                 <table class="timetable">
                     <thead>
                         <tr>
@@ -2520,6 +2566,7 @@
                         </select>
                     </div>
                     <button class="btn" style="background: var(--success);" onclick="openTadxPay()"><i data-lucide="credit-card" style="width:18px;height:18px;"></i>Koupit jízdenku</button>
+                    <button class="btn btn-secondary" id="ticket-rebuy-btn" style="margin-top:8px; display:none;" onclick="rebuyLastTicket()"><i data-lucide="repeat" style="width:16px;height:16px;"></i>Koupit znovu: <span id="ticket-rebuy-label"></span></button>
                 </div>
 
                 <div id="ticket-auth-warning">
@@ -2532,7 +2579,22 @@
 
             <div class="card" id="ticket-history-box" style="display:none;">
                 <h3 style="margin-bottom: 10px; font-size: 0.95rem;"><i data-lucide="receipt" style="width:16px;height:16px;"></i>Historie jízdenek</h3>
+                <div class="stat-card" style="margin-bottom: 10px;">
+                    <div class="stat-value"><i data-lucide="wallet" style="width:16px;height:16px;"></i><span id="ticket-total-spent">0 Kč</span></div>
+                    <div class="stat-label">Celkem utraceno za jízdenky</div>
+                </div>
+                <div class="segmented" id="ticket-history-filter" style="margin-bottom: 10px;">
+                    <button class="active" data-filter="all" onclick="setTicketHistoryFilter('all')">Vše</button>
+                    <button data-filter="valid" onclick="setTicketHistoryFilter('valid')">Platné</button>
+                    <button data-filter="expired" onclick="setTicketHistoryFilter('expired')">Prošlé</button>
+                </div>
                 <div id="ticket-history-list"></div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 6px; font-size: 0.95rem;"><i data-lucide="history" style="width:16px;height:16px;"></i>Historie plateb TadxPay</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Přehled transakcí zpracovaných simulovanou platební bránou TadxPay.</p>
+                <div id="tadxpay-log-list"></div>
             </div>
 
             <div class="card">
@@ -2559,9 +2621,25 @@
         <!-- VÍCE -->
         <div id="tab-more" class="tab-content">
             <div class="card">
-                <div class="form-group" style="margin-bottom: 0;">
+                <div class="quick-actions" style="margin-bottom: 0;">
+                    <button class="btn btn-secondary" onclick="openChangelogModal()"><i data-lucide="sparkles" style="width:16px;height:16px;"></i>Co je nového</button>
+                    <button class="btn btn-secondary" onclick="reportTimetableError()"><i data-lucide="file-warning" style="width:16px;height:16px;"></i>Nahlásit chybu v jízdním řádu</button>
+                </div>
+                <div id="data-updated-label" style="font-size: 0.72rem; color: var(--text-muted); margin-top: 10px; display:flex; align-items:center; gap:5px;">
+                    <i data-lucide="refresh-cw" style="width:12px;height:12px;"></i><span></span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="form-group" style="margin-bottom: 10px;">
                     <label><i data-lucide="search" style="width:14px;height:14px;"></i>Hledat linku</label>
                     <input type="text" id="lines-search-input" placeholder="Např. 4, x88…" oninput="renderLinesList()">
+                </div>
+                <div class="segmented" id="lines-filter" style="margin-bottom: 0;">
+                    <button class="active" data-filter="all" onclick="setLinesFilter('all')"><i data-lucide="asterisk"></i>Vše</button>
+                    <button data-filter="tram" onclick="setLinesFilter('tram')"><i data-lucide="train-front"></i>Tram</button>
+                    <button data-filter="troley" onclick="setLinesFilter('troley')"><i data-lucide="zap"></i>Trolej</button>
+                    <button data-filter="bus" onclick="setLinesFilter('bus')"><i data-lucide="bus-front"></i>Bus</button>
                 </div>
             </div>
             <div class="card" id="lines-list"></div>
@@ -2664,6 +2742,7 @@
                 <div class="badge-chip-row" id="badge-chip-row"></div>
 
                 <h3 style="margin-top: 16px; margin-bottom: 4px; font-size: 0.9rem;"><i data-lucide="history" style="width:16px;height:16px;"></i>Poslední hledání</h3>
+                <input type="text" id="search-history-filter-input" placeholder="Hledat v historii…" oninput="renderSearchHistory()" style="width:100%; padding:8px 10px; margin-bottom:8px; border-radius:8px; border:1px solid var(--border); background: var(--input-bg); color: var(--text); font-family:inherit; font-size:0.82rem;">
                 <div id="search-history-list"></div>
 
                 <div class="quick-actions">
@@ -2694,7 +2773,16 @@
                     <button data-theme-choice="dark" onclick="setThemeChoice('dark')"><i data-lucide="moon"></i>Tmavý</button>
                     <button data-theme-choice="auto" onclick="setThemeChoice('auto')"><i data-lucide="monitor"></i>Auto</button>
                 </div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 14px;" id="theme-current-label"></div>
 
+                <div class="settings-row">
+                    <span class="settings-label"><i data-lucide="clock-4"></i>24hodinový formát času</span>
+                    <label class="switch"><input type="checkbox" id="setting-24h-format" onchange="saveSettings()"><span class="switch-track"></span></label>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-label"><i data-lucide="layout-list"></i>Kompaktní zobrazení karet spojení</span>
+                    <label class="switch"><input type="checkbox" id="setting-compact-cards" onchange="saveSettings()"><span class="switch-track"></span></label>
+                </div>
                 <div class="settings-row">
                     <span class="settings-label"><i data-lucide="bell-ring"></i>Upozornění na odjezd oblíbených spojů</span>
                     <label class="switch"><input type="checkbox" id="setting-notify-departures" onchange="saveSettings()"><span class="switch-track"></span></label>
@@ -2710,6 +2798,10 @@
                 <div class="settings-row">
                     <span class="settings-label"><i data-lucide="waves"></i>Omezit animace</span>
                     <label class="switch"><input type="checkbox" id="setting-reduce-motion" onchange="saveSettings()"><span class="switch-track"></span></label>
+                </div>
+                <div class="form-group" style="margin-top: 10px; margin-bottom: 0;">
+                    <label><i data-lucide="map-pin" style="width:14px;height:14px;"></i>Výchozí zastávka pro vyhledávání</label>
+                    <select id="setting-default-stop" onchange="saveSettings()"></select>
                 </div>
             </div>
 
@@ -3026,12 +3118,21 @@
             const fromSelect = document.getElementById('from-stop');
             const toSelect = document.getElementById('to-stop');
             const depSelect = document.getElementById('dep-stop');
+            const defaultStopSelect = document.getElementById('setting-default-stop');
 
             sortedStops.forEach(stop => {
                 fromSelect.add(new Option(stop, stop));
                 toSelect.add(new Option(stop, stop));
                 depSelect.add(new Option(stop, stop));
+                if (defaultStopSelect) defaultStopSelect.add(new Option(stop, stop));
             });
+            if (defaultStopSelect) {
+                defaultStopSelect.insertBefore(new Option('— Nezvoleno —', ''), defaultStopSelect.firstChild);
+                if (appSettings.defaultStop) {
+                    defaultStopSelect.value = appSettings.defaultStop;
+                    if (sortedStops.includes(appSettings.defaultStop)) fromSelect.value = appSettings.defaultStop;
+                }
+            }
 
             if (sortedStops.length > 1) toSelect.selectedIndex = 1;
             syncStopSelects();
@@ -3440,6 +3541,11 @@
         function formatTime(totalMinutes) {
             const h = Math.floor(totalMinutes / 60) % 24;
             const m = totalMinutes % 60;
+            if (typeof appSettings !== 'undefined' && appSettings && appSettings.use12h) {
+                const suffix = h >= 12 ? 'PM' : 'AM';
+                const h12 = h % 12 === 0 ? 12 : h % 12;
+                return `${h12}:${String(m).padStart(2, '0')} ${suffix}`;
+            }
             return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
         }
 
@@ -3841,6 +3947,7 @@
 
                             <div class="quick-actions">
                                 <button class="btn btn-secondary" onclick="event.stopPropagation(); shareTrip('${res.line}', '${res.firstStop.replace(/'/g,"\\'")}', '${res.lastStop.replace(/'/g,"\\'")}', '${formatTime(res.depTime)}')"><i data-lucide="share-2" style="width:16px;height:16px;"></i>Sdílet spoj</button>
+                                <button class="btn btn-secondary" onclick="event.stopPropagation(); copyRouteSummary('${res.line}', '${res.firstStop.replace(/'/g,"\\'")}', '${res.lastStop.replace(/'/g,"\\'")}', '${formatTime(res.depTime)}', '${formatTime(res.arrTime)}')"><i data-lucide="copy" style="width:16px;height:16px;"></i>Kopírovat</button>
                                 <button class="btn btn-secondary" onclick="event.stopPropagation(); exportTripToCalendar('${res.line}', '${res.firstStop.replace(/'/g,"\\'")}', '${res.lastStop.replace(/'/g,"\\'")}', ${res.depTime}, ${res.arrTime})"><i data-lucide="calendar-plus" style="width:16px;height:16px;"></i>Kalendář</button>
                                 <button class="btn btn-secondary" onclick="event.stopPropagation(); openReportModal('${res.line.replace(/'/g,"\\'")}', ${res.depTime})"><i data-lucide="flag" style="width:16px;height:16px;"></i>Nahlásit</button>
                             </div>
@@ -3989,10 +4096,13 @@
             showDepartures();
         }
 
-        let hideDelayedDepartures = false;
+        let delayFilterMode = 'all';
 
-        function toggleHideDelayed() {
-            hideDelayedDepartures = document.getElementById('dep-hide-delayed').checked;
+        function setDelayFilterMode(mode) {
+            delayFilterMode = mode;
+            document.querySelectorAll('#dep-delay-filter button').forEach(b => {
+                b.classList.toggle('active', b.dataset.delayMode === mode);
+            });
             showDepartures();
         }
 
@@ -4027,14 +4137,19 @@
 
             list.sort((a, b) => a.time - b.time);
 
-            if (hideDelayedDepartures) {
+            if (delayFilterMode === 'no-delay') {
                 list = list.filter(item => !item.delayInfo || !item.delayInfo.category);
+            } else if (delayFilterMode === 'only-delay') {
+                list = list.filter(item => item.delayInfo && item.delayInfo.category);
             }
 
             list = list.slice(0, 12);
 
             if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4">${hideDelayedDepartures ? 'Žádné spoje bez zpoždění v nejbližší době.' : 'Žádné odjezdy v nejbližší době.'}</td></tr>`;
+                const emptyMsg = delayFilterMode === 'no-delay' ? 'Žádné spoje bez zpoždění v nejbližší době.'
+                    : delayFilterMode === 'only-delay' ? 'Žádné zpožděné spoje v nejbližší době.'
+                    : 'Žádné odjezdy v nejbližší době.';
+                tbody.innerHTML = `<tr><td colspan="4">${emptyMsg}</td></tr>`;
                 return;
             }
 
@@ -4059,6 +4174,16 @@
             cacheDeparturesOffline(stop, list);
         }
 
+        let linesFilterType = 'all';
+
+        function setLinesFilter(type) {
+            linesFilterType = type;
+            document.querySelectorAll('#lines-filter button').forEach(b => {
+                b.classList.toggle('active', b.dataset.filter === type);
+            });
+            renderLinesList();
+        }
+
         function renderLinesList() {
             const container = document.getElementById('lines-list');
             const searchInput = document.getElementById('lines-search-input');
@@ -4066,7 +4191,7 @@
 
             let html = '<h2><i data-lucide="list" style="width:20px;height:20px;"></i>Přehled všech linek</h2><br>';
 
-            const filtered = rawLinesData.filter(l => !query || l.name.toLowerCase().includes(query));
+            const filtered = rawLinesData.filter(l => (!query || l.name.toLowerCase().includes(query)) && (linesFilterType === 'all' || l.type === linesFilterType));
 
             if (filtered.length === 0) {
                 html += `<div class="empty-state"><i data-lucide="search-x"></i><p>Žádná linka neodpovídá hledání „${query}".</p></div>`;
@@ -4112,6 +4237,8 @@
             const expiresLabel = `${expiresAt.toLocaleDateString('cs-CZ')} ${expiresAt.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}`;
 
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${ticketId}`;
+            const price = Number(selectedOption.dataset.price || 0);
+            const isSubscription = validityDays >= 7;
 
             const html = `
                 <div class="ticket-card">
@@ -4122,16 +4249,22 @@
                     <p style="font-size: 0.85rem; color: var(--text-muted);">ID: <strong>${ticketId}</strong></p>
                     <p style="font-size: 0.85rem; color: var(--text-muted);">Zakoupeno: ${dateStr} ${timeStr}</p>
                     <p style="font-size: 0.85rem; color: var(--text-muted);">Platnost do: <strong>${expiresLabel}</strong></p>
+                    <div class="quick-actions" style="margin-top: 10px;">
+                        <button class="btn btn-secondary" onclick="copyTicketId('${ticketId}')"><i data-lucide="copy" style="width:16px;height:16px;"></i>Kopírovat ID</button>
+                        <button class="btn btn-secondary" onclick="exportTicketToCalendar('${ticketId}')"><i data-lucide="calendar-plus" style="width:16px;height:16px;"></i>Do kalendáře</button>
+                        <button class="btn btn-secondary" onclick="shareQrTicket('${ticketId}', '${qrUrl}')"><i data-lucide="qr-code" style="width:16px;height:16px;"></i>Sdílet QR</button>
+                    </div>
                 </div>
             `;
 
             document.getElementById('ticket-output').innerHTML = html;
             if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
 
-            addTicketToHistory({ id: ticketId, type, category, date: dateStr, time: timeStr, expiresAt: expiresAt.toISOString(), expiresLabel });
+            addTicketToHistory({ id: ticketId, type, category, date: dateStr, time: timeStr, expiresAt: expiresAt.toISOString(), expiresLabel, price, qrUrl });
             incrementStat('tickets');
             showToast('success', 'check-circle-2', `Jízdenka ${ticketId} zakoupena.`);
             checkAndAwardBadges();
+            updateRebuyButton();
 
             return ticketId;
         }
@@ -4141,6 +4274,7 @@
            Zcela klientská simulace (žádná reálná platba, žádný přenos dat).
            ============================================================ */
         let tpPin = '';
+        let lastTxn = null;
         let tpBusy = false;
 
         function openTadxPay() {
@@ -4207,11 +4341,19 @@
 
             // Simulace ověřování transakce u (fiktivní) platební brány
             setTimeout(() => {
+                const typeSelect = document.getElementById('ticket-type');
+                const selectedOption = typeSelect.options[typeSelect.selectedIndex];
+                const price = Number(selectedOption.dataset.price || 0);
+
                 const ticketId = buyTicket();
+                const txnId = `TXN-${ticketId.replace('TCK-', '')}`;
+
+                addTadxPayLogEntry({ txnId, ticketId, price, at: new Date().toISOString() });
+                lastTxn = { txnId, ticketId, price, type: selectedOption.textContent.trim() };
 
                 document.getElementById('tp-processing-step').style.display = 'none';
                 document.getElementById('tp-success-step').style.display = 'flex';
-                document.getElementById('tp-success-id').textContent = `TXN-${ticketId.replace('TCK-', '')}`;
+                document.getElementById('tp-success-id').textContent = txnId;
                 if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
 
                 setTimeout(() => {
@@ -4299,16 +4441,20 @@
         const SETTINGS_KEY = 'idos-settings';
 
         function loadSettings() {
+            const defaults = {
+                themeChoice: 'auto',
+                notifyDepartures: false,
+                offlineCache: true,
+                nearestWidget: true,
+                reduceMotion: false,
+                use12h: false,
+                compactCards: false,
+                defaultStop: ''
+            };
             try {
                 const raw = localStorage.getItem(SETTINGS_KEY);
-                return raw ? JSON.parse(raw) : {
-                    themeChoice: 'auto',
-                    notifyDepartures: false,
-                    offlineCache: true,
-                    nearestWidget: true,
-                    reduceMotion: false
-                };
-            } catch (e) { return { themeChoice: 'auto', notifyDepartures: false, offlineCache: true, nearestWidget: true, reduceMotion: false }; }
+                return raw ? { ...defaults, ...JSON.parse(raw) } : defaults;
+            } catch (e) { return defaults; }
         }
 
         function persistSettings(settings) {
@@ -4322,14 +4468,20 @@
             const offlineEl = document.getElementById('setting-offline-cache');
             const nearestEl = document.getElementById('setting-nearest-widget');
             const reduceEl = document.getElementById('setting-reduce-motion');
+            const use12hEl = document.getElementById('setting-24h-format');
+            const compactEl = document.getElementById('setting-compact-cards');
             if (notifyEl) notifyEl.checked = !!appSettings.notifyDepartures;
             if (offlineEl) offlineEl.checked = !!appSettings.offlineCache;
             if (nearestEl) nearestEl.checked = !!appSettings.nearestWidget;
             if (reduceEl) reduceEl.checked = !!appSettings.reduceMotion;
+            if (use12hEl) use12hEl.checked = !appSettings.use12h; // přepínač "24hodinový formát" — zaškrtnuto = 24h
+            if (compactEl) compactEl.checked = !!appSettings.compactCards;
 
             document.querySelectorAll('#theme-segmented button').forEach(b => {
                 b.classList.toggle('active', b.dataset.themeChoice === appSettings.themeChoice);
             });
+            updateThemeCurrentLabel();
+            document.body.classList.toggle('compact-cards', !!appSettings.compactCards);
 
             document.body.style.setProperty('--force-reduce-motion', appSettings.reduceMotion ? '1' : '0');
             if (appSettings.reduceMotion) {
@@ -4340,11 +4492,27 @@
             if (nearestWidget && !appSettings.nearestWidget) nearestWidget.style.display = 'none';
         }
 
+        function updateThemeCurrentLabel() {
+            const el = document.getElementById('theme-current-label');
+            if (!el) return;
+            const labels = { light: 'Aktuálně: Světlý motiv', dark: 'Aktuálně: Tmavý motiv', auto: `Aktuálně: Auto (podle systému — nyní ${getEffectiveTheme() === 'dark' ? 'tmavý' : 'světlý'})` };
+            el.textContent = labels[appSettings.themeChoice] || '';
+        }
+
         function saveSettings() {
             appSettings.notifyDepartures = document.getElementById('setting-notify-departures').checked;
             appSettings.offlineCache = document.getElementById('setting-offline-cache').checked;
             appSettings.nearestWidget = document.getElementById('setting-nearest-widget').checked;
             appSettings.reduceMotion = document.getElementById('setting-reduce-motion').checked;
+            const use12hEl = document.getElementById('setting-24h-format');
+            if (use12hEl) appSettings.use12h = !use12hEl.checked;
+            const compactEl = document.getElementById('setting-compact-cards');
+            if (compactEl) {
+                appSettings.compactCards = compactEl.checked;
+                document.body.classList.toggle('compact-cards', appSettings.compactCards);
+            }
+            const defaultStopEl = document.getElementById('setting-default-stop');
+            if (defaultStopEl) appSettings.defaultStop = defaultStopEl.value;
             persistSettings(appSettings);
             showToast('info', 'settings', 'Nastavení uloženo.');
             renderNearestDepartureWidget();
@@ -4368,6 +4536,7 @@
                 try { localStorage.setItem('idos-theme', choice); } catch (e) { /* ignore */ }
             }
             updateThemeColorMeta(getEffectiveTheme());
+            updateThemeCurrentLabel();
             showToast('info', 'sun-moon', 'Motiv aplikace změněn.');
         }
 
@@ -4435,11 +4604,18 @@
         function renderSearchHistory() {
             const container = document.getElementById('search-history-list');
             if (!container) return;
-            const list = loadSearchHistory();
+            const filterInput = document.getElementById('search-history-filter-input');
+            const query = filterInput ? filterInput.value.trim().toLowerCase() : '';
+            const fullList = loadSearchHistory();
+            const list = query ? fullList.filter(item => item.from.toLowerCase().includes(query) || item.to.toLowerCase().includes(query)) : fullList;
 
-            if (list.length === 0) {
+            if (fullList.length === 0) {
                 container.innerHTML = '<div class="empty-state"><i data-lucide="history"></i><p>Zatím jsi nic nehledal/a.</p></div>';
                 if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+                return;
+            }
+            if (list.length === 0) {
+                container.innerHTML = `<p style="font-size: 0.82rem; color: var(--text-muted);">Nic neodpovídá hledání „${query}".</p>`;
                 return;
             }
 
@@ -4479,29 +4655,65 @@
             renderTicketHistory();
         }
 
+        let ticketHistoryFilterMode = 'all';
+
+        function setTicketHistoryFilter(mode) {
+            ticketHistoryFilterMode = mode;
+            document.querySelectorAll('#ticket-history-filter button').forEach(b => {
+                b.classList.toggle('active', b.dataset.filter === mode);
+            });
+            renderTicketHistory();
+        }
+
+        function ticketTypeIcon(type) {
+            if (!type) return 'ticket';
+            if (type.includes('Roční') || type.includes('6měsíční') || type.includes('Měsíční') || type.includes('Týdenní')) return 'crown';
+            if (type.includes('24 hod')) return 'sun';
+            return 'ticket';
+        }
+
         function renderTicketHistory() {
             const box = document.getElementById('ticket-history-box');
             const container = document.getElementById('ticket-history-list');
             if (!box || !container) return;
-            const list = loadTicketHistory();
+            const fullList = loadTicketHistory();
 
-            if (list.length === 0) {
+            if (fullList.length === 0) {
                 box.style.display = 'none';
                 renderActiveTickets();
                 return;
             }
 
             box.style.display = 'block';
+
+            const totalSpent = fullList.reduce((sum, t) => sum + (Number(t.price) || 0), 0);
+            const totalEl = document.getElementById('ticket-total-spent');
+            if (totalEl) totalEl.textContent = `${totalSpent}\u00A0Kč`;
+
+            let list = fullList;
+            if (ticketHistoryFilterMode === 'valid') {
+                list = list.filter(t => t.expiresAt && new Date(t.expiresAt).getTime() > Date.now());
+            } else if (ticketHistoryFilterMode === 'expired') {
+                list = list.filter(t => !t.expiresAt || new Date(t.expiresAt).getTime() <= Date.now());
+            }
+
+            if (list.length === 0) {
+                container.innerHTML = `<p style="font-size: 0.82rem; color: var(--text-muted);">Žádné jízdenky v tomto filtru.</p>`;
+                renderActiveTickets();
+                return;
+            }
+
             container.innerHTML = list.slice(0, 10).map(t => {
                 const isValid = t.expiresAt ? new Date(t.expiresAt).getTime() > Date.now() : false;
                 const statusLabel = t.expiresAt ? (isValid ? 'Platná' : 'Prošlá') : '';
                 return `
                 <div class="history-item">
-                    <span class="history-route"><i data-lucide="ticket" style="width:14px;height:14px; flex-shrink:0; color: var(--text-muted);"></i>${t.type}${t.category ? ` · ${t.category}` : ''}</span>
+                    <span class="history-route"><i data-lucide="${ticketTypeIcon(t.type)}" style="width:14px;height:14px; flex-shrink:0; color: ${isValid ? 'var(--success)' : 'var(--text-muted)'};"></i>${t.type}${t.category ? ` · ${t.category}` : ''}</span>
                     <span class="history-meta">
-                        ${t.date} ${t.time}
+                        ${t.date} ${t.time}${t.price ? ` · ${t.price}\u00A0Kč` : ''}
                         ${t.expiresLabel ? `<br>Platnost do: ${t.expiresLabel}` : ''}
                         ${statusLabel ? `<br><span style="color: ${isValid ? 'var(--success)' : 'var(--danger)'};">${statusLabel}</span>` : ''}
+                        <br><a href="#" onclick="event.preventDefault(); copyTicketId('${t.id}')" style="color: var(--primary); font-size: 0.72rem;">Kopírovat ID</a>
                     </span>
                 </div>
             `;
@@ -4524,10 +4736,22 @@
             container.innerHTML = list.slice(0, 5).map(t => `
                 <div class="history-item">
                     <span class="history-route"><i data-lucide="ticket-check" style="width:14px;height:14px; flex-shrink:0; color: var(--success);"></i>${t.type}${t.category ? ` · ${t.category}` : ''}</span>
-                    <span class="history-meta">Platí do: <strong style="color: var(--success);">${t.expiresLabel}</strong></span>
+                    <span class="history-meta">Zbývá: <strong style="color: var(--success);">${formatCountdownRemaining(t.expiresAt)}</strong><br>Platí do: ${t.expiresLabel}</span>
                 </div>
             `).join('');
             if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+        }
+
+        function formatCountdownRemaining(expiresAtIso) {
+            const diffMs = new Date(expiresAtIso).getTime() - Date.now();
+            if (diffMs <= 0) return 'Prošlá';
+            const totalMin = Math.floor(diffMs / 60000);
+            const days = Math.floor(totalMin / 1440);
+            const hours = Math.floor((totalMin % 1440) / 60);
+            const mins = totalMin % 60;
+            if (days > 0) return `${days} d ${hours} h`;
+            if (hours > 0) return `${hours} h ${mins} min`;
+            return `${mins} min`;
         }
 
         /* ============================================================
@@ -4592,7 +4816,10 @@
             { id: 'explorer', icon: 'compass', label: 'Průzkumník (10 hledání)', check: (s) => s.searches >= 10 },
             { id: 'first-ticket', icon: 'ticket', label: 'První jízdenka', check: (s) => s.tickets >= 1 },
             { id: 'regular', icon: 'flame', label: 'Pravidelný cestující (3 dny v řadě)', check: (s) => (s.streak || 0) >= 3 },
-            { id: 'collector', icon: 'star', label: 'Sběratel oblíbených (3+)', check: (s) => loadFavorites().length >= 3 }
+            { id: 'collector', icon: 'star', label: 'Sběratel oblíbených (3+)', check: (s) => loadFavorites().length >= 3 },
+            { id: 'subscriber', icon: 'crown', label: 'Předplatitel', check: () => loadTicketHistory().some(t => t.type && (t.type.includes('Týdenní') || t.type.includes('Měsíční') || t.type.includes('6měsíční') || t.type.includes('Roční'))) },
+            { id: 'eco-bronze', icon: 'leaf', label: 'Eco start (1 kg CO₂)', check: (s) => ((s.searches || 0) * 0.12) >= 1 },
+            { id: 'eco-silver', icon: 'leaf', label: 'Eco cestovatel (5 kg CO₂)', check: (s) => ((s.searches || 0) * 0.12) >= 5 }
         ];
 
         function loadEarnedBadges() {
@@ -5014,6 +5241,274 @@
         /* ============================================================
            MEGA UPDATE — INICIALIZACE NOVÝCH FUNKCÍ
            ============================================================ */
+        /* ============================================================
+           MEGA UPDATE #2 — CHANGELOG
+           ============================================================ */
+        const CHANGELOG_DATA = [
+            {
+                version: '2.0', date: 'Srpen 2026',
+                entries: [
+                    { tag: 'new', text: 'Changelog — přehled novinek přímo v aplikaci.' },
+                    { tag: 'new', text: 'Filtr linek podle typu vozidla (tramvaj/trolejbus/autobus) v sekci Více.' },
+                    { tag: 'new', text: 'Filtr odjezdů „Jen zpožděné spoje".' },
+                    { tag: 'new', text: 'Export jízdenky do kalendáře (.ics) a kopírování ID jízdenky.' },
+                    { tag: 'new', text: 'Filtrování historie jízdenek podle platnosti (platné / prošlé).' },
+                    { tag: 'new', text: 'Souhrn celkových výdajů za jízdenky.' },
+                    { tag: 'new', text: 'Odpočet do vypršení platnosti u aktivní jízdenky.' },
+                    { tag: 'new', text: 'Upozornění před vypršením platnosti jízdenky.' },
+                    { tag: 'new', text: 'Rychlé opakování poslední koupené jízdenky.' },
+                    { tag: 'new', text: 'Odznak za nákup předplatného a odznaky za úsporu CO₂.' },
+                    { tag: 'new', text: 'Historie plateb TadxPay a stažitelná účtenka po platbě.' },
+                    { tag: 'new', text: 'Vyhledávání v historii hledaných spojení.' },
+                    { tag: 'new', text: 'Kopírování shrnutí spojení do schránky.' },
+                    { tag: 'new', text: 'Nahlášení chyby v jízdním řádu (odlišné od hlášení zpoždění spoje).' },
+                    { tag: 'new', text: 'Přepínač 12/24hodinového formátu času.' },
+                    { tag: 'new', text: 'Výchozí zastávka pro vyhledávání spojení.' },
+                    { tag: 'new', text: 'Kompaktní zobrazení karet spojení.' },
+                    { tag: 'new', text: 'Sdílení QR kódu jízdenky.' },
+                    { tag: 'improve', text: 'Popisek aktuálně zvoleného motivu vzhledu.' },
+                    { tag: 'improve', text: 'Ukazatel poslední aktualizace dat na kartě Více.' },
+                    { tag: 'improve', text: 'Barevné odlišení typu jízdenky v historii.' }
+                ]
+            },
+            {
+                version: '1.0', date: 'Dříve',
+                entries: [
+                    { tag: 'new', text: 'Vyhledávání spojení, odjezdy, jízdenky a jejich historie.' },
+                    { tag: 'new', text: 'Oblíbené trasy a zastávky, widget nejbližšího odjezdu.' },
+                    { tag: 'new', text: 'Odznaky, statistiky a eco přehled CO₂.' },
+                    { tag: 'new', text: 'Hlášení zpoždění a sdílení spojů.' },
+                    { tag: 'new', text: 'Tmavý/světlý/systémový motiv, offline cache odjezdů.' }
+                ]
+            }
+        ];
+
+        function renderChangelog() {
+            const container = document.getElementById('changelog-list');
+            if (!container) return;
+            const tagLabel = { new: 'Nové', improve: 'Vylepšení', fix: 'Oprava' };
+            container.innerHTML = CHANGELOG_DATA.map(v => `
+                <div class="changelog-entry">
+                    <div class="changelog-version">Verze ${v.version} <span class="changelog-date">${v.date}</span></div>
+                    <ul class="changelog-items">
+                        ${v.entries.map(e => `<li><span class="changelog-tag ${e.tag}">${tagLabel[e.tag]}</span> ${e.text}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        }
+
+        function openChangelogModal() {
+            renderChangelog();
+            document.getElementById('changelog-modal-overlay').classList.add('open');
+            document.body.classList.add('menu-open');
+        }
+
+        function closeChangelogModal() {
+            document.getElementById('changelog-modal-overlay').classList.remove('open');
+            document.body.classList.remove('menu-open');
+        }
+
+        /* ============================================================
+           MEGA UPDATE #2 — NAHLÁŠENÍ CHYBY V JÍZDNÍM ŘÁDU
+           (odlišné od hlášení zpoždění konkrétního spoje)
+           ============================================================ */
+        function reportTimetableError() {
+            const subject = encodeURIComponent('Chyba v jízdním řádu — IDOS Doprava');
+            const body = encodeURIComponent('Popiš prosím, u které linky / zastávky / dne se v jízdním řádu vyskytuje chyba:\n\n');
+            window.location.href = `mailto:tad.studio.cz@gmail.com?subject=${subject}&body=${body}`;
+        }
+
+        /* ============================================================
+           MEGA UPDATE #2 — POSLEDNÍ AKTUALIZACE DAT
+           ============================================================ */
+        const DATA_LAST_UPDATED_LABEL = '17. 8. 2026';
+
+        function renderDataUpdatedLabel() {
+            const el = document.querySelector('#data-updated-label span');
+            if (el) el.textContent = `Data jízdních řádů naposledy zkontrolována: ${DATA_LAST_UPDATED_LABEL}`;
+        }
+
+        /* ============================================================
+           MEGA UPDATE #2 — HISTORIE PLATEB TADXPAY (odděleně od jízdenek)
+           ============================================================ */
+        const TADXPAY_LOG_KEY = 'idos-tadxpay-log';
+
+        function loadTadxPayLog() {
+            try {
+                const raw = localStorage.getItem(TADXPAY_LOG_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveTadxPayLog(list) {
+            try { localStorage.setItem(TADXPAY_LOG_KEY, JSON.stringify(list.slice(0, 30))); } catch (e) { /* ignore */ }
+        }
+
+        function addTadxPayLogEntry(entry) {
+            const list = loadTadxPayLog();
+            list.unshift(entry);
+            saveTadxPayLog(list);
+            renderTadxPayLog();
+        }
+
+        function renderTadxPayLog() {
+            const container = document.getElementById('tadxpay-log-list');
+            if (!container) return;
+            const list = loadTadxPayLog();
+            if (list.length === 0) {
+                container.innerHTML = '<p style="font-size: 0.82rem; color: var(--text-muted);">Zatím žádné zpracované platby.</p>';
+                return;
+            }
+            container.innerHTML = list.slice(0, 10).map(t => {
+                const d = new Date(t.at);
+                const dateLabel = d.toLocaleDateString('cs-CZ') + ' ' + d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+                return `
+                <div class="history-item">
+                    <span class="history-route"><i data-lucide="check-circle-2" style="width:14px;height:14px; flex-shrink:0; color: var(--success);"></i>${t.txnId} · karta •••• 4471</span>
+                    <span class="history-meta">${dateLabel}${t.price ? `<br>${t.price}\u00A0Kč` : ''}</span>
+                </div>
+            `;
+            }).join('');
+            if (window.lucide) lucide.createIcons({ attrs: { "aria-hidden": "true", focusable: "false" } });
+        }
+
+        /* ============================================================
+           MEGA UPDATE #2 — KOPÍROVÁNÍ / ÚČTENKA / SDÍLENÍ
+           ============================================================ */
+        function copyToClipboard(text, successMessage) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('success', 'copy', successMessage || 'Zkopírováno do schránky.');
+                }).catch(() => {
+                    showToast('danger', 'alert-triangle', 'Kopírování se nezdařilo.');
+                });
+            } else {
+                showToast('danger', 'alert-triangle', 'Kopírování není v tomto prohlížeči podporováno.');
+            }
+        }
+
+        function copyTicketId(ticketId) {
+            copyToClipboard(ticketId, `ID jízdenky ${ticketId} zkopírováno.`);
+        }
+
+        function copyLastTxnId() {
+            if (!lastTxn) return;
+            copyToClipboard(lastTxn.txnId, `ID transakce ${lastTxn.txnId} zkopírováno.`);
+        }
+
+        function copyRouteSummary(line, from, to, depLabel, arrLabel) {
+            copyToClipboard(`Linka ${line}: ${from} → ${to}, odjezd ${depLabel}, příjezd ${arrLabel}.`, 'Shrnutí spojení zkopírováno.');
+        }
+
+        function copyLastSearchSummary() {
+            const from = document.getElementById('from-stop').value;
+            const to = document.getElementById('to-stop').value;
+            copyToClipboard(`Hledám spojení z ${from} do ${to}.`, 'Shrnutí hledání zkopírováno.');
+        }
+
+        function exportTicketToCalendar(ticketId) {
+            const ticket = loadTicketHistory().find(t => t.id === ticketId);
+            if (!ticket || !ticket.expiresAt) return;
+            const start = new Date();
+            const end = new Date(ticket.expiresAt);
+            downloadIcs('jizdenka-idos.ics', `Jízdenka: ${ticket.type}`, `Platnost jízdenky ${ticket.id} do ${ticket.expiresLabel}.`,
+                start.getHours() * 60 + start.getMinutes(), end.getHours() * 60 + end.getMinutes());
+        }
+
+        function shareQrTicket(ticketId, qrUrl) {
+            if (navigator.share) {
+                navigator.share({ title: 'Moje jízdenka IDOS', text: `Jízdenka ${ticketId}`, url: qrUrl }).catch(() => { /* zrušeno */ });
+            } else {
+                copyToClipboard(qrUrl, 'Odkaz na QR kód zkopírován.');
+            }
+        }
+
+        function downloadLastReceipt() {
+            if (!lastTxn) return;
+            const now = new Date();
+            const lines = [
+                'IDOS DOPRAVA — ÚČTENKA (TadxPay, simulace)',
+                '============================================',
+                `TXN ID: ${lastTxn.txnId}`,
+                `Jízdenka: ${lastTxn.ticketId}`,
+                `Typ: ${lastTxn.type}`,
+                `Částka: ${lastTxn.price} Kč`,
+                `Datum: ${now.toLocaleDateString('cs-CZ')} ${now.toLocaleTimeString('cs-CZ')}`,
+                'Karta: •••• •••• •••• 4471',
+                '--------------------------------------------',
+                'Toto je účtenka ze simulovaného platebního',
+                'prostředí, nejde o doklad o reálné platbě.'
+            ].join('\n');
+            const blob = new Blob([lines], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ucteka-${lastTxn.txnId}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            showToast('success', 'download', 'Účtenka byla stažena.');
+        }
+
+        /* ============================================================
+           MEGA UPDATE #2 — RYCHLÉ OPAKOVÁNÍ POSLEDNÍ JÍZDENKY
+           ============================================================ */
+        function updateRebuyButton() {
+            const btn = document.getElementById('ticket-rebuy-btn');
+            const label = document.getElementById('ticket-rebuy-label');
+            if (!btn || !label) return;
+            const last = loadTicketHistory()[0];
+            if (!last) { btn.style.display = 'none'; return; }
+            btn.style.display = 'flex';
+            label.textContent = last.type;
+        }
+
+        function rebuyLastTicket() {
+            const last = loadTicketHistory()[0];
+            if (!last) return;
+            const typeSelect = document.getElementById('ticket-type');
+            const categorySelect = document.getElementById('ticket-category');
+            const optionMatch = Array.from(typeSelect.options).find(o => o.value === last.type);
+            if (optionMatch) typeSelect.value = last.type;
+            if (categorySelect && last.category) categorySelect.value = last.category;
+            openTadxPay();
+        }
+
+        /* ============================================================
+           MEGA UPDATE #2 — UPOZORNĚNÍ PŘED VYPRŠENÍM JÍZDENKY
+           ============================================================ */
+        const NOTIFIED_EXPIRY_KEY = 'idos-notified-expiry';
+
+        function loadNotifiedExpiry() {
+            try {
+                const raw = localStorage.getItem(NOTIFIED_EXPIRY_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveNotifiedExpiry(list) {
+            try { localStorage.setItem(NOTIFIED_EXPIRY_KEY, JSON.stringify(list.slice(-100))); } catch (e) { /* ignore */ }
+        }
+
+        function checkTicketExpiryWarnings() {
+            const tickets = loadTicketHistory();
+            const notified = loadNotifiedExpiry();
+            const now = Date.now();
+
+            tickets.forEach(t => {
+                if (!t.expiresAt || notified.includes(t.id)) return;
+                const diffH = (new Date(t.expiresAt).getTime() - now) / 3600000;
+                if (diffH > 0 && diffH <= 2) {
+                    showToast('info', 'alarm-clock', `Jízdenka ${t.type} vyprší za necelé 2 hodiny.`);
+                    addNotification('alarm-clock', `Jízdenka „${t.type}" brzy vyprší (do ${t.expiresLabel}).`);
+                    notified.push(t.id);
+                    saveNotifiedExpiry(notified);
+                }
+            });
+        }
+
+
         function initMegaUpdate() {
             applySettingsToUI();
             renderSearchHistory();
@@ -5024,11 +5519,17 @@
             renderNearestDepartureWidget();
             updateLiveDelayBanner();
             calculateFare();
+            renderDataUpdatedLabel();
+            renderTadxPayLog();
+            updateRebuyButton();
+            checkTicketExpiryWarnings();
 
-            // Průběžná aktualizace živých dat (widget nejbližšího odjezdu, banner zpoždění)
+            // Průběžná aktualizace živých dat (widget nejbližšího odjezdu, banner zpoždění, expirace jízdenek)
             setInterval(() => {
                 renderNearestDepartureWidget();
                 updateLiveDelayBanner();
+                checkTicketExpiryWarnings();
+                renderActiveTickets();
             }, 30000);
         }
 
