@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generátor GIFů z obrázků</title>
-    <!-- Načtení knihovny gif.js z CDN -->
+    <title>Rychlý Generátor GIFů</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
     <style>
         body {
@@ -28,13 +27,8 @@
             text-align: center;
         }
 
-        .input-group {
-            margin: 20px 0;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
+        .input-group { margin: 20px 0; }
+        input[type="file"] { display: none; }
 
         .custom-file-upload {
             border: 2px dashed #f1c40f;
@@ -44,29 +38,13 @@
             border-radius: 6px;
             color: #f1c40f;
             font-weight: bold;
-            transition: 0.3s;
         }
 
-        .custom-file-upload:hover {
-            background-color: #f1c40f;
-            color: #000;
-        }
+        .custom-file-upload:hover { background-color: #f1c40f; color: #000; }
+        .controls { margin: 20px 0; display: flex; flex-direction: column; gap: 15px; align-items: center; }
 
-        .controls {
-            margin: 20px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            align-items: center;
-        }
-
-        label {
-            font-size: 14px;
-        }
-
-        input[type="number"] {
-            width: 80px;
-            padding: 5px;
+        input[type="number"], select {
+            padding: 6px;
             border-radius: 4px;
             border: 1px solid #444;
             background: #2a2a2a;
@@ -83,33 +61,12 @@
             font-weight: bold;
             border-radius: 6px;
             cursor: pointer;
-            transition: 0.3s;
         }
 
-        button.btn-generate:hover {
-            background-color: #219150;
-        }
-
-        button:disabled {
-            background-color: #555;
-            cursor: not-allowed;
-        }
-
-        #status {
-            margin-top: 15px;
-            font-style: italic;
-            color: #aaa;
-        }
-
-        #resultArea {
-            margin-top: 25px;
-        }
-
-        #resultArea img {
-            max-width: 100%;
-            border: 2px solid #444;
-            border-radius: 6px;
-        }
+        button:disabled { background-color: #555; cursor: not-allowed; }
+        #status { margin-top: 15px; font-weight: bold; color: #f1c40f; }
+        #resultArea { margin-top: 25px; }
+        #resultArea img { max-width: 100%; border: 2px solid #444; border-radius: 6px; }
 
         .download-btn {
             display: inline-block;
@@ -121,17 +78,13 @@
             border-radius: 6px;
             font-weight: bold;
         }
-
-        .download-btn:hover {
-            background-color: #2980b9;
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>Tvorba GIFu z obrázků</h1>
-    <p>Vyber PNG nebo JPG obrázky a vytvoř z nich ke stažení animovaný GIF.</p>
+    <p>Vyber PNG nebo JPG obrázky a vytvoř animovaný GIF.</p>
 
     <div class="input-group">
         <label for="imageInput" class="custom-file-upload">
@@ -143,15 +96,23 @@
 
     <div class="controls">
         <div>
-            <label for="delayInput">Doba jednoho snímku (v ms): </label>
+            <label for="delayInput">Doba snímku (ms): </label>
             <input type="number" id="delayInput" value="800" min="50" step="50">
         </div>
+        <div>
+            <label for="maxSizeInput">Max. šířka (px): </label>
+            <select id="maxSizeInput">
+                <option value="400">400 px (Bleskové)</option>
+                <option value="600" selected>600 px (Doporučeno)</option>
+                <option value="800">800 px (Vyšší kvalita)</option>
+                <option value="0">Původní (Pomalé!)</option>
+            </select>
+        </div>
 
-        <button id="generateBtn" class="btn-generate" disabled>Vytvořit a vygenerovat GIF</button>
+        <button id="generateBtn" class="btn-generate" disabled>Vygenerovat GIF</button>
     </div>
 
     <div id="status"></div>
-
     <div id="resultArea"></div>
 </div>
 
@@ -162,10 +123,10 @@
     const status = document.getElementById('status');
     const resultArea = document.getElementById('resultArea');
     const delayInput = document.getElementById('delayInput');
+    const maxSizeInput = document.getElementById('maxSizeInput');
 
     let loadedFiles = [];
 
-    // Po výberu souborů
     imageInput.addEventListener('change', (e) => {
         loadedFiles = Array.from(e.target.files);
         if (loadedFiles.length > 0) {
@@ -177,39 +138,39 @@
         }
     });
 
-    // Generování GIFu
     generateBtn.addEventListener('click', async () => {
         if (loadedFiles.length === 0) return;
 
-        status.textContent = 'Zpracovávám obrázky...';
+        status.textContent = 'Pravuji a zmenšuji obrázky...';
         resultArea.innerHTML = '';
         generateBtn.disabled = true;
 
         const delay = parseInt(delayInput.value) || 500;
+        const maxSize = parseInt(maxSizeInput.value);
 
-        // Inicializace GIF.js knihovny
         const gif = new GIF({
-            workers: 2,
+            workers: 4, // Zvýšeno pro vyšší výkon
             quality: 10,
             workerScript: 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'
         });
 
-        // Načtení všech obrázků do HTML Image elementů
+        // Ukazatel průběhu (Progress bar)
+        gif.on('progress', (p) => {
+            status.textContent = `Generuji GIF: ${Math.round(p * 100)} %`;
+        });
+
         for (let i = 0; i < loadedFiles.length; i++) {
-            const img = await loadImage(loadedFiles[i]);
-            gif.addFrame(img, { delay: delay });
+            const canvas = await processAndResizeImage(loadedFiles[i], maxSize);
+            gif.addFrame(canvas, { delay: delay, copy: true });
         }
 
-        status.textContent = 'Generuji GIF soubor... Počkejte prosím.';
+        status.textContent = 'Finální zpracování...';
 
-        // Po dokončení vygenerování
         gif.on('finished', (blob) => {
             status.textContent = 'GIF je hotový!';
             generateBtn.disabled = false;
 
-            // Vytvoření odkazu ke stažení
             const url = URL.createObjectURL(blob);
-            
             resultArea.innerHTML = `
                 <h3>Váš hotový GIF:</h3>
                 <img src="${url}" alt="Vygenerovaný GIF"><br>
@@ -220,14 +181,28 @@
         gif.render();
     });
 
-    // Helper funkce pro asynchronní načtení obrázku
-    function loadImage(file) {
-        return new Promise((resolve, reject) => {
+    // Zmenšení obrázků na Canvasu pro extrémní zrychlení
+    function processAndResizeImage(file, maxSize) {
+        return new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
-                img.onload = () => resolve(img);
-                img.onerror = reject;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (maxSize > 0 && width > maxSize) {
+                        height = Math.round((height * maxSize) / width);
+                        width = maxSize;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas);
+                };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
